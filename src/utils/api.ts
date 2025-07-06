@@ -1,11 +1,11 @@
 
-const API_BASE_URL = 'http://localhost:8000/api'; // Update this to your actual API URL
+const API_BASE_URL = 'http://localhost:8000/api';
 
-// Types for API responses
-export interface User {
+// Types
+export interface Service {
   id: number;
-  email: string;
-  username?: string;
+  name: string;
+  description: string;
 }
 
 export interface Blog {
@@ -15,7 +15,7 @@ export interface Blog {
   content: string;
   created_at: string;
   published: boolean;
-  images: Array<{ image: string }>;
+  images: { image: string }[];
 }
 
 export interface Event {
@@ -24,13 +24,7 @@ export interface Event {
   description: string;
   location: string;
   date: string;
-  images: Array<{ image: string }>;
-}
-
-export interface Service {
-  id: number;
-  name: string;
-  description: string;
+  images: { image: string }[];
 }
 
 export interface BloodInventory {
@@ -45,163 +39,89 @@ export interface VaccineInventory {
   available: boolean;
 }
 
-export interface BloodRequest {
-  id: number;
-  user: User;
-  blood_group: string;
-  location: string;
-  contact: string;
-  date_required: string;
-}
-
-export interface BloodDonationInterest {
-  id: number;
-  user: User;
-  blood_group: string;
-  available_date: string;
-  contact_info: string;
-}
-
-// Auth token management
-export const getAuthToken = (): string | null => {
-  return localStorage.getItem('access_token');
+// Helper function to get auth headers
+const getAuthHeaders = (): Record<string, string> => {
+  const token = localStorage.getItem('access_token');
+  return token ? { 'Authorization': `Bearer ${token}` } : {};
 };
 
-export const setAuthToken = (token: string): void => {
-  localStorage.setItem('access_token', token);
-};
-
-export const removeAuthToken = (): void => {
-  localStorage.removeItem('access_token');
-  localStorage.removeItem('refresh_token');
-};
-
-// API request helper
-const apiRequest = async <T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> => {
-  const token = getAuthToken();
-  const headers: HeadersInit = {
+// Generic API call function
+const apiCall = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const headers = {
     'Content-Type': 'application/json',
+    ...getAuthHeaders(),
     ...options.headers,
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  const response = await fetch(url, {
     ...options,
     headers,
   });
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
+    throw new Error(`API call failed: ${response.status} ${response.statusText}`);
   }
 
   return response.json();
 };
 
-// Authentication APIs
-export const authAPI = {
-  login: async (email: string, password: string) => {
-    const response = await apiRequest<{ access: string; refresh: string }>('/auth/login/', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-    });
-    
-    setAuthToken(response.access);
-    localStorage.setItem('refresh_token', response.refresh);
-    return response;
-  },
-
-  register: async (email: string, password: string, username?: string) => {
-    return apiRequest<User>('/auth/register/', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, username }),
-    });
-  },
-
-  refreshToken: async () => {
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) throw new Error('No refresh token available');
-    
-    const response = await apiRequest<{ access: string }>('/auth/token/refresh/', {
-      method: 'POST',
-      body: JSON.stringify({ refresh: refreshToken }),
-    });
-    
-    setAuthToken(response.access);
-    return response;
-  },
-
-  forgotPassword: async (email: string) => {
-    return apiRequest<{ detail: string }>('/auth/forgot-password/', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
-  },
-};
-
-// Blog APIs
-export const blogAPI = {
-  getBlogs: () => apiRequest<Blog[]>('/blogs/'),
-  getBlog: (slug: string) => apiRequest<Blog>(`/blogs/${slug}/`),
-  addComment: (blogId: number, comment: string) => {
-    return apiRequest(`/blogs/${blogId}/comments/`, {
-      method: 'POST',
-      body: JSON.stringify({ comment }),
-    });
-  },
-};
-
-// Event APIs
-export const eventAPI = {
-  getEvents: () => apiRequest<Event[]>('/events/'),
-  getEvent: (id: number) => apiRequest<Event>(`/events/${id}/`),
-};
-
-// Service APIs
+// Service API
 export const serviceAPI = {
-  getServices: () => apiRequest<Service[]>('/services/'),
+  getServices: (): Promise<Service[]> => apiCall('/services/'),
 };
 
-// Blood Inventory APIs
-export const bloodInventoryAPI = {
-  getBloodInventory: () => apiRequest<BloodInventory[]>('/blood-inventory/'),
+// Blog API
+export const blogAPI = {
+  getBlogs: (): Promise<Blog[]> => apiCall('/blogs/'),
+  getBlog: (slug: string): Promise<Blog> => apiCall(`/blogs/${slug}/`),
 };
 
-// Vaccine Inventory APIs
-export const vaccineInventoryAPI = {
-  getVaccineInventory: () => apiRequest<VaccineInventory[]>('/vaccine-inventory/'),
+// Event API
+export const eventAPI = {
+  getEvents: (): Promise<Event[]> => apiCall('/events/'),
+  getEvent: (id: number): Promise<Event> => apiCall(`/events/${id}/`),
 };
 
-// Blood Request APIs
-export const bloodRequestAPI = {
-  createBloodRequest: (data: {
+// Blood Inventory API
+export const bloodAPI = {
+  getBloodInventory: (): Promise<BloodInventory[]> => apiCall('/blood-inventory/'),
+  requestBlood: (data: {
     blood_group: string;
     location: string;
     contact: string;
     date_required: string;
-  }) => {
-    return apiRequest<BloodRequest>('/request-blood/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-};
-
-// Blood Donation Interest APIs
-export const bloodDonationAPI = {
-  createDonationInterest: (data: {
+  }) => apiCall('/request-blood/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+  donateInterest: (data: {
     blood_group: string;
     available_date: string;
     contact_info: string;
-  }) => {
-    return apiRequest<BloodDonationInterest>('/donate-interest/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
+  }) => apiCall('/donate-interest/', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+};
+
+// Vaccine Inventory API
+export const vaccineAPI = {
+  getVaccineInventory: (): Promise<VaccineInventory[]> => apiCall('/vaccine-inventory/'),
+};
+
+// Auth API
+export const authAPI = {
+  login: (email: string, password: string) => apiCall('/auth/login/', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  }),
+  register: (email: string, password: string, username?: string) => apiCall('/auth/register/', {
+    method: 'POST',
+    body: JSON.stringify({ email, password, username }),
+  }),
+  refreshToken: (refresh: string) => apiCall('/auth/token/refresh/', {
+    method: 'POST',
+    body: JSON.stringify({ refresh }),
+  }),
 };
