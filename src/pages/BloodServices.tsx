@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { bloodInventoryAPI, vaccineInventoryAPI, bloodRequestAPI, bloodDonationAPI, BloodInventory, VaccineInventory } from '@/utils/api';
+import { bloodAPI, vaccineAPI, BloodInventory, VaccineInventory } from '@/utils/api';
 import { Heart, Activity, Calendar, User, Phone, MapPin } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -58,8 +58,8 @@ const BloodServices = () => {
       try {
         console.log('Fetching blood and vaccine inventory...');
         const [bloodData, vaccineData] = await Promise.all([
-          bloodInventoryAPI.getBloodInventory(),
-          vaccineInventoryAPI.getVaccineInventory()
+          bloodAPI.getBloodInventory(),
+          vaccineAPI.getVaccineInventory()
         ]);
         setBloodInventory(bloodData);
         setVaccineInventory(vaccineData);
@@ -78,7 +78,7 @@ const BloodServices = () => {
   const handleRequestSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await bloodRequestAPI.createBloodRequest(requestForm);
+      await bloodAPI.requestBlood(requestForm);
       toast({
         title: "Blood Request Submitted",
         description: "Your blood request has been submitted successfully. We will contact you soon."
@@ -96,7 +96,7 @@ const BloodServices = () => {
   const handleDonateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await bloodDonationAPI.createDonationInterest(donateForm);
+      await bloodAPI.donateInterest(donateForm);
       toast({
         title: "Donation Interest Registered",
         description: "Thank you for your interest in donating blood. We will contact you soon."
