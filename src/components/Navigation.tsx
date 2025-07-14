@@ -2,11 +2,20 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Menu, X, Activity } from 'lucide-react';
+import { Menu, X, Activity, User, LogOut, Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   const navItems = [
     { name: 'Home', path: '/' },
@@ -50,6 +59,50 @@ const Navigation = () => {
                 {item.name}
               </Link>
             ))}
+            
+            {isAuthenticated ? (
+              <div className="flex items-center space-x-4">
+                {isAdmin && (
+                  <Link
+                    to="/admin"
+                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                  >
+                    Admin
+                  </Link>
+                )}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="flex items-center space-x-2">
+                      <User className="h-4 w-4" />
+                      <span>{user?.email}</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <Settings className="h-4 w-4 mr-2" />
+                      Profile
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout}>
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              <div className="flex items-center space-x-4">
+                <Link to="/login">
+                  <Button variant="outline">Login</Button>
+                </Link>
+                <Link to="/register">
+                  <Button className="medical-gradient text-white hover:opacity-90">
+                    Register
+                  </Button>
+                </Link>
+              </div>
+            )}
+            
             <Button className="medical-gradient text-white hover:opacity-90">
               Emergency Contact
             </Button>
@@ -84,7 +137,44 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <div className="pt-2">
+              <div className="pt-2 space-y-2">
+                {isAuthenticated ? (
+                  <>
+                    {isAdmin && (
+                      <Link
+                        to="/admin"
+                        onClick={() => setIsOpen(false)}
+                        className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                      >
+                        Admin
+                      </Link>
+                    )}
+                    <div className="px-3 py-2 text-sm text-gray-500">
+                      {user?.email}
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={logout}
+                      className="w-full text-left justify-start"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <div className="space-y-2">
+                    <Link to="/login" onClick={() => setIsOpen(false)}>
+                      <Button variant="outline" className="w-full">
+                        Login
+                      </Button>
+                    </Link>
+                    <Link to="/register" onClick={() => setIsOpen(false)}>
+                      <Button className="medical-gradient text-white w-full">
+                        Register
+                      </Button>
+                    </Link>
+                  </div>
+                )}
                 <Button className="medical-gradient text-white w-full">
                   Emergency Contact
                 </Button>
