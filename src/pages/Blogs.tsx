@@ -6,13 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
 import { blogAPI, Blog } from '@/utils/api';
-import { Calendar, Search, User } from 'lucide-react';
+import { Calendar, Search, User, Plus, Edit, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const { isAdmin } = useAuth();
 
   // Extended default blogs for demo
   const defaultBlogs = [
@@ -155,6 +158,18 @@ const Blogs = () => {
       {/* Blog Posts */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto">
+          {/* Admin Actions */}
+          {isAdmin && (
+            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
+                <Button className="flex items-center space-x-2">
+                  <Plus className="w-4 h-4" />
+                  <span>Create New Blog</span>
+                </Button>
+              </div>
+            </div>
+          )}
           {filteredBlogs.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-xl text-gray-600">No articles found matching your search.</p>
@@ -188,12 +203,28 @@ const Blogs = () => {
                     <CardDescription className="text-gray-600 leading-relaxed mb-4 flex-1">
                       {truncateContent(blog.content)}
                     </CardDescription>
-                    <Link 
-                      to={`/blogs/${blog.slug}`}
-                      className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors inline-flex items-center mt-auto"
-                    >
-                      Read Full Article →
-                    </Link>
+                    <div className="flex justify-between items-center mt-auto">
+                      <Link 
+                        to={`/blogs/${blog.slug}`}
+                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors inline-flex items-center"
+                      >
+                        Read Full Article →
+                      </Link>
+                      
+                      {/* Admin Actions */}
+                      {isAdmin && (
+                        <div className="flex space-x-1">
+                          <Button size="sm" variant="outline" className="flex items-center space-x-1">
+                            <Edit className="w-3 h-3" />
+                            <span>Edit</span>
+                          </Button>
+                          <Button size="sm" variant="destructive" className="flex items-center space-x-1">
+                            <Trash2 className="w-3 h-3" />
+                            <span>Delete</span>
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               ))}

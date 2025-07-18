@@ -18,6 +18,9 @@ import ForgotPassword from "./pages/ForgotPassword";
 import Admin from "./pages/Admin";
 import AdminUsers from "./pages/AdminUsers";
 import NotFound from "./pages/NotFound";
+import BlogDetail from "./pages/BlogDetail";
+import BloodInventoryPage from "./pages/BloodInventory";
+import VaccineInventoryPage from "./pages/VaccineInventory";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +55,9 @@ const App = () => (
                 <AdminUsers />
               </ProtectedRoute>
             } />
+            <Route path="/blogs/:slug" element={<BlogDetail />} />
+            <Route path="/blood-inventory" element={<BloodInventoryPage />} />
+            <Route path="/vaccine-inventory" element={<VaccineInventoryPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

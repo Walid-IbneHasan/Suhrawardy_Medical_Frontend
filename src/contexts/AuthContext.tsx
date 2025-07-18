@@ -40,11 +40,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await authAPI.login(email, password) as { access: string; refresh: string };
+      const response = await authAPI.login(email, password) as { access: string; refresh: string; is_superuser: boolean };
       authUtils.setTokens(response);
       
       // Fetch user data after login
       const userData = await authAPI.getUserProfile() as User;
+      // Override with is_superuser from login response
+      userData.is_superuser = response.is_superuser;
       authUtils.setUser(userData);
       setUser(userData);
       

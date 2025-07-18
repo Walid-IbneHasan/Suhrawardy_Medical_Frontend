@@ -10,7 +10,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { bloodAPI, vaccineAPI, BloodInventory, VaccineInventory } from '@/utils/api';
 import { Heart, Activity, Calendar, User, Phone, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const BloodServices = () => {
   const [bloodInventory, setBloodInventory] = useState<BloodInventory[]>([]);
@@ -18,6 +20,7 @@ const BloodServices = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'request' | 'donate' | 'inventory'>('inventory');
   const { toast } = useToast();
+  const { isAuthenticated } = useAuth();
 
   // Form states
   const [requestForm, setRequestForm] = useState({
@@ -237,17 +240,28 @@ const BloodServices = () => {
           {activeTab === 'request' && (
             <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Request Blood</h2>
-              <Card className="shadow-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Heart className="w-6 h-6 text-red-500" />
-                    <span>Blood Request Form</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Fill out this form to request blood. We will contact you as soon as possible.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              {!isAuthenticated ? (
+                <Card className="shadow-xl">
+                  <CardContent className="p-8 text-center">
+                    <h3 className="text-xl font-semibold mb-4">Login Required</h3>
+                    <p className="text-gray-600 mb-6">Please login to request blood services.</p>
+                    <Button>
+                      <Link to="/login">Login</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Heart className="w-6 h-6 text-red-500" />
+                      <span>Blood Request Form</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Fill out this form to request blood. We will contact you as soon as possible.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
                   <form onSubmit={handleRequestSubmit} className="space-y-6">
                     <div>
                       <Label htmlFor="blood_group">Blood Group Required</Label>
@@ -319,6 +333,7 @@ const BloodServices = () => {
                   </form>
                 </CardContent>
               </Card>
+              )}
             </div>
           )}
 
@@ -326,17 +341,28 @@ const BloodServices = () => {
           {activeTab === 'donate' && (
             <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">Donate Blood</h2>
-              <Card className="shadow-xl">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Heart className="w-6 h-6 text-red-500" />
-                    <span>Blood Donation Interest</span>
-                  </CardTitle>
-                  <CardDescription>
-                    Register your interest in donating blood. Your contribution can save lives.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
+              {!isAuthenticated ? (
+                <Card className="shadow-xl">
+                  <CardContent className="p-8 text-center">
+                    <h3 className="text-xl font-semibold mb-4">Login Required</h3>
+                    <p className="text-gray-600 mb-6">Please login to register for blood donation.</p>
+                    <Button>
+                      <Link to="/login">Login</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="shadow-xl">
+                  <CardHeader>
+                    <CardTitle className="flex items-center space-x-2">
+                      <Heart className="w-6 h-6 text-red-500" />
+                      <span>Blood Donation Interest</span>
+                    </CardTitle>
+                    <CardDescription>
+                      Register your interest in donating blood. Your contribution can save lives.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
                   <form onSubmit={handleDonateSubmit} className="space-y-6">
                     <div>
                       <Label htmlFor="donor_blood_group">Your Blood Group</Label>
@@ -388,6 +414,7 @@ const BloodServices = () => {
                   </form>
                 </CardContent>
               </Card>
+              )}
             </div>
           )}
         </div>
