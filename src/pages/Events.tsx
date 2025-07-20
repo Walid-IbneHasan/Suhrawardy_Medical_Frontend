@@ -3,12 +3,23 @@ import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { eventAPI, Event } from '@/utils/api';
-import { Calendar, MapPin, Clock } from 'lucide-react';
+import { eventAPI, Event, adminAPI } from '@/utils/api';
+import { Calendar, MapPin, Clock, Plus, Edit, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [formData, setFormData] = useState({ title: '', description: '', location: '', date: '' });
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   // Default events for demo
   const defaultEvents = [
@@ -54,6 +65,66 @@ const Events = () => {
 
     fetchEvents();
   }, []);
+
+  const handleCreateEvent = async () => {
+    try {
+      await adminAPI.events.create(formData);
+      toast({ title: "Success", description: "Event created successfully" });
+      setDialogOpen(false);
+      setFormData({ title: '', description: '', location: '', date: '' });
+      // Refresh events
+      const data = await eventAPI.getEvents();
+      setEvents(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create event", variant: "destructive" });
+    }
+  };
+
+  const handleEditEvent = async () => {
+    if (!editingEvent) return;
+    try {
+      await adminAPI.events.update(editingEvent.id, formData);
+      toast({ title: "Success", description: "Event updated successfully" });
+      setDialogOpen(false);
+      setEditingEvent(null);
+      setFormData({ title: '', description: '', location: '', date: '' });
+      // Refresh events
+      const data = await eventAPI.getEvents();
+      setEvents(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update event", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteEvent = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this event?')) return;
+    try {
+      await adminAPI.events.delete(id);
+      toast({ title: "Success", description: "Event deleted successfully" });
+      // Refresh events
+      const data = await eventAPI.getEvents();
+      setEvents(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete event", variant: "destructive" });
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingEvent(null);
+    setFormData({ title: '', description: '', location: '', date: '' });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (event: Event) => {
+    setEditingEvent(event);
+    setFormData({ 
+      title: event.title, 
+      description: event.description, 
+      location: event.location, 
+      date: event.date.substring(0, 16) // Format for datetime-local input
+    });
+    setDialogOpen(true);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -118,6 +189,56 @@ const Events = () => {
       {/* Events List */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto">
+          {/* Admin Actions */}
+          {isAdmin && (
+            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openCreateDialog} className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Add Event</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{editingEvent ? 'Edit Event' : 'Create New Event'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Event title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      />
+                      <Textarea
+                        placeholder="Event description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={4}
+                      />
+                      <Input
+                        placeholder="Event location"
+                        value={formData.location}
+                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                      />
+                      <Input
+                        type="datetime-local"
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      />
+                      <Button
+                        onClick={editingEvent ? handleEditEvent : handleCreateEvent}
+                        className="w-full"
+                      >
+                        {editingEvent ? 'Update Event' : 'Create Event'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          )}
           {events.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-xl text-gray-600">No upcoming events at the moment. Check back soon!</p>
@@ -157,9 +278,25 @@ const Events = () => {
                       <CardDescription className="text-gray-600 leading-relaxed mb-4 flex-1">
                         {event.description}
                       </CardDescription>
-                      <div className="flex items-center text-sm text-blue-600 mt-auto">
-                        <MapPin className="w-4 h-4 mr-2" />
-                        {event.location}
+                      <div className="flex items-center justify-between mt-auto">
+                        <div className="flex items-center text-sm text-blue-600">
+                          <MapPin className="w-4 h-4 mr-2" />
+                          {event.location}
+                        </div>
+                        
+                        {/* Admin Actions */}
+                        {isAdmin && (
+                          <div className="flex space-x-1">
+                            <Button size="sm" variant="outline" onClick={() => openEditDialog(event)} className="flex items-center space-x-1">
+                              <Edit className="w-3 h-3" />
+                              <span>Edit</span>
+                            </Button>
+                            <Button size="sm" variant="destructive" onClick={() => handleDeleteEvent(event.id)} className="flex items-center space-x-1">
+                              <Trash2 className="w-3 h-3" />
+                              <span>Delete</span>
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </CardContent>
                   </Card>

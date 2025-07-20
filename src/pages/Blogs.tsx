@@ -5,17 +5,25 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Link } from 'react-router-dom';
-import { blogAPI, Blog } from '@/utils/api';
+import { blogAPI, Blog, adminAPI } from '@/utils/api';
 import { Calendar, Search, User, Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const [formData, setFormData] = useState({ title: '', slug: '', content: '', published: false });
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   // Extended default blogs for demo
   const defaultBlogs = [
@@ -75,6 +83,69 @@ const Blogs = () => {
 
     fetchBlogs();
   }, []);
+
+  const handleCreateBlog = async () => {
+    try {
+      await adminAPI.blogs.create(formData);
+      toast({ title: "Success", description: "Blog created successfully" });
+      setDialogOpen(false);
+      setFormData({ title: '', slug: '', content: '', published: false });
+      // Refresh blogs
+      const data = await blogAPI.getBlogs();
+      setBlogs(data);
+      setFilteredBlogs(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create blog", variant: "destructive" });
+    }
+  };
+
+  const handleEditBlog = async () => {
+    if (!editingBlog) return;
+    try {
+      await adminAPI.blogs.update(editingBlog.slug, formData);
+      toast({ title: "Success", description: "Blog updated successfully" });
+      setDialogOpen(false);
+      setEditingBlog(null);
+      setFormData({ title: '', slug: '', content: '', published: false });
+      // Refresh blogs
+      const data = await blogAPI.getBlogs();
+      setBlogs(data);
+      setFilteredBlogs(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update blog", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteBlog = async (slug: string) => {
+    if (!confirm('Are you sure you want to delete this blog?')) return;
+    try {
+      await adminAPI.blogs.delete(slug);
+      toast({ title: "Success", description: "Blog deleted successfully" });
+      // Refresh blogs
+      const data = await blogAPI.getBlogs();
+      setBlogs(data);
+      setFilteredBlogs(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete blog", variant: "destructive" });
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingBlog(null);
+    setFormData({ title: '', slug: '', content: '', published: false });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (blog: Blog) => {
+    setEditingBlog(blog);
+    setFormData({ 
+      title: blog.title, 
+      slug: blog.slug, 
+      content: blog.content, 
+      published: blog.published 
+    });
+    setDialogOpen(true);
+  };
 
   useEffect(() => {
     const filtered = blogs.filter(blog =>
@@ -163,10 +234,53 @@ const Blogs = () => {
             <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
-                <Button className="flex items-center space-x-2">
-                  <Plus className="w-4 h-4" />
-                  <span>Create New Blog</span>
-                </Button>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openCreateDialog} className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Create New Blog</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>{editingBlog ? 'Edit Blog' : 'Create New Blog'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Blog title"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      />
+                      <Input
+                        placeholder="Blog slug (URL-friendly)"
+                        value={formData.slug}
+                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                      />
+                      <Textarea
+                        placeholder="Blog content"
+                        value={formData.content}
+                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        rows={6}
+                      />
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="published"
+                          checked={formData.published}
+                          onCheckedChange={(checked) => setFormData({ ...formData, published: !!checked })}
+                        />
+                        <label htmlFor="published" className="text-sm font-medium">
+                          Published
+                        </label>
+                      </div>
+                      <Button
+                        onClick={editingBlog ? handleEditBlog : handleCreateBlog}
+                        className="w-full"
+                      >
+                        {editingBlog ? 'Update Blog' : 'Create Blog'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           )}
@@ -214,11 +328,11 @@ const Blogs = () => {
                       {/* Admin Actions */}
                       {isAdmin && (
                         <div className="flex space-x-1">
-                          <Button size="sm" variant="outline" className="flex items-center space-x-1">
+                          <Button size="sm" variant="outline" onClick={() => openEditDialog(blog)} className="flex items-center space-x-1">
                             <Edit className="w-3 h-3" />
                             <span>Edit</span>
                           </Button>
-                          <Button size="sm" variant="destructive" className="flex items-center space-x-1">
+                          <Button size="sm" variant="destructive" onClick={() => handleDeleteBlog(blog.slug)} className="flex items-center space-x-1">
                             <Trash2 className="w-3 h-3" />
                             <span>Delete</span>
                           </Button>

@@ -3,14 +3,22 @@ import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { vaccineAPI, VaccineInventory } from '@/utils/api';
+import { vaccineAPI, VaccineInventory, adminAPI } from '@/utils/api';
 import { Syringe, Plus, Edit, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const VaccineInventoryPage = () => {
   const [vaccineInventory, setVaccineInventory] = useState<VaccineInventory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingVaccine, setEditingVaccine] = useState<VaccineInventory | null>(null);
+  const [formData, setFormData] = useState({ type: '', available: false });
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   // Default data for demo
   const defaultVaccineInventory = [
@@ -40,6 +48,61 @@ const VaccineInventoryPage = () => {
 
     fetchVaccineInventory();
   }, []);
+
+  const handleCreateVaccineInventory = async () => {
+    try {
+      await adminAPI.vaccineInventory.create(formData);
+      toast({ title: "Success", description: "Vaccine inventory created successfully" });
+      setDialogOpen(false);
+      setFormData({ type: '', available: false });
+      // Refresh inventory
+      const data = await vaccineAPI.getVaccineInventory();
+      setVaccineInventory(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create vaccine inventory", variant: "destructive" });
+    }
+  };
+
+  const handleEditVaccineInventory = async () => {
+    if (!editingVaccine) return;
+    try {
+      await adminAPI.vaccineInventory.update(editingVaccine.id, formData);
+      toast({ title: "Success", description: "Vaccine inventory updated successfully" });
+      setDialogOpen(false);
+      setEditingVaccine(null);
+      setFormData({ type: '', available: false });
+      // Refresh inventory
+      const data = await vaccineAPI.getVaccineInventory();
+      setVaccineInventory(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update vaccine inventory", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteVaccineInventory = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this vaccine inventory?')) return;
+    try {
+      await adminAPI.vaccineInventory.delete(id);
+      toast({ title: "Success", description: "Vaccine inventory deleted successfully" });
+      // Refresh inventory
+      const data = await vaccineAPI.getVaccineInventory();
+      setVaccineInventory(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete vaccine inventory", variant: "destructive" });
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingVaccine(null);
+    setFormData({ type: '', available: false });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (vaccine: VaccineInventory) => {
+    setEditingVaccine(vaccine);
+    setFormData({ type: vaccine.type, available: vaccine.available });
+    setDialogOpen(true);
+  };
 
   if (loading) {
     return (
@@ -87,10 +150,42 @@ const VaccineInventoryPage = () => {
             <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
-                <Button className="flex items-center space-x-2">
-                  <Plus className="w-4 h-4" />
-                  <span>Add Vaccine</span>
-                </Button>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openCreateDialog} className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Add Vaccine</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{editingVaccine ? 'Edit Vaccine Inventory' : 'Create New Vaccine Inventory'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Vaccine type (e.g., Hepatitis B)"
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                      />
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="available"
+                          checked={formData.available}
+                          onCheckedChange={(checked) => setFormData({ ...formData, available: !!checked })}
+                        />
+                        <label htmlFor="available" className="text-sm font-medium">
+                          Available
+                        </label>
+                      </div>
+                      <Button
+                        onClick={editingVaccine ? handleEditVaccineInventory : handleCreateVaccineInventory}
+                        className="w-full"
+                      >
+                        {editingVaccine ? 'Update Inventory' : 'Create Inventory'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           )}
@@ -115,11 +210,11 @@ const VaccineInventoryPage = () => {
                   {/* Admin Actions */}
                   {isAdmin && (
                     <div className="flex space-x-2">
-                      <Button size="sm" variant="outline" className="flex items-center space-x-1">
+                      <Button size="sm" variant="outline" onClick={() => openEditDialog(vaccine)} className="flex items-center space-x-1">
                         <Edit className="w-3 h-3" />
                         <span>Edit</span>
                       </Button>
-                      <Button size="sm" variant="destructive" className="flex items-center space-x-1">
+                      <Button size="sm" variant="destructive" onClick={() => handleDeleteVaccineInventory(vaccine.id)} className="flex items-center space-x-1">
                         <Trash2 className="w-3 h-3" />
                         <span>Delete</span>
                       </Button>

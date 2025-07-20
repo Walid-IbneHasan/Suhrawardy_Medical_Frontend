@@ -151,3 +151,82 @@ export const authAPI = {
     body: JSON.stringify(data),
   }),
 };
+
+// Admin APIs
+export const adminAPI = {
+  // Services
+  services: {
+    getAll: (): Promise<Service[]> => apiCall('/admin/services/'),
+    create: (data: { name: string; description: string }) => apiCall('/admin/services/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { name: string; description: string }) => apiCall(`/admin/services/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/services/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Blogs
+  blogs: {
+    getAll: (): Promise<Blog[]> => apiCall('/admin/blogs/'),
+    create: (data: { title: string; slug: string; content: string; published: boolean }) => apiCall('/admin/blogs/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (slug: string, data: { title: string; slug: string; content: string; published: boolean }) => apiCall(`/admin/blogs/${slug}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (slug: string) => apiCall(`/admin/blogs/${slug}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Events
+  events: {
+    getAll: (): Promise<Event[]> => apiCall('/admin/events/'),
+    create: (data: { title: string; description: string; location: string; date: string }) => apiCall('/admin/events/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; location: string; date: string }) => apiCall(`/admin/events/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/events/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Blood Inventory
+  bloodInventory: {
+    getAll: (): Promise<BloodInventory[]> => apiCall('/admin/blood-inventory/'),
+    create: (data: { group: string; available: boolean }) => apiCall('/admin/blood-inventory/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { group: string; available: boolean }) => apiCall(`/admin/blood-inventory/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/blood-inventory/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Vaccine Inventory
+  vaccineInventory: {
+    getAll: (): Promise<VaccineInventory[]> => apiCall('/admin/vaccine-inventory/'),
+    create: (data: { type: string; available: boolean }) => apiCall('/admin/vaccine-inventory/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { type: string; available: boolean }) => apiCall(`/admin/vaccine-inventory/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/vaccine-inventory/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+};

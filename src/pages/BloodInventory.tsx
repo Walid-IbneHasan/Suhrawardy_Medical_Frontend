@@ -3,14 +3,22 @@ import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { bloodAPI, BloodInventory } from '@/utils/api';
+import { bloodAPI, BloodInventory, adminAPI } from '@/utils/api';
 import { Heart, Plus, Edit, Trash2 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const BloodInventoryPage = () => {
   const [bloodInventory, setBloodInventory] = useState<BloodInventory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingBlood, setEditingBlood] = useState<BloodInventory | null>(null);
+  const [formData, setFormData] = useState({ group: '', available: false });
   const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   // Default data for demo
   const defaultBloodInventory = [
@@ -40,6 +48,61 @@ const BloodInventoryPage = () => {
 
     fetchBloodInventory();
   }, []);
+
+  const handleCreateBloodInventory = async () => {
+    try {
+      await adminAPI.bloodInventory.create(formData);
+      toast({ title: "Success", description: "Blood inventory created successfully" });
+      setDialogOpen(false);
+      setFormData({ group: '', available: false });
+      // Refresh inventory
+      const data = await bloodAPI.getBloodInventory();
+      setBloodInventory(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create blood inventory", variant: "destructive" });
+    }
+  };
+
+  const handleEditBloodInventory = async () => {
+    if (!editingBlood) return;
+    try {
+      await adminAPI.bloodInventory.update(editingBlood.id, formData);
+      toast({ title: "Success", description: "Blood inventory updated successfully" });
+      setDialogOpen(false);
+      setEditingBlood(null);
+      setFormData({ group: '', available: false });
+      // Refresh inventory
+      const data = await bloodAPI.getBloodInventory();
+      setBloodInventory(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update blood inventory", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteBloodInventory = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this blood inventory?')) return;
+    try {
+      await adminAPI.bloodInventory.delete(id);
+      toast({ title: "Success", description: "Blood inventory deleted successfully" });
+      // Refresh inventory
+      const data = await bloodAPI.getBloodInventory();
+      setBloodInventory(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete blood inventory", variant: "destructive" });
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingBlood(null);
+    setFormData({ group: '', available: false });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (blood: BloodInventory) => {
+    setEditingBlood(blood);
+    setFormData({ group: blood.group, available: blood.available });
+    setDialogOpen(true);
+  };
 
   if (loading) {
     return (
@@ -87,10 +150,42 @@ const BloodInventoryPage = () => {
             <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
-                <Button className="flex items-center space-x-2">
-                  <Plus className="w-4 h-4" />
-                  <span>Add Blood Group</span>
-                </Button>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openCreateDialog} className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Add Blood Group</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{editingBlood ? 'Edit Blood Inventory' : 'Create New Blood Inventory'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Blood group (e.g., A+, O-)"
+                        value={formData.group}
+                        onChange={(e) => setFormData({ ...formData, group: e.target.value })}
+                      />
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="available"
+                          checked={formData.available}
+                          onCheckedChange={(checked) => setFormData({ ...formData, available: !!checked })}
+                        />
+                        <label htmlFor="available" className="text-sm font-medium">
+                          Available
+                        </label>
+                      </div>
+                      <Button
+                        onClick={editingBlood ? handleEditBloodInventory : handleCreateBloodInventory}
+                        className="w-full"
+                      >
+                        {editingBlood ? 'Update Inventory' : 'Create Inventory'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           )}
@@ -112,11 +207,11 @@ const BloodInventoryPage = () => {
                   {/* Admin Actions */}
                   {isAdmin && (
                     <div className="flex flex-col space-y-1">
-                      <Button size="sm" variant="outline" className="flex items-center justify-center space-x-1">
+                      <Button size="sm" variant="outline" onClick={() => openEditDialog(blood)} className="flex items-center justify-center space-x-1">
                         <Edit className="w-3 h-3" />
                         <span>Edit</span>
                       </Button>
-                      <Button size="sm" variant="destructive" className="flex items-center justify-center space-x-1">
+                      <Button size="sm" variant="destructive" onClick={() => handleDeleteBloodInventory(blood.id)} className="flex items-center justify-center space-x-1">
                         <Trash2 className="w-3 h-3" />
                         <span>Delete</span>
                       </Button>

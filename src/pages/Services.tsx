@@ -2,12 +2,23 @@
 import { useEffect, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { serviceAPI, Service } from '@/utils/api';
-import { Activity, Heart, Users, Calendar, Stethoscope, Shield } from 'lucide-react';
+import { serviceAPI, Service, adminAPI } from '@/utils/api';
+import { Activity, Heart, Users, Calendar, Stethoscope, Shield, Plus, Edit, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 const Services = () => {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [formData, setFormData] = useState({ name: '', description: '' });
+  const { isAdmin } = useAuth();
+  const { toast } = useToast();
 
   // Extended default services for demo
   const defaultServices = [
@@ -62,6 +73,61 @@ const Services = () => {
     fetchServices();
   }, []);
 
+  const handleCreateService = async () => {
+    try {
+      await adminAPI.services.create(formData);
+      toast({ title: "Success", description: "Service created successfully" });
+      setDialogOpen(false);
+      setFormData({ name: '', description: '' });
+      // Refresh services
+      const data = await serviceAPI.getServices();
+      setServices(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to create service", variant: "destructive" });
+    }
+  };
+
+  const handleEditService = async () => {
+    if (!editingService) return;
+    try {
+      await adminAPI.services.update(editingService.id, formData);
+      toast({ title: "Success", description: "Service updated successfully" });
+      setDialogOpen(false);
+      setEditingService(null);
+      setFormData({ name: '', description: '' });
+      // Refresh services
+      const data = await serviceAPI.getServices();
+      setServices(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to update service", variant: "destructive" });
+    }
+  };
+
+  const handleDeleteService = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this service?')) return;
+    try {
+      await adminAPI.services.delete(id);
+      toast({ title: "Success", description: "Service deleted successfully" });
+      // Refresh services
+      const data = await serviceAPI.getServices();
+      setServices(data);
+    } catch (error) {
+      toast({ title: "Error", description: "Failed to delete service", variant: "destructive" });
+    }
+  };
+
+  const openCreateDialog = () => {
+    setEditingService(null);
+    setFormData({ name: '', description: '' });
+    setDialogOpen(true);
+  };
+
+  const openEditDialog = (service: Service) => {
+    setEditingService(service);
+    setFormData({ name: service.name, description: service.description });
+    setDialogOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen">
@@ -108,6 +174,46 @@ const Services = () => {
       {/* Services Grid */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto">
+          {/* Admin Actions */}
+          {isAdmin && (
+            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
+                <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button onClick={openCreateDialog} className="flex items-center space-x-2">
+                      <Plus className="w-4 h-4" />
+                      <span>Add Service</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>{editingService ? 'Edit Service' : 'Create New Service'}</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4">
+                      <Input
+                        placeholder="Service name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      />
+                      <Textarea
+                        placeholder="Service description"
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={4}
+                      />
+                      <Button
+                        onClick={editingService ? handleEditService : handleCreateService}
+                        className="w-full"
+                      >
+                        {editingService ? 'Update Service' : 'Create Service'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          )}
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             {services.map((service, index) => {
               const IconComponent = serviceIcons[index % serviceIcons.length];
@@ -120,9 +226,23 @@ const Services = () => {
                     <CardTitle className="text-xl text-gray-900">{service.name}</CardTitle>
                   </CardHeader>
                   <CardContent className="text-center flex-1">
-                    <CardDescription className="text-gray-600 leading-relaxed">
+                    <CardDescription className="text-gray-600 leading-relaxed mb-4">
                       {service.description}
                     </CardDescription>
+                    
+                    {/* Admin Actions */}
+                    {isAdmin && (
+                      <div className="flex space-x-2 justify-center">
+                        <Button size="sm" variant="outline" onClick={() => openEditDialog(service)} className="flex items-center space-x-1">
+                          <Edit className="w-3 h-3" />
+                          <span>Edit</span>
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => handleDeleteService(service.id)} className="flex items-center space-x-1">
+                          <Trash2 className="w-3 h-3" />
+                          <span>Delete</span>
+                        </Button>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               );
