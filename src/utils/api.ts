@@ -1,4 +1,3 @@
-
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // Types
@@ -39,9 +38,43 @@ export interface VaccineInventory {
   available: boolean;
 }
 
+export interface About {
+  id: number;
+  title: string;
+  description: string;
+  years_experience: number;
+  patients_served: string;
+  satisfaction_rate: string;
+  image?: string;
+  images?: { id: number; image: string }[];
+}
+
+export interface Achievement {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  specialty: string;
+  images: { image: string }[];
+}
+
+export interface Mission {
+  id: number;
+  title: string;
+  description: string;
+  phone: string;
+  email: string;
+  address: string;
+}
+
 // Helper function to get auth headers
 const getAuthHeaders = (): Record<string, string> => {
-  // Get token from cookie using js-cookie
   const token = document.cookie
     .split('; ')
     .find(row => row.startsWith('access_token='))
@@ -54,21 +87,33 @@ const getAuthHeaders = (): Record<string, string> => {
 const apiCall = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = {
-    'Content-Type': 'application/json',
     ...getAuthHeaders(),
     ...options.headers,
   };
+
+  // Omit Content-Type for FormData to let the browser set multipart/form-data with boundary
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
-  if (!response.ok) {
+  // Accept 204 No Content as success for DELETE requests
+  if (!response.ok && !(options.method === 'DELETE' && response.status === 204)) {
     throw new Error(`API call failed: ${response.status} ${response.statusText}`);
   }
 
-  return response.json();
+  // For DELETE requests with 204, return an empty object
+  if (options.method === 'DELETE' && response.status === 204) {
+    return {} as T;
+  }
+
+  // Handle empty response body (e.g., 204 or no content)
+  const text = await response.text();
+  return text ? JSON.parse(text) : {};
 };
 
 // Service API
@@ -113,6 +158,14 @@ export const bloodAPI = {
 // Vaccine Inventory API
 export const vaccineAPI = {
   getVaccineInventory: (): Promise<VaccineInventory[]> => apiCall('/vaccine-inventory/'),
+};
+
+// About API
+export const aboutAPI = {
+  getAbout: (): Promise<About[]> => apiCall('/about/'),
+  getAchievements: (): Promise<Achievement[]> => apiCall('/achievements/'),
+  getTeamMembers: (): Promise<TeamMember[]> => apiCall('/team-members/'),
+  getMission: (): Promise<Mission[]> => apiCall('/mission/'),
 };
 
 // Auth API
@@ -226,6 +279,66 @@ export const adminAPI = {
       body: JSON.stringify(data),
     }),
     delete: (id: number) => apiCall(`/admin/vaccine-inventory/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // About
+  about: {
+    getAll: (): Promise<About[]> => apiCall('/admin/about/'),
+    create: (data: FormData) => apiCall('/admin/about/', {
+      method: 'POST',
+      body: data,
+    }),
+    update: (id: number, data: FormData) => apiCall(`/admin/about/${id}/`, {
+      method: 'PATCH',
+      body: data,
+    }),
+    delete: (id: number) => apiCall(`/admin/about/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Achievements
+  achievements: {
+    getAll: (): Promise<Achievement[]> => apiCall('/admin/achievements/'),
+    create: (data: { title: string; description: string; icon: string }) => apiCall('/admin/achievements/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; icon: string }) => apiCall(`/admin/achievements/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/achievements/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Team Members
+  teamMembers: {
+    getAll: (): Promise<TeamMember[]> => apiCall('/admin/team-members/'),
+    create: (data: FormData) => apiCall('/admin/team-members/', {
+      method: 'POST',
+      body: data,
+    }),
+    update: (id: number, data: FormData) => apiCall(`/admin/team-members/${id}/`, {
+      method: 'PATCH',
+      body: data,
+    }),
+    delete: (id: number) => apiCall(`/admin/team-members/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Mission
+  mission: {
+    getAll: (): Promise<Mission[]> => apiCall('/admin/mission/'),
+    create: (data: { title: string; description: string; phone: string; email: string; address: string }) => apiCall('/admin/mission/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; phone: string; email: string; address: string }) => apiCall(`/admin/mission/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/mission/${id}/`, {
       method: 'DELETE',
     }),
   },
