@@ -225,17 +225,20 @@ export const adminAPI = {
   // Blogs
   blogs: {
     getAll: (): Promise<Blog[]> => apiCall('/admin/blogs/'),
-    create: (data: { title: string; slug: string; content: string; published: boolean }) => apiCall('/admin/blogs/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    update: (slug: string, data: { title: string; slug: string; content: string; published: boolean }) => apiCall(`/admin/blogs/${slug}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-    delete: (slug: string) => apiCall(`/admin/blogs/${slug}/`, {
-      method: 'DELETE',
-    }),
+    create: (data: FormData) =>
+      apiCall("/admin/blogs/", {
+        method: "POST",
+        body: data,
+      }),
+    update: (slug: string, data: FormData) =>
+      apiCall(`/admin/blogs/${slug}/`, {
+        method: "PATCH",
+        body: data,
+      }),
+    delete: (slug: string) =>
+      apiCall(`/admin/blogs/${slug}/`, {
+        method: "DELETE",
+      }),
   },
   // Events
   events: {

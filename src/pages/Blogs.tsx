@@ -1,29 +1,47 @@
-
-import { useEffect, useState } from 'react';
-import Navigation from '@/components/Navigation';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Link } from 'react-router-dom';
-import { blogAPI, Blog, adminAPI } from '@/utils/api';
-import { Calendar, Search, User, Plus, Edit, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { useEffect, useState } from "react";
+import Navigation from "@/components/Navigation";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Link, useLocation } from "react-router-dom";
+import { blogAPI, Blog, adminAPI } from "@/utils/api";
+import { Calendar, Search, Plus, Edit, Trash2, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [filteredBlogs, setFilteredBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
-  const [formData, setFormData] = useState({ title: '', slug: '', content: '', published: false });
+  const [formData, setFormData] = useState({
+    title: "",
+    slug: "",
+    content: "",
+    published: false,
+  });
+  const [imageFiles, setImageFiles] = useState<File[]>([]);
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const location = useLocation();
 
   // Extended default blogs for demo
   const defaultBlogs = [
@@ -31,49 +49,93 @@ const Blogs = () => {
       id: 1,
       title: "The Importance of Regular Health Checkups",
       slug: "importance-regular-health-checkups",
-      content: "Regular health checkups are essential for maintaining good health and preventing diseases. Early detection can save lives and reduce healthcare costs significantly. During routine checkups, healthcare providers can identify risk factors and provide preventive care recommendations.",
+      content:
+        "Regular health checkups are essential for maintaining good health and preventing diseases. Early detection can save lives and reduce healthcare costs significantly. During routine checkups, healthcare providers can identify risk factors and provide preventive care recommendations.",
       created_at: "2024-01-15T10:00:00Z",
       published: true,
-      images: [{ image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }]
+      images: [
+        {
+          id: 1,
+          image:
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        },
+      ],
     },
     {
       id: 2,
       title: "Understanding Blood Donation: Benefits and Process",
       slug: "understanding-blood-donation",
-      content: "Blood donation is a noble act that can save lives. Learn about the benefits, process, and eligibility criteria for blood donation. One donation can help save up to three lives, making it one of the most impactful ways to contribute to your community's health.",
+      content:
+        "Blood donation is a noble act that can save lives. Learn about the benefits, process, and eligibility criteria for blood donation. One donation can help save up to three lives, making it one of the most impactful ways to contribute to your community's health.",
       created_at: "2024-01-10T14:30:00Z",
       published: true,
-      images: [{ image: "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }]
+      images: [
+        {
+          id: 2,
+          image:
+            "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        },
+      ],
     },
     {
       id: 3,
       title: "Vaccination Schedule: Protecting Your Family",
       slug: "vaccination-schedule-family",
-      content: "Staying up-to-date with vaccinations is crucial for protecting yourself and your loved ones from preventable diseases. Vaccines have been one of the greatest public health achievements, dramatically reducing the incidence of serious diseases.",
+      content:
+        "Staying up-to-date with vaccinations is crucial for protecting yourself and your loved ones from preventable diseases. Vaccines have been one of the greatest public health achievements, dramatically reducing the incidence of serious diseases.",
       created_at: "2024-01-05T09:15:00Z",
       published: true,
-      images: [{ image: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }]
+      images: [
+        {
+          id: 3,
+          image:
+            "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        },
+      ],
     },
     {
       id: 4,
       title: "Mental Health Awareness: Breaking the Stigma",
       slug: "mental-health-awareness",
-      content: "Mental health is just as important as physical health. Understanding common mental health conditions and knowing when to seek help can make a significant difference in overall well-being and quality of life.",
+      content:
+        "Mental health is just as important as physical health. Understanding common mental health conditions and knowing when to seek help can make a significant difference in overall well-being and quality of life.",
       created_at: "2024-01-01T16:45:00Z",
       published: true,
-      images: [{ image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" }]
-    }
+      images: [
+        {
+          id: 4,
+          image:
+            "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
+        },
+      ],
+    },
   ];
+
+  // Handle navigation from BlogDetail for editing
+  useEffect(() => {
+    const state = location.state as { blog?: Blog };
+    if (state?.blog) {
+      setEditingBlog(state.blog);
+      setFormData({
+        title: state.blog.title,
+        slug: state.blog.slug,
+        content: state.blog.content,
+        published: state.blog.published,
+      });
+      setImageFiles([]);
+      setDialogOpen(true);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        console.log('Fetching blogs...');
+        console.log("Fetching blogs...");
         const data = await blogAPI.getBlogs();
         setBlogs(data);
         setFilteredBlogs(data);
       } catch (error) {
-        console.error('Failed to fetch blogs:', error);
+        console.error("Failed to fetch blogs:", error);
         setBlogs(defaultBlogs);
         setFilteredBlogs(defaultBlogs);
       } finally {
@@ -86,87 +148,140 @@ const Blogs = () => {
 
   const handleCreateBlog = async () => {
     try {
-      await adminAPI.blogs.create(formData);
+      const formDataPayload = new FormData();
+      formDataPayload.append("title", formData.title);
+      formDataPayload.append("slug", formData.slug);
+      formDataPayload.append("content", formData.content);
+      formDataPayload.append("published", String(formData.published));
+      imageFiles.forEach((file) => {
+        formDataPayload.append("image_files", file);
+      });
+
+      console.log("FormData contents:");
+      for (const [key, value] of formDataPayload.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
+      await adminAPI.blogs.create(formDataPayload);
       toast({ title: "Success", description: "Blog created successfully" });
       setDialogOpen(false);
-      setFormData({ title: '', slug: '', content: '', published: false });
-      // Refresh blogs
+      setFormData({ title: "", slug: "", content: "", published: false });
+      setImageFiles([]);
       const data = await blogAPI.getBlogs();
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to create blog", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to create blog",
+        variant: "destructive",
+      });
     }
   };
 
   const handleEditBlog = async () => {
     if (!editingBlog) return;
     try {
-      await adminAPI.blogs.update(editingBlog.slug, formData);
+      const formDataPayload = new FormData();
+      formDataPayload.append("title", formData.title);
+      formDataPayload.append("slug", formData.slug);
+      formDataPayload.append("content", formData.content);
+      formDataPayload.append("published", String(formData.published));
+      imageFiles.forEach((file) => {
+        formDataPayload.append("image_files", file);
+      });
+
+      console.log("FormData contents for update:");
+      for (const [key, value] of formDataPayload.entries()) {
+        console.log(`${key}: ${value}`);
+      }
+
+      await adminAPI.blogs.update(editingBlog.slug, formDataPayload);
       toast({ title: "Success", description: "Blog updated successfully" });
       setDialogOpen(false);
       setEditingBlog(null);
-      setFormData({ title: '', slug: '', content: '', published: false });
-      // Refresh blogs
+      setFormData({ title: "", slug: "", content: "", published: false });
+      setImageFiles([]);
       const data = await blogAPI.getBlogs();
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to update blog", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to update blog",
+        variant: "destructive",
+      });
     }
   };
 
   const handleDeleteBlog = async (slug: string) => {
-    if (!confirm('Are you sure you want to delete this blog?')) return;
+    if (!confirm("Are you sure you want to delete this blog?")) return;
     try {
       await adminAPI.blogs.delete(slug);
       toast({ title: "Success", description: "Blog deleted successfully" });
-      // Refresh blogs
       const data = await blogAPI.getBlogs();
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
-      toast({ title: "Error", description: "Failed to delete blog", variant: "destructive" });
+      toast({
+        title: "Error",
+        description: "Failed to delete blog",
+        variant: "destructive",
+      });
     }
   };
 
   const openCreateDialog = () => {
     setEditingBlog(null);
-    setFormData({ title: '', slug: '', content: '', published: false });
+    setFormData({ title: "", slug: "", content: "", published: false });
+    setImageFiles([]);
     setDialogOpen(true);
   };
 
   const openEditDialog = (blog: Blog) => {
     setEditingBlog(blog);
-    setFormData({ 
-      title: blog.title, 
-      slug: blog.slug, 
-      content: blog.content, 
-      published: blog.published 
+    setFormData({
+      title: blog.title,
+      slug: blog.slug,
+      content: blog.content,
+      published: blog.published,
     });
+    setImageFiles([]);
     setDialogOpen(true);
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      setImageFiles((prev) => [...prev, ...Array.from(files)]);
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImageFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
   useEffect(() => {
-    const filtered = blogs.filter(blog =>
-      blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      blog.content.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = blogs.filter(
+      (blog) =>
+        blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        blog.content.toLowerCase().includes(searchTerm.toLowerCase())
     );
     setFilteredBlogs(filtered);
   }, [searchTerm, blogs]);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const truncateContent = (content: string, maxLength: number = 200) => {
     if (content.length <= maxLength) return content;
-    return content.substr(0, maxLength) + '...';
+    return content.substr(0, maxLength) + "...";
   };
 
   if (loading) {
@@ -176,12 +291,17 @@ const Blogs = () => {
         <div className="section-padding">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">Health Blog</h1>
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+                Health Blog
+              </h1>
               <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="bg-white rounded-xl overflow-hidden shadow-lg animate-pulse">
+                <div
+                  key={i}
+                  className="bg-white rounded-xl overflow-hidden shadow-lg animate-pulse"
+                >
                   <div className="w-full h-48 bg-gray-200"></div>
                   <div className="p-6">
                     <div className="h-6 bg-gray-200 rounded mb-4"></div>
@@ -201,17 +321,19 @@ const Blogs = () => {
   return (
     <div className="min-h-screen">
       <Navigation />
-      
+
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">Health Blog</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            Health Blog
+          </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-            Stay informed with the latest healthcare news, tips, and insights from our medical experts.
-            Your health journey starts with knowledge.
+            Stay informed with the latest healthcare news, tips, and insights
+            from our medical experts. Your health journey starts with knowledge.
           </p>
-          
+
           {/* Search Bar */}
           <div className="max-w-md mx-auto relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -233,50 +355,99 @@ const Blogs = () => {
           {isAdmin && (
             <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium text-blue-800">Admin Panel</h3>
+                <h3 className="text-lg font-medium text-blue-800">
+                  Admin Panel
+                </h3>
                 <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button onClick={openCreateDialog} className="flex items-center space-x-2">
+                    <Button
+                      onClick={openCreateDialog}
+                      className="flex items-center space-x-2"
+                    >
                       <Plus className="w-4 h-4" />
                       <span>Create New Blog</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                      <DialogTitle>{editingBlog ? 'Edit Blog' : 'Create New Blog'}</DialogTitle>
+                      <DialogTitle>
+                        {editingBlog ? "Edit Blog" : "Create New Blog"}
+                      </DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Input
                         placeholder="Blog title"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
                       />
                       <Input
                         placeholder="Blog slug (URL-friendly)"
                         value={formData.slug}
-                        onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, slug: e.target.value })
+                        }
                       />
                       <Textarea
                         placeholder="Blog content"
                         value={formData.content}
-                        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, content: e.target.value })
+                        }
                         rows={6}
                       />
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="published"
                           checked={formData.published}
-                          onCheckedChange={(checked) => setFormData({ ...formData, published: !!checked })}
+                          onCheckedChange={(checked) =>
+                            setFormData({ ...formData, published: !!checked })
+                          }
                         />
-                        <label htmlFor="published" className="text-sm font-medium">
+                        <label
+                          htmlFor="published"
+                          className="text-sm font-medium"
+                        >
                           Published
                         </label>
                       </div>
+                      <div className="space-y-2">
+                        <Input
+                          type="file"
+                          accept="image/*"
+                          multiple
+                          onChange={handleImageChange}
+                          className="border-dashed border-2 border-gray-300 p-2"
+                        />
+                        {imageFiles.length > 0 && (
+                          <div className="grid grid-cols-3 gap-2">
+                            {imageFiles.map((file, index) => (
+                              <div key={index} className="relative">
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  alt={`Preview ${index + 1}`}
+                                  className="w-full h-24 object-cover rounded"
+                                />
+                                <button
+                                  onClick={() => removeImage(index)}
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                                >
+                                  <X className="w-4 h-4" />
+                                </button>
+                                <p className="text-xs truncate">{file.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                       <Button
-                        onClick={editingBlog ? handleEditBlog : handleCreateBlog}
+                        onClick={
+                          editingBlog ? handleEditBlog : handleCreateBlog
+                        }
                         className="w-full"
                       >
-                        {editingBlog ? 'Update Blog' : 'Create Blog'}
+                        {editingBlog ? "Update Blog" : "Create Blog"}
                       </Button>
                     </div>
                   </DialogContent>
@@ -286,23 +457,33 @@ const Blogs = () => {
           )}
           {filteredBlogs.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-xl text-gray-600">No articles found matching your search.</p>
+              <p className="text-xl text-gray-600">
+                No articles found matching your search.
+              </p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {filteredBlogs.map((blog) => (
-                <Card key={blog.id} className="medical-card-hover border-0 shadow-lg overflow-hidden h-full">
+                <Card
+                  key={blog.id}
+                  className="medical-card-hover border-0 shadow-lg overflow-hidden h-full"
+                >
                   <div className="relative">
                     <img
-                      src={blog.images[0]?.image || "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"}
+                      src={
+                        blog.images[0]?.image ||
+                        "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                      }
                       alt={blog.title}
                       className="w-full h-48 object-cover"
                     />
                     <div className="absolute top-4 left-4">
-                      <Badge className="medical-gradient text-white">Health Tips</Badge>
+                      <Badge className="medical-gradient text-white">
+                        Health
+                      </Badge>
                     </div>
                   </div>
-                  
+
                   <CardHeader className="pb-4">
                     <div className="flex items-center text-sm text-gray-500 mb-2">
                       <Calendar className="w-4 h-4 mr-2" />
@@ -312,27 +493,37 @@ const Blogs = () => {
                       {blog.title}
                     </CardTitle>
                   </CardHeader>
-                  
+
                   <CardContent className="flex-1 flex flex-col">
                     <CardDescription className="text-gray-600 leading-relaxed mb-4 flex-1">
                       {truncateContent(blog.content)}
                     </CardDescription>
                     <div className="flex justify-between items-center mt-auto">
-                      <Link 
+                      <Link
                         to={`/blogs/${blog.slug}`}
                         className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors inline-flex items-center"
                       >
                         Read Full Article →
                       </Link>
-                      
+
                       {/* Admin Actions */}
                       {isAdmin && (
                         <div className="flex space-x-1">
-                          <Button size="sm" variant="outline" onClick={() => openEditDialog(blog)} className="flex items-center space-x-1">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openEditDialog(blog)}
+                            className="flex items-center space-x-1"
+                          >
                             <Edit className="w-3 h-3" />
                             <span>Edit</span>
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDeleteBlog(blog.slug)} className="flex items-center space-x-1">
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDeleteBlog(blog.slug)}
+                            className="flex items-center space-x-1"
+                          >
                             <Trash2 className="w-3 h-3" />
                             <span>Delete</span>
                           </Button>
