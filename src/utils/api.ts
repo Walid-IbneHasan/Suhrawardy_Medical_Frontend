@@ -1,4 +1,3 @@
-
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // Types
@@ -32,6 +31,22 @@ export interface BloodInventory {
   group: string;
   available: boolean;
 }
+export interface BloodRequest {
+  id: number;
+  user?: { email: string };
+  blood_group: string;
+  location: string;
+  contact: string;
+  date_required: string;
+}
+
+export interface BloodDonationInterest {
+  id: number;
+  user?: { email: string };
+  blood_group: string;
+  available_date: string;
+  contact_info: string;
+}
 
 export interface VaccineInventory {
   id: number;
@@ -39,9 +54,71 @@ export interface VaccineInventory {
   available: boolean;
 }
 
+export interface About {
+  id: number;
+  title: string;
+  description: string;
+  years_experience: number;
+  patients_served: string;
+  satisfaction_rate: string;
+  image?: string;
+  images?: { id: number; image: string }[];
+}
+
+export interface Achievement {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+}
+
+export interface TeamMember {
+  id: number;
+  name: string;
+  role: string;
+  specialty: string;
+  images: { image: string }[];
+}
+
+export interface Mission {
+  id: number;
+  title: string;
+  description: string;
+  phone: string;
+  email: string;
+  address: string;
+}
+export interface HomeAbout {
+  id: number;
+  title: string;
+  description: string;
+  years_experience: number;
+  patients_served: string;
+  satisfaction_rate: string;
+}
+
+export interface MissionStatement {
+  id: number;
+  statement: string;
+}
+
+export interface HomeAboutAchievement {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+}
+export interface User {
+  id: number;
+  email: string;
+  username: string | null;
+  is_staff: boolean;
+  is_superuser: boolean;
+  date_joined: string;
+}
+
 // Helper function to get auth headers
 const getAuthHeaders = (): Record<string, string> => {
-  // Get token from cookie using js-cookie
   const token = document.cookie
     .split('; ')
     .find(row => row.startsWith('access_token='))
@@ -54,21 +131,33 @@ const getAuthHeaders = (): Record<string, string> => {
 const apiCall = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
   const url = `${API_BASE_URL}${endpoint}`;
   const headers = {
-    'Content-Type': 'application/json',
     ...getAuthHeaders(),
     ...options.headers,
   };
+
+  // Omit Content-Type for FormData to let the browser set multipart/form-data with boundary
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
-  if (!response.ok) {
+  // Accept 204 No Content as success for DELETE requests
+  if (!response.ok && !(options.method === 'DELETE' && response.status === 204)) {
     throw new Error(`API call failed: ${response.status} ${response.statusText}`);
   }
 
-  return response.json();
+  // For DELETE requests with 204, return an empty object
+  if (options.method === 'DELETE' && response.status === 204) {
+    return {} as T;
+  }
+
+  // Handle empty response body (e.g., 204 or no content)
+  const text = await response.text();
+  return text ? JSON.parse(text) : {};
 };
 
 // Service API
@@ -113,6 +202,17 @@ export const bloodAPI = {
 // Vaccine Inventory API
 export const vaccineAPI = {
   getVaccineInventory: (): Promise<VaccineInventory[]> => apiCall('/vaccine-inventory/'),
+};
+
+// About API
+export const aboutAPI = {
+  getAbout: (): Promise<About[]> => apiCall('/about/'),
+  getAchievements: (): Promise<Achievement[]> => apiCall('/achievements/'),
+  getTeamMembers: (): Promise<TeamMember[]> => apiCall('/team-members/'),
+  getMission: (): Promise<Mission[]> => apiCall('/mission/'),
+  getHomeAbout: (): Promise<HomeAbout[]> => apiCall('/home-about/'),
+  getMissionStatement: (): Promise<MissionStatement[]> => apiCall('/mission-statement/'),
+  getHomeAchievements: (): Promise<HomeAboutAchievement[]> => apiCall('/home-achievements/'),
 };
 
 // Auth API
@@ -172,48 +272,81 @@ export const adminAPI = {
   // Blogs
   blogs: {
     getAll: (): Promise<Blog[]> => apiCall('/admin/blogs/'),
-    create: (data: { title: string; slug: string; content: string; published: boolean }) => apiCall('/admin/blogs/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    update: (slug: string, data: { title: string; slug: string; content: string; published: boolean }) => apiCall(`/admin/blogs/${slug}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-    delete: (slug: string) => apiCall(`/admin/blogs/${slug}/`, {
-      method: 'DELETE',
-    }),
+    create: (data: FormData) =>
+      apiCall("/admin/blogs/", {
+        method: "POST",
+        body: data,
+      }),
+    update: (slug: string, data: FormData) =>
+      apiCall(`/admin/blogs/${slug}/`, {
+        method: "PATCH",
+        body: data,
+      }),
+    delete: (slug: string) =>
+      apiCall(`/admin/blogs/${slug}/`, {
+        method: "DELETE",
+      }),
   },
   // Events
   events: {
     getAll: (): Promise<Event[]> => apiCall('/admin/events/'),
-    create: (data: { title: string; description: string; location: string; date: string }) => apiCall('/admin/events/', {
+    create: (data: FormData) => apiCall('/admin/events/', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: data,
     }),
-    update: (id: number, data: { title: string; description: string; location: string; date: string }) => apiCall(`/admin/events/${id}/`, {
+    update: (id: number, data: FormData) => apiCall(`/admin/events/${id}/`, {
       method: 'PATCH',
-      body: JSON.stringify(data),
+      body: data,
     }),
     delete: (id: number) => apiCall(`/admin/events/${id}/`, {
       method: 'DELETE',
     }),
   },
-  // Blood Inventory
-  bloodInventory: {
-    getAll: (): Promise<BloodInventory[]> => apiCall('/admin/blood-inventory/'),
-    create: (data: { group: string; available: boolean }) => apiCall('/admin/blood-inventory/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    update: (id: number, data: { group: string; available: boolean }) => apiCall(`/admin/blood-inventory/${id}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-    delete: (id: number) => apiCall(`/admin/blood-inventory/${id}/`, {
-      method: 'DELETE',
-    }),
-  },
+    // Blood Inventory
+    bloodInventory: {
+      getAll: (): Promise<BloodInventory[]> => apiCall('/admin/blood-inventory/'),
+      create: (data: { group: string; available: boolean }) => apiCall('/admin/blood-inventory/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: { group: string; available: boolean }) => apiCall(`/admin/blood-inventory/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/blood-inventory/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
+    // Blood Requests
+    bloodRequests: {
+      getAll: (): Promise<BloodRequest[]> => apiCall('/admin/blood-requests/'),
+      create: (data: { blood_group: string; location: string; contact: string; date_required: string }) => apiCall('/admin/blood-requests/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: { blood_group: string; location: string; contact: string; date_required: string }) => apiCall(`/admin/blood-requests/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/blood-requests/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
+    // Blood Donation Interests
+    donationInterests: {
+      getAll: (): Promise<BloodDonationInterest[]> => apiCall('/admin/donation-interests/'),
+      create: (data: { blood_group: string; available_date: string; contact_info: string }) => apiCall('/admin/donation-interests/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: { blood_group: string; available_date: string; contact_info: string }) => apiCall(`/admin/donation-interests/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/donation-interests/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
   // Vaccine Inventory
   vaccineInventory: {
     getAll: (): Promise<VaccineInventory[]> => apiCall('/admin/vaccine-inventory/'),
@@ -226,6 +359,129 @@ export const adminAPI = {
       body: JSON.stringify(data),
     }),
     delete: (id: number) => apiCall(`/admin/vaccine-inventory/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Home About
+  homeAbout: {
+    getAll: (): Promise<HomeAbout[]> => apiCall('/admin/home-about/'),
+    create: (data: { title: string; description: string; years_experience: number; patients_served: string; satisfaction_rate: string }) => apiCall('/admin/home-about/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; years_experience: number; patients_served: string; satisfaction_rate: string }) => apiCall(`/admin/home-about/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/home-about/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Mission Statement
+  missionStatement: {
+    getAll: (): Promise<MissionStatement[]> => apiCall('/admin/mission-statement/'),
+    create: (data: { statement: string }) => apiCall('/admin/mission-statement/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { statement: string }) => apiCall(`/admin/mission-statement/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/mission-statement/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Home About Achievements
+  homeAchievements: {
+    getAll: (): Promise<HomeAboutAchievement[]> => apiCall('/admin/home-achievements/'),
+    create: (data: { title: string; description: string; icon: string }) => apiCall('/admin/home-achievements/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; icon: string }) => apiCall(`/admin/home-achievements/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/home-achievements/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // About
+  about: {
+    getAll: (): Promise<About[]> => apiCall('/admin/about/'),
+    create: (data: FormData) => apiCall('/admin/about/', {
+      method: 'POST',
+      body: data,
+    }),
+    update: (id: number, data: FormData) => apiCall(`/admin/about/${id}/`, {
+      method: 'PATCH',
+      body: data,
+    }),
+    delete: (id: number) => apiCall(`/admin/about/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Achievements
+  achievements: {
+    getAll: (): Promise<Achievement[]> => apiCall('/admin/achievements/'),
+    create: (data: { title: string; description: string; icon: string }) => apiCall('/admin/achievements/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; icon: string }) => apiCall(`/admin/achievements/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/achievements/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Team Members
+  teamMembers: {
+    getAll: (): Promise<TeamMember[]> => apiCall('/admin/team-members/'),
+    create: (data: FormData) => apiCall('/admin/team-members/', {
+      method: 'POST',
+      body: data,
+    }),
+    update: (id: number, data: FormData) => apiCall(`/admin/team-members/${id}/`, {
+      method: 'PATCH',
+      body: data,
+    }),
+    delete: (id: number) => apiCall(`/admin/team-members/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Mission
+  mission: {
+    getAll: (): Promise<Mission[]> => apiCall('/admin/mission/'),
+    create: (data: { title: string; description: string; phone: string; email: string; address: string }) => apiCall('/admin/mission/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; phone: string; email: string; address: string }) => apiCall(`/admin/mission/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/mission/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Users
+  users: {
+    getAll: (): Promise<User[]> => apiCall('/admin/users/'),
+    create: (data: {
+      email: string;
+      password: string;
+      confirm_password: string;
+      username?: string;
+      is_staff: boolean;
+      is_superuser: boolean;
+    }) => apiCall('/admin/users/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/users/${id}/`, {
       method: 'DELETE',
     }),
   },

@@ -1,31 +1,38 @@
-
-import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { Menu, X, Activity, User, LogOut, Settings } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Menu, X, Activity, User, LogOut, Settings } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const location = useLocation();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   const navItems = [
-    { name: 'Home', path: '/' },
-    { name: 'Services', path: '/services' },
-    { name: 'Blogs', path: '/blogs' },
-    { name: 'Events', path: '/events' },
-    { name: 'Blood Services', path: '/blood-services' },
-    { name: 'Blood Inventory', path: '/blood-inventory' },
-    { name: 'Vaccines', path: '/vaccine-inventory' },
-    { name: 'About', path: '/about' },
+    { name: "Home", path: "/" },
+    { name: "Services", path: "/services" },
+    { name: "Blogs", path: "/blogs" },
+    { name: "Events", path: "/events" },
+    { name: "Blood", path: "/blood-inventory" },
+    { name: "Vaccines", path: "/vaccine-inventory" },
+    { name: "About", path: "/about" },
   ];
 
   const isActive = (path: string) => {
@@ -42,7 +49,7 @@ const Navigation = () => {
               <Activity className="h-6 w-6 text-white" />
             </div>
             <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              MediCare Plus
+              MediCare
             </span>
           </Link>
 
@@ -54,27 +61,30 @@ const Navigation = () => {
                 to={item.path}
                 className={`px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-md ${
                   isActive(item.path)
-                    ? 'text-blue-600 bg-blue-50'
-                    : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    ? "text-blue-600 bg-blue-50"
+                    : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
                 }`}
               >
                 {item.name}
               </Link>
             ))}
-            
+
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 {isAdmin && (
                   <Link
-                    to="/admin"
+                    to="/admin/users/"
                     className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                   >
-                    Admin
+                    Users
                   </Link>
                 )}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="flex items-center space-x-2">
+                    <Button
+                      variant="ghost"
+                      className="flex items-center space-x-2"
+                    >
                       <User className="h-4 w-4" />
                       <span>{user?.email}</span>
                     </Button>
@@ -104,10 +114,44 @@ const Navigation = () => {
                 </Link>
               </div>
             )}
-            
-            <Button className="medical-gradient text-white hover:opacity-90">
-              Emergency Contact
-            </Button>
+
+            <Dialog
+              open={isEmergencyModalOpen}
+              onOpenChange={setIsEmergencyModalOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="medical-gradient text-white hover:opacity-90">
+                  Emergency Contact
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Emergency Contact</DialogTitle>
+                  <DialogDescription>
+                    <p className="text-red-600 font-semibold mb-4">
+                      Please call this number only in case of a true medical
+                      emergency.
+                    </p>
+                    <p className="text-lg">
+                      📞{" "}
+                      <a
+                        href="tel:+15551234567"
+                        className="text-blue-600 hover:underline"
+                      >
+                        +1 (555) 123-4567
+                      </a>
+                    </p>
+                  </DialogDescription>
+                </DialogHeader>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEmergencyModalOpen(false)}
+                  className="mt-4"
+                >
+                  Close
+                </Button>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Mobile menu button */}
@@ -116,7 +160,11 @@ const Navigation = () => {
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-600 hover:text-gray-800 focus:outline-none"
             >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isOpen ? (
+                <X className="h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -132,8 +180,8 @@ const Navigation = () => {
                   onClick={() => setIsOpen(false)}
                   className={`block px-3 py-2 text-base font-medium transition-colors duration-200 rounded-md ${
                     isActive(item.path)
-                      ? 'text-blue-600 bg-blue-50'
-                      : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
                   }`}
                 >
                   {item.name}
@@ -144,11 +192,11 @@ const Navigation = () => {
                   <>
                     {isAdmin && (
                       <Link
-                        to="/admin"
+                        to="/admin/users/"
                         onClick={() => setIsOpen(false)}
                         className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                       >
-                        Admin
+                        Users
                       </Link>
                     )}
                     <div className="px-3 py-2 text-sm text-gray-500">
@@ -177,9 +225,43 @@ const Navigation = () => {
                     </Link>
                   </div>
                 )}
-                <Button className="medical-gradient text-white w-full">
-                  Emergency Contact
-                </Button>
+                <Dialog
+                  open={isEmergencyModalOpen}
+                  onOpenChange={setIsEmergencyModalOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="medical-gradient text-white w-full">
+                      Emergency Contact
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Emergency Contact</DialogTitle>
+                      <DialogDescription>
+                        <p className="text-red-600 font-semibold mb-4">
+                          Please call this number only in case of a true medical
+                          emergency.
+                        </p>
+                        <p className="text-lg">
+                          📞{" "}
+                          <a
+                            href="tel:+15551234567"
+                            className="text-blue-600 hover:underline"
+                          >
+                            +1 (555) 123-4567
+                          </a>
+                        </p>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEmergencyModalOpen(false)}
+                      className="mt-4"
+                    >
+                      Close
+                    </Button>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>

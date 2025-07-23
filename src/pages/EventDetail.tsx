@@ -4,9 +4,11 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { blogAPI, Blog, adminAPI } from "@/utils/api";
+import { eventAPI, Event, adminAPI } from "@/utils/api";
 import {
   Calendar,
+  MapPin,
+  Clock,
   ArrowLeft,
   Edit,
   Trash2,
@@ -16,9 +18,9 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 
-const BlogDetail = () => {
-  const { slug } = useParams<{ slug: string }>();
-  const [blog, setBlog] = useState<Blog | null>(null);
+const EventDetail = () => {
+  const { id } = useParams<{ id: string }>();
+  const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { isAdmin } = useAuth();
@@ -26,62 +28,78 @@ const BlogDetail = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchBlog = async () => {
-      if (!slug) return;
+    const fetchEvent = async () => {
+      if (!id) return;
 
       try {
-        console.log("Fetching blog:", slug);
-        const blogData = await blogAPI.getBlog(slug);
-        setBlog(blogData);
+        console.log("Fetching event:", id);
+        const eventData = await eventAPI.getEvent(parseInt(id));
+        setEvent(eventData);
       } catch (error) {
-        console.error("Failed to fetch blog:", error);
+        console.error("Failed to fetch event:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchBlog();
-  }, [slug]);
+    fetchEvent();
+  }, [id]);
 
-  const handleDeleteBlog = async () => {
-    if (!blog || !confirm("Are you sure you want to delete this blog?")) return;
+  const handleDeleteEvent = async () => {
+    if (!event || !confirm("Are you sure you want to delete this event?"))
+      return;
     try {
-      await adminAPI.blogs.delete(blog.slug);
-      toast({ title: "Success", description: "Blog deleted successfully" });
-      navigate("/blogs");
+      await adminAPI.events.delete(event.id);
+      toast({ title: "Success", description: "Event deleted successfully" });
+      navigate("/events");
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete blog",
+        description: "Failed to delete event",
         variant: "destructive",
       });
     }
   };
 
-  const handleEditBlog = () => {
-    if (blog) {
-      navigate("/blogs", { state: { blog } });
+  const handleEditEvent = () => {
+    if (event) {
+      navigate("/events", { state: { event } });
     }
   };
 
   const handlePrevImage = () => {
-    if (blog && blog.images.length > 0) {
+    if (event && event.images.length > 0) {
       setCurrentImageIndex((prev) =>
-        prev === 0 ? blog.images.length - 1 : prev - 1
+        prev === 0 ? event.images.length - 1 : prev - 1
       );
     }
   };
 
   const handleNextImage = () => {
-    if (blog && blog.images.length > 0) {
+    if (event && event.images.length > 0) {
       setCurrentImageIndex((prev) =>
-        prev === blog.images.length - 1 ? 0 : prev + 1
+        prev === event.images.length - 1 ? 0 : prev + 1
       );
     }
   };
 
   const handleDotClick = (index: number) => {
     setCurrentImageIndex(index);
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return {
+      date: date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      }),
+      time: date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
   };
 
   if (loading) {
@@ -102,23 +120,25 @@ const BlogDetail = () => {
     );
   }
 
-  if (!blog) {
+  if (!event) {
     return (
       <div className="min-h-screen">
         <Navigation />
         <div className="section-padding">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-2xl font-bold text-gray-900 mb-4">
-              Blog Not Found
+              Event Not Found
             </h1>
-            <Link to="/blogs">
-              <Button>Back to Blogs</Button>
+            <Link to="/events">
+              <Button>Back to Events</Button>
             </Link>
           </div>
         </div>
       </div>
     );
   }
+
+  const { date, time } = formatDate(event.date);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -128,11 +148,11 @@ const BlogDetail = () => {
         <div className="max-w-4xl mx-auto">
           {/* Back Button */}
           <Link
-            to="/blogs"
+            to="/events"
             className="inline-flex items-center text-primary hover:text-primary/80 mb-8"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Blogs
+            Back to Events
           </Link>
 
           {/* Admin Actions */}
@@ -142,17 +162,17 @@ const BlogDetail = () => {
                 Admin Actions
               </h3>
               <div className="flex space-x-2">
-                <Button size="sm" variant="outline" onClick={handleEditBlog}>
+                <Button size="sm" variant="outline" onClick={handleEditEvent}>
                   <Edit className="w-3 h-3 mr-2" />
-                  Edit Blog
+                  Edit Event
                 </Button>
                 <Button
                   size="sm"
                   variant="destructive"
-                  onClick={handleDeleteBlog}
+                  onClick={handleDeleteEvent}
                 >
                   <Trash2 className="w-3 h-3 mr-2" />
-                  Delete Blog
+                  Delete Event
                 </Button>
               </div>
             </div>
@@ -160,26 +180,34 @@ const BlogDetail = () => {
 
           <Card className="shadow-lg">
             <CardContent className="p-8">
-              {/* Blog Header */}
+              {/* Event Header */}
               <div className="mb-8">
                 <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                  {blog.title}
+                  {event.title}
                 </h1>
-                <div className="flex items-center text-gray-500 text-sm">
+                <div className="flex items-center text-gray-500 text-sm mb-2">
                   <Calendar className="w-4 h-4 mr-2" />
-                  <span>{new Date(blog.created_at).toLocaleDateString()}</span>
+                  <span>{date}</span>
+                </div>
+                <div className="flex items-center text-gray-500 text-sm mb-2">
+                  <Clock className="w-4 h-4 mr-2" />
+                  <span>{time}</span>
+                </div>
+                <div className="flex items-center text-gray-500 text-sm">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span>{event.location}</span>
                 </div>
               </div>
 
-              {/* Blog Images Slider */}
-              {blog.images && blog.images.length > 0 && (
+              {/* Event Images Slider */}
+              {event.images && event.images.length > 0 && (
                 <div className="mb-8 relative">
                   <div className="relative w-full h-64 overflow-hidden rounded-lg">
-                    {blog.images.map((image, index) => (
+                    {event.images.map((image, index) => (
                       <img
-                        key={index}
+                        key={image.id}
                         src={image.image}
-                        alt={`Blog image ${index + 1}`}
+                        alt={`Event image ${index + 1}`}
                         className={`w-full h-64 object-cover absolute top-0 left-0 transition-opacity duration-500 ${
                           index === currentImageIndex
                             ? "opacity-100"
@@ -188,7 +216,7 @@ const BlogDetail = () => {
                       />
                     ))}
                   </div>
-                  {blog.images.length > 1 && (
+                  {event.images.length > 1 && (
                     <>
                       <button
                         onClick={handlePrevImage}
@@ -203,7 +231,7 @@ const BlogDetail = () => {
                         <ChevronRight className="w-6 h-6" />
                       </button>
                       <div className="flex justify-center mt-4 space-x-2">
-                        {blog.images.map((_, index) => (
+                        {event.images.map((_, index) => (
                           <button
                             key={index}
                             onClick={() => handleDotClick(index)}
@@ -220,12 +248,12 @@ const BlogDetail = () => {
                 </div>
               )}
 
-              {/* Blog Content */}
+              {/* Event Content */}
               <div className="prose max-w-none">
                 <div
                   className="text-gray-700 leading-relaxed"
                   dangerouslySetInnerHTML={{
-                    __html: blog.content.replace(/\n/g, "<br />"),
+                    __html: event.description.replace(/\n/g, "<br />"),
                   }}
                 />
               </div>
@@ -238,4 +266,4 @@ const BlogDetail = () => {
   );
 };
 
-export default BlogDetail;
+export default EventDetail;

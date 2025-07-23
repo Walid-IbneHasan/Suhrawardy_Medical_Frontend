@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -21,6 +20,7 @@ import NotFound from "./pages/NotFound";
 import BlogDetail from "./pages/BlogDetail";
 import BloodInventoryPage from "./pages/BloodInventory";
 import VaccineInventoryPage from "./pages/VaccineInventory";
+import EventDetail from "./pages/EventDetail";
 
 const queryClient = new QueryClient();
 
@@ -36,28 +36,41 @@ const App = () => (
             <Route path="/services" element={<Services />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/events" element={<Events />} />
-            <Route path="/blood-services" element={
-              <ProtectedRoute>
-                <BloodServices />
-              </ProtectedRoute>
-            } />
+            <Route
+              path="/blood-services"
+              element={
+                <ProtectedRoute>
+                  <BloodServices />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/admin" element={
-              <ProtectedRoute adminOnly>
-                <Admin />
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/users" element={
-              <ProtectedRoute adminOnly>
-                <AdminUsers />
-              </ProtectedRoute>
-            } />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute adminOnly>
+                  <Admin />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin/users"
+              element={
+                <ProtectedRoute adminOnly>
+                  <AdminUsers />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/blogs/:slug" element={<BlogDetail />} />
+            <Route path="/events/:id" element={<EventDetail />} />
             <Route path="/blood-inventory" element={<BloodInventoryPage />} />
-            <Route path="/vaccine-inventory" element={<VaccineInventoryPage />} />
+            <Route
+              path="/vaccine-inventory"
+              element={<VaccineInventoryPage />}
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
