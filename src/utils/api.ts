@@ -72,6 +72,14 @@ export interface Mission {
   email: string;
   address: string;
 }
+export interface User {
+  id: number;
+  email: string;
+  username: string | null;
+  is_staff: boolean;
+  is_superuser: boolean;
+  date_joined: string;
+}
 
 // Helper function to get auth headers
 const getAuthHeaders = (): Record<string, string> => {
@@ -243,13 +251,13 @@ export const adminAPI = {
   // Events
   events: {
     getAll: (): Promise<Event[]> => apiCall('/admin/events/'),
-    create: (data: { title: string; description: string; location: string; date: string }) => apiCall('/admin/events/', {
+    create: (data: FormData) => apiCall('/admin/events/', {
       method: 'POST',
-      body: JSON.stringify(data),
+      body: data,
     }),
-    update: (id: number, data: { title: string; description: string; location: string; date: string }) => apiCall(`/admin/events/${id}/`, {
+    update: (id: number, data: FormData) => apiCall(`/admin/events/${id}/`, {
       method: 'PATCH',
-      body: JSON.stringify(data),
+      body: data,
     }),
     delete: (id: number) => apiCall(`/admin/events/${id}/`, {
       method: 'DELETE',
@@ -342,6 +350,24 @@ export const adminAPI = {
       body: JSON.stringify(data),
     }),
     delete: (id: number) => apiCall(`/admin/mission/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Users
+  users: {
+    getAll: (): Promise<User[]> => apiCall('/admin/users/'),
+    create: (data: {
+      email: string;
+      password: string;
+      confirm_password: string;
+      username?: string;
+      is_staff: boolean;
+      is_superuser: boolean;
+    }) => apiCall('/admin/users/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/users/${id}/`, {
       method: 'DELETE',
     }),
   },
