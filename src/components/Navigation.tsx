@@ -21,8 +21,7 @@ const Navigation = () => {
     { name: "Services", path: "/services" },
     { name: "Blogs", path: "/blogs" },
     { name: "Events", path: "/events" },
-    { name: "Blood Services", path: "/blood-services" },
-    { name: "Blood Inventory", path: "/blood-inventory" },
+    { name: "Blood", path: "/blood-inventory" },
     { name: "Vaccines", path: "/vaccine-inventory" },
     { name: "About", path: "/about" },
   ];

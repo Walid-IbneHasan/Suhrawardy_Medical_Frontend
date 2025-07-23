@@ -31,6 +31,22 @@ export interface BloodInventory {
   group: string;
   available: boolean;
 }
+export interface BloodRequest {
+  id: number;
+  user?: { email: string };
+  blood_group: string;
+  location: string;
+  contact: string;
+  date_required: string;
+}
+
+export interface BloodDonationInterest {
+  id: number;
+  user?: { email: string };
+  blood_group: string;
+  available_date: string;
+  contact_info: string;
+}
 
 export interface VaccineInventory {
   id: number;
@@ -263,21 +279,51 @@ export const adminAPI = {
       method: 'DELETE',
     }),
   },
-  // Blood Inventory
-  bloodInventory: {
-    getAll: (): Promise<BloodInventory[]> => apiCall('/admin/blood-inventory/'),
-    create: (data: { group: string; available: boolean }) => apiCall('/admin/blood-inventory/', {
-      method: 'POST',
-      body: JSON.stringify(data),
-    }),
-    update: (id: number, data: { group: string; available: boolean }) => apiCall(`/admin/blood-inventory/${id}/`, {
-      method: 'PATCH',
-      body: JSON.stringify(data),
-    }),
-    delete: (id: number) => apiCall(`/admin/blood-inventory/${id}/`, {
-      method: 'DELETE',
-    }),
-  },
+    // Blood Inventory
+    bloodInventory: {
+      getAll: (): Promise<BloodInventory[]> => apiCall('/admin/blood-inventory/'),
+      create: (data: { group: string; available: boolean }) => apiCall('/admin/blood-inventory/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: { group: string; available: boolean }) => apiCall(`/admin/blood-inventory/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/blood-inventory/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
+    // Blood Requests
+    bloodRequests: {
+      getAll: (): Promise<BloodRequest[]> => apiCall('/admin/blood-requests/'),
+      create: (data: { blood_group: string; location: string; contact: string; date_required: string }) => apiCall('/admin/blood-requests/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: { blood_group: string; location: string; contact: string; date_required: string }) => apiCall(`/admin/blood-requests/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/blood-requests/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
+    // Blood Donation Interests
+    donationInterests: {
+      getAll: (): Promise<BloodDonationInterest[]> => apiCall('/admin/donation-interests/'),
+      create: (data: { blood_group: string; available_date: string; contact_info: string }) => apiCall('/admin/donation-interests/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: { blood_group: string; available_date: string; contact_info: string }) => apiCall(`/admin/donation-interests/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/donation-interests/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
   // Vaccine Inventory
   vaccineInventory: {
     getAll: (): Promise<VaccineInventory[]> => apiCall('/admin/vaccine-inventory/'),
