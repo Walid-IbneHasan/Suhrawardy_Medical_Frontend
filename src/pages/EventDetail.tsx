@@ -145,11 +145,11 @@ const EventDetail = () => {
       <Navigation />
 
       <div className="section-padding">
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Back Button */}
           <Link
             to="/events"
-            className="inline-flex items-center text-primary hover:text-primary/80 mb-8"
+            className="inline-flex items-center text-primary hover:text-primary/80 mb-8 animate-fade-in-up transition-colors duration-200"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Events
@@ -178,37 +178,39 @@ const EventDetail = () => {
             </div>
           )}
 
-          <Card className="shadow-lg">
-            <CardContent className="p-8">
+          <Card className="shadow-lg animate-fade-in-up">
+            <CardContent className="p-4 sm:p-6 lg:p-8">
               {/* Event Header */}
               <div className="mb-8">
-                <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-4 animate-fade-in-up">
                   {event.title}
                 </h1>
-                <div className="flex items-center text-gray-500 text-sm mb-2">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  <span>{date}</span>
-                </div>
-                <div className="flex items-center text-gray-500 text-sm mb-2">
-                  <Clock className="w-4 h-4 mr-2" />
-                  <span>{time}</span>
-                </div>
-                <div className="flex items-center text-gray-500 text-sm">
-                  <MapPin className="w-4 h-4 mr-2" />
-                  <span>{event.location}</span>
+                <div className="space-y-2 sm:space-y-1">
+                  <div className="flex items-center text-gray-500 text-sm animate-slide-in-left">
+                    <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="break-words">{date}</span>
+                  </div>
+                  <div className="flex items-center text-gray-500 text-sm animate-slide-in-left" style={{animationDelay: '0.1s'}}>
+                    <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span>{time}</span>
+                  </div>
+                  <div className="flex items-center text-gray-500 text-sm animate-slide-in-left" style={{animationDelay: '0.2s'}}>
+                    <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                    <span className="break-words">{event.location}</span>
+                  </div>
                 </div>
               </div>
 
               {/* Event Images Slider */}
               {event.images && event.images.length > 0 && (
-                <div className="mb-8 relative">
-                  <div className="relative w-full h-64 overflow-hidden rounded-lg">
+                <div className="mb-8 relative animate-fade-in-up"  style={{animationDelay: '0.3s'}}>
+                  <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded-lg">
                     {event.images.map((image, index) => (
                       <img
-                        key={image.id}
-                        src={image.image}
+                        key={index}
+                        src={typeof image === 'string' ? image : image.image}
                         alt={`Event image ${index + 1}`}
-                        className={`w-full h-64 object-cover absolute top-0 left-0 transition-opacity duration-500 ${
+                        className={`w-full h-48 sm:h-56 md:h-64 object-cover absolute top-0 left-0 transition-opacity duration-500 ${
                           index === currentImageIndex
                             ? "opacity-100"
                             : "opacity-0"
@@ -220,25 +222,25 @@ const EventDetail = () => {
                     <>
                       <button
                         onClick={handlePrevImage}
-                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75"
+                        className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1.5 sm:p-2 rounded-full hover:bg-opacity-75 transition-all duration-200 hover:scale-110"
                       >
-                        <ChevronLeft className="w-6 h-6" />
+                        <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                       </button>
                       <button
                         onClick={handleNextImage}
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-2 rounded-full hover:bg-opacity-75"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-1.5 sm:p-2 rounded-full hover:bg-opacity-75 transition-all duration-200 hover:scale-110"
                       >
-                        <ChevronRight className="w-6 h-6" />
+                        <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                       </button>
                       <div className="flex justify-center mt-4 space-x-2">
                         {event.images.map((_, index) => (
                           <button
                             key={index}
                             onClick={() => handleDotClick(index)}
-                            className={`w-3 h-3 rounded-full ${
+                            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-200 hover:scale-125 ${
                               index === currentImageIndex
-                                ? "bg-blue-600"
-                                : "bg-gray-300"
+                                ? "bg-blue-600 scale-110"
+                                : "bg-gray-300 hover:bg-gray-400"
                             }`}
                           />
                         ))}
@@ -249,9 +251,9 @@ const EventDetail = () => {
               )}
 
               {/* Event Content */}
-              <div className="prose max-w-none">
+              <div className="prose max-w-none animate-fade-in-up" style={{animationDelay: '0.4s'}}>
                 <div
-                  className="text-gray-700 leading-relaxed"
+                  className="text-gray-700 leading-relaxed text-sm sm:text-base"
                   dangerouslySetInnerHTML={{
                     __html: event.description.replace(/\n/g, "<br />"),
                   }}

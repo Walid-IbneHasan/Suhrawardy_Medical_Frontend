@@ -62,13 +62,13 @@ const ServicesSection = () => {
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Our Services</h2>
             <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl p-6 animate-pulse">
-                <div className="w-12 h-12 bg-gray-200 rounded-lg mb-4"></div>
-                <div className="h-6 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded mb-1"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div key={i} className="bg-white rounded-xl p-4 sm:p-6 animate-pulse">
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-gray-200 rounded-lg mb-4"></div>
+                <div className="h-5 sm:h-6 bg-gray-200 rounded mb-2"></div>
+                <div className="h-3 sm:h-4 bg-gray-200 rounded mb-1"></div>
+                <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4"></div>
               </div>
             ))}
           </div>
@@ -88,19 +88,19 @@ const ServicesSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {services.slice(0, 4).map((service, index) => {
             const IconComponent = serviceIcons[index % serviceIcons.length];
             return (
-              <Card key={service.id} className="medical-card-hover border-0 shadow-lg bg-white">
+              <Card key={service.id} className="medical-card-hover border-0 shadow-lg bg-white animate-fade-in-up" style={{animationDelay: `${index * 0.1}s`}}>
                 <CardHeader className="text-center pb-4">
-                  <div className="medical-gradient w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
-                    <IconComponent className="w-8 h-8 text-white" />
+                  <div className="medical-gradient w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center mx-auto mb-4 transition-transform duration-200 hover:scale-110">
+                    <IconComponent className="w-6 h-6 sm:w-8 sm:h-8 text-white" />
                   </div>
-                  <CardTitle className="text-xl text-gray-900">{service.name}</CardTitle>
+                  <CardTitle className="text-lg sm:text-xl text-gray-900">{service.name}</CardTitle>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <CardDescription className="text-gray-600 leading-relaxed">
+                  <CardDescription className="text-gray-600 leading-relaxed text-sm sm:text-base">
                     {service.description}
                   </CardDescription>
                 </CardContent>
@@ -109,9 +109,9 @@ const ServicesSection = () => {
           })}
         </div>
 
-        <div className="text-center">
+        <div className="text-center animate-fade-in-up" style={{animationDelay: '0.4s'}}>
           <Link to="/services">
-            <Button size="lg" className="medical-gradient text-white hover:opacity-90 px-8 py-3">
+            <Button size="lg" className="medical-gradient text-white hover:opacity-90 px-8 py-3 transition-all duration-200 hover:scale-105">
               View All Services
             </Button>
           </Link>
