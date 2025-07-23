@@ -88,6 +88,26 @@ export interface Mission {
   email: string;
   address: string;
 }
+export interface HomeAbout {
+  id: number;
+  title: string;
+  description: string;
+  years_experience: number;
+  patients_served: string;
+  satisfaction_rate: string;
+}
+
+export interface MissionStatement {
+  id: number;
+  statement: string;
+}
+
+export interface HomeAboutAchievement {
+  id: number;
+  title: string;
+  description: string;
+  icon: string;
+}
 export interface User {
   id: number;
   email: string;
@@ -190,6 +210,9 @@ export const aboutAPI = {
   getAchievements: (): Promise<Achievement[]> => apiCall('/achievements/'),
   getTeamMembers: (): Promise<TeamMember[]> => apiCall('/team-members/'),
   getMission: (): Promise<Mission[]> => apiCall('/mission/'),
+  getHomeAbout: (): Promise<HomeAbout[]> => apiCall('/home-about/'),
+  getMissionStatement: (): Promise<MissionStatement[]> => apiCall('/mission-statement/'),
+  getHomeAchievements: (): Promise<HomeAboutAchievement[]> => apiCall('/home-achievements/'),
 };
 
 // Auth API
@@ -336,6 +359,51 @@ export const adminAPI = {
       body: JSON.stringify(data),
     }),
     delete: (id: number) => apiCall(`/admin/vaccine-inventory/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Home About
+  homeAbout: {
+    getAll: (): Promise<HomeAbout[]> => apiCall('/admin/home-about/'),
+    create: (data: { title: string; description: string; years_experience: number; patients_served: string; satisfaction_rate: string }) => apiCall('/admin/home-about/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; years_experience: number; patients_served: string; satisfaction_rate: string }) => apiCall(`/admin/home-about/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/home-about/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Mission Statement
+  missionStatement: {
+    getAll: (): Promise<MissionStatement[]> => apiCall('/admin/mission-statement/'),
+    create: (data: { statement: string }) => apiCall('/admin/mission-statement/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { statement: string }) => apiCall(`/admin/mission-statement/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/mission-statement/${id}/`, {
+      method: 'DELETE',
+    }),
+  },
+  // Home About Achievements
+  homeAchievements: {
+    getAll: (): Promise<HomeAboutAchievement[]> => apiCall('/admin/home-achievements/'),
+    create: (data: { title: string; description: string; icon: string }) => apiCall('/admin/home-achievements/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+    update: (id: number, data: { title: string; description: string; icon: string }) => apiCall(`/admin/home-achievements/${id}/`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }),
+    delete: (id: number) => apiCall(`/admin/home-achievements/${id}/`, {
       method: 'DELETE',
     }),
   },

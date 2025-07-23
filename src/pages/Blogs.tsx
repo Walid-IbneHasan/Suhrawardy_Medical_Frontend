@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import {
   Card,
   CardContent,
@@ -537,6 +538,7 @@ const Blogs = () => {
           )}
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

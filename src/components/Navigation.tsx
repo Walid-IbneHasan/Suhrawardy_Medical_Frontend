@@ -10,9 +10,18 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEmergencyModalOpen, setIsEmergencyModalOpen] = useState(false);
   const location = useLocation();
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
@@ -64,10 +73,10 @@ const Navigation = () => {
               <div className="flex items-center space-x-4">
                 {isAdmin && (
                   <Link
-                    to="/admin"
+                    to="/admin/users/"
                     className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                   >
-                    Admin
+                    Users
                   </Link>
                 )}
                 <DropdownMenu>
@@ -106,9 +115,43 @@ const Navigation = () => {
               </div>
             )}
 
-            <Button className="medical-gradient text-white hover:opacity-90">
-              Emergency Contact
-            </Button>
+            <Dialog
+              open={isEmergencyModalOpen}
+              onOpenChange={setIsEmergencyModalOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="medical-gradient text-white hover:opacity-90">
+                  Emergency Contact
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Emergency Contact</DialogTitle>
+                  <DialogDescription>
+                    <p className="text-red-600 font-semibold mb-4">
+                      Please call this number only in case of a true medical
+                      emergency.
+                    </p>
+                    <p className="text-lg">
+                      📞{" "}
+                      <a
+                        href="tel:+15551234567"
+                        className="text-blue-600 hover:underline"
+                      >
+                        +1 (555) 123-4567
+                      </a>
+                    </p>
+                  </DialogDescription>
+                </DialogHeader>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsEmergencyModalOpen(false)}
+                  className="mt-4"
+                >
+                  Close
+                </Button>
+              </DialogContent>
+            </Dialog>
           </div>
 
           {/* Mobile menu button */}
@@ -149,11 +192,11 @@ const Navigation = () => {
                   <>
                     {isAdmin && (
                       <Link
-                        to="/admin"
+                        to="/admin/users/"
                         onClick={() => setIsOpen(false)}
                         className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                       >
-                        Admin
+                        Users
                       </Link>
                     )}
                     <div className="px-3 py-2 text-sm text-gray-500">
@@ -182,9 +225,43 @@ const Navigation = () => {
                     </Link>
                   </div>
                 )}
-                <Button className="medical-gradient text-white w-full">
-                  Emergency Contact
-                </Button>
+                <Dialog
+                  open={isEmergencyModalOpen}
+                  onOpenChange={setIsEmergencyModalOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="medical-gradient text-white w-full">
+                      Emergency Contact
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Emergency Contact</DialogTitle>
+                      <DialogDescription>
+                        <p className="text-red-600 font-semibold mb-4">
+                          Please call this number only in case of a true medical
+                          emergency.
+                        </p>
+                        <p className="text-lg">
+                          📞{" "}
+                          <a
+                            href="tel:+15551234567"
+                            className="text-blue-600 hover:underline"
+                          >
+                            +1 (555) 123-4567
+                          </a>
+                        </p>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEmergencyModalOpen(false)}
+                      className="mt-4"
+                    >
+                      Close
+                    </Button>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>

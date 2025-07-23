@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import {
   Card,
   CardContent,
@@ -496,6 +497,7 @@ const Events = () => {
           )}
         </div>
       </section>
+      <Footer />
     </div>
   );
 };

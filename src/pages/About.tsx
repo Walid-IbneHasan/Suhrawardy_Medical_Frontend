@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import {
   Card,
   CardContent,
@@ -48,14 +49,15 @@ const About = () => {
   const { toast } = useToast();
 
   // Icon mapping for achievements
-  const iconMap: { [key: string]: React.ComponentType<{ className: string }> } = {
-    Award,
-    Users,
-    Heart,
-    Activity,
-    Shield,
-    Clock,
-  };
+  const iconMap: { [key: string]: React.ComponentType<{ className: string }> } =
+    {
+      Award,
+      Users,
+      Heart,
+      Activity,
+      Shield,
+      Clock,
+    };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,7 +94,10 @@ const About = () => {
       for (const key in formData) {
         formDataPayload.append(key, formData[key]);
       }
-      if ((dialogType === "teamMember" || dialogType === "about") && imageFile) {
+      if (
+        (dialogType === "teamMember" || dialogType === "about") &&
+        imageFile
+      ) {
         formDataPayload.append("image", imageFile);
       }
 
@@ -156,7 +161,10 @@ const About = () => {
       for (const key in formData) {
         formDataPayload.append(key, formData[key]);
       }
-      if ((dialogType === "teamMember" || dialogType === "about") && imageFile) {
+      if (
+        (dialogType === "teamMember" || dialogType === "about") &&
+        imageFile
+      ) {
         formDataPayload.append("image", imageFile);
       }
 
@@ -862,6 +870,7 @@ const About = () => {
           </div>
         </DialogContent>
       </Dialog>
+      <Footer />
     </div>
   );
 };

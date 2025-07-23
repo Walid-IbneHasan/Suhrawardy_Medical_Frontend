@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { blogAPI, Blog, adminAPI } from "@/utils/api";
@@ -232,6 +233,7 @@ const BlogDetail = () => {
           </Card>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
