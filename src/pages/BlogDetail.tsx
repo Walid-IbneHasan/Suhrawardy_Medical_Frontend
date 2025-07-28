@@ -98,6 +98,7 @@ const BlogDetail = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -116,6 +117,7 @@ const BlogDetail = () => {
             </Link>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -221,13 +223,8 @@ const BlogDetail = () => {
               )}
 
               {/* Blog Content */}
-              <div className="prose max-w-none">
-                <div
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: blog.content.replace(/\n/g, "<br />"),
-                  }}
-                />
+              <div className="prose max-w-none text-gray-700 leading-relaxed">
+                <div dangerouslySetInnerHTML={{ __html: blog.content }} />
               </div>
             </CardContent>
           </Card>

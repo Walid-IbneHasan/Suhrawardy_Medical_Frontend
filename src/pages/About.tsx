@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import {
@@ -25,10 +25,20 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const About = () => {
   const [about, setAbout] = useState<About | null>(null);
@@ -47,6 +57,7 @@ const About = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const quillRef = useRef<ReactQuill>(null);
 
   // Icon mapping for achievements
   const iconMap: { [key: string]: React.ComponentType<{ className: string }> } =
@@ -58,6 +69,20 @@ const About = () => {
       Shield,
       Clock,
     };
+
+  // Icon options for dropdown
+  const iconOptions = Object.keys(iconMap);
+
+  // Quill toolbar configuration (same as Events.tsx)
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
+    ],
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,11 +98,16 @@ const About = () => {
         setAchievements(achievementsData);
         setTeam(teamData);
         setMission(missionData[0] || null);
+        if (aboutData[0]?.image) {
+          console.log("About image URL:", aboutData[0].image);
+        } else {
+          console.log("No About image provided by backend, using default.");
+        }
       } catch (error: any) {
-        console.error("Failed to load About page data:", error.message, error);
+        console.error("Failed to load About page data:", error);
         toast({
           title: "Error",
-          description: "Failed to load About page data",
+          description: "Failed to load About page data. Please try again.",
           variant: "destructive",
         });
       } finally {
@@ -101,7 +131,6 @@ const About = () => {
         formDataPayload.append("image", imageFile);
       }
 
-      // Debug FormData contents
       console.log("FormData contents:");
       for (const [key, value] of formDataPayload.entries()) {
         console.log(`${key}: ${value}`);
@@ -145,10 +174,12 @@ const About = () => {
       setDialogType(null);
       setImageFile(null);
     } catch (error: any) {
-      console.error(`Failed to create ${dialogType}:`, error.message, error);
+      console.error(`Failed to create ${dialogType}:`, error);
       toast({
         title: "Error",
-        description: `Failed to create ${dialogType}: ${error.message}`,
+        description: `Failed to create ${dialogType}: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -168,7 +199,6 @@ const About = () => {
         formDataPayload.append("image", imageFile);
       }
 
-      // Debug FormData contents
       console.log("FormData contents for update:");
       for (const [key, value] of formDataPayload.entries()) {
         console.log(`${key}: ${value}`);
@@ -213,10 +243,12 @@ const About = () => {
       setDialogType(null);
       setImageFile(null);
     } catch (error: any) {
-      console.error(`Failed to update ${dialogType}:`, error.message, error);
+      console.error(`Failed to update ${dialogType}:`, error);
       toast({
         title: "Error",
-        description: `Failed to update ${dialogType}: ${error.message}`,
+        description: `Failed to update ${dialogType}: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -262,10 +294,12 @@ const About = () => {
         setMission(missionResponse[0] || null);
       }
     } catch (error: any) {
-      console.error(`Failed to delete ${type}:`, error.message, error);
+      console.error(`Failed to delete ${type}:`, error);
       toast({
         title: "Error",
-        description: `Failed to delete ${type}: ${error.message}`,
+        description: `Failed to delete ${type}: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -286,7 +320,7 @@ const About = () => {
             satisfaction_rate: "",
           }
         : type === "achievement"
-        ? { title: "", description: "", icon: "" }
+        ? { title: "", description: "", icon: "Award" }
         : type === "teamMember"
         ? { name: "", role: "", specialty: "" }
         : { title: "", description: "", phone: "", email: "", address: "" }
@@ -359,6 +393,7 @@ const About = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -414,15 +449,19 @@ const About = () => {
               </h1>
               <div className="w-24 h-1 medical-gradient rounded-full mb-8"></div>
 
-              <p className="text-xl text-gray-600 mb-6 leading-relaxed">
-                {about?.description.split("\n")[0] ||
-                  "For over 25 years, MediCare Plus has been at the forefront of providing exceptional healthcare services to our community."}
-              </p>
-
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                {about?.description.split("\n")[1] ||
-                  "Our mission is to provide accessible, high-quality healthcare services that improve the health and well-being of our community."}
-              </p>
+              <div className="text-xl text-gray-600 mb-6 leading-relaxed">
+                {about?.description ? (
+                  <div
+                    dangerouslySetInnerHTML={{ __html: about.description }}
+                  />
+                ) : (
+                  <p>
+                    For over 25 years, MediCare Plus has been at the forefront
+                    of providing exceptional healthcare services to our
+                    community.
+                  </p>
+                )}
+              </div>
 
               <div className="grid grid-cols-3 gap-8">
                 <div className="text-center">
@@ -707,28 +746,35 @@ const About = () => {
             <DialogTitle>
               {editingItem ? `Edit ${dialogType}` : `Create ${dialogType}`}
             </DialogTitle>
+            <DialogDescription>
+              {editingItem
+                ? `Update the ${dialogType} details below.`
+                : `Fill in the details to create a new ${dialogType}.`}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
             {dialogType === "about" && (
               <>
                 <Input
-                  placeholder="Title"
+                  placeholder="Enter About title (e.g., About MediCare Plus)"
                   value={formData.title || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
                 />
-                <Textarea
-                  placeholder="Description"
+                <ReactQuill
+                  ref={quillRef}
                   value={formData.description || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, description: e.target.value })
+                  onChange={(content) =>
+                    setFormData({ ...formData, description: content })
                   }
-                  rows={4}
+                  modules={quillModules}
+                  className="bg-white border border-gray-200 rounded"
+                  placeholder="Write your About description here..."
                 />
                 <Input
                   type="number"
-                  placeholder="Years Experience"
+                  placeholder="Enter years of experience (e.g., 25)"
                   value={formData.years_experience || ""}
                   onChange={(e) =>
                     setFormData({
@@ -738,7 +784,7 @@ const About = () => {
                   }
                 />
                 <Input
-                  placeholder="Patients Served"
+                  placeholder="Enter patients served (e.g., 50K+)"
                   value={formData.patients_served || ""}
                   onChange={(e) =>
                     setFormData({
@@ -748,7 +794,7 @@ const About = () => {
                   }
                 />
                 <Input
-                  placeholder="Satisfaction Rate"
+                  placeholder="Enter satisfaction rate (e.g., 98%)"
                   value={formData.satisfaction_rate || ""}
                   onChange={(e) =>
                     setFormData({
@@ -761,53 +807,64 @@ const About = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  placeholder="Upload About image"
                 />
               </>
             )}
             {dialogType === "achievement" && (
               <>
                 <Input
-                  placeholder="Title"
+                  placeholder="Enter achievement title (e.g., Best Hospital Award)"
                   value={formData.title || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
                 />
                 <Textarea
-                  placeholder="Description"
+                  placeholder="Enter achievement description"
                   value={formData.description || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
                   rows={4}
                 />
-                <Input
-                  placeholder="Icon (e.g., Award, Users, Heart)"
-                  value={formData.icon || ""}
-                  onChange={(e) =>
-                    setFormData({ ...formData, icon: e.target.value })
+                <Select
+                  value={formData.icon || "Award"}
+                  onValueChange={(value) =>
+                    setFormData({ ...formData, icon: value })
                   }
-                />
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select icon" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {iconOptions.map((icon) => (
+                      <SelectItem key={icon} value={icon}>
+                        {icon}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </>
             )}
             {dialogType === "teamMember" && (
               <>
                 <Input
-                  placeholder="Name"
+                  placeholder="Enter team member name (e.g., Dr. John Doe)"
                   value={formData.name || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
                 />
                 <Input
-                  placeholder="Role"
+                  placeholder="Enter role (e.g., Chief Surgeon)"
                   value={formData.role || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, role: e.target.value })
                   }
                 />
                 <Input
-                  placeholder="Specialty"
+                  placeholder="Enter specialty (e.g., Cardiology)"
                   value={formData.specialty || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, specialty: e.target.value })
@@ -817,20 +874,21 @@ const About = () => {
                   type="file"
                   accept="image/*"
                   onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                  placeholder="Upload team member image"
                 />
               </>
             )}
             {dialogType === "mission" && (
               <>
                 <Input
-                  placeholder="Title"
+                  placeholder="Enter mission title (e.g., Our Mission)"
                   value={formData.title || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, title: e.target.value })
                   }
                 />
                 <Textarea
-                  placeholder="Description"
+                  placeholder="Enter mission description"
                   value={formData.description || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
@@ -838,21 +896,21 @@ const About = () => {
                   rows={4}
                 />
                 <Input
-                  placeholder="Phone"
+                  placeholder="Enter phone number (e.g., +1 (555) 123-4567)"
                   value={formData.phone || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, phone: e.target.value })
                   }
                 />
                 <Input
-                  placeholder="Email"
+                  placeholder="Enter email (e.g., info@medicareplus.com)"
                   value={formData.email || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, email: e.target.value })
                   }
                 />
                 <Textarea
-                  placeholder="Address"
+                  placeholder="Enter address (e.g., 123 Healthcare Ave, Medical City)"
                   value={formData.address || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, address: e.target.value })

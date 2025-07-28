@@ -37,13 +37,18 @@ const EventDetail = () => {
         setEvent(eventData);
       } catch (error) {
         console.error("Failed to fetch event:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load event. Please try again.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvent();
-  }, [id]);
+  }, [id, toast]);
 
   const handleDeleteEvent = async () => {
     if (!event || !confirm("Are you sure you want to delete this event?"))
@@ -53,9 +58,10 @@ const EventDetail = () => {
       toast({ title: "Success", description: "Event deleted successfully" });
       navigate("/events");
     } catch (error) {
+      console.error("Error deleting event:", error);
       toast({
         title: "Error",
-        description: "Failed to delete event",
+        description: "Failed to delete event. Please try again.",
         variant: "destructive",
       });
     }
@@ -116,6 +122,7 @@ const EventDetail = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -134,6 +141,7 @@ const EventDetail = () => {
             </Link>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -190,11 +198,17 @@ const EventDetail = () => {
                     <Calendar className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span className="break-words">{date}</span>
                   </div>
-                  <div className="flex items-center text-gray-500 text-sm animate-slide-in-left" style={{animationDelay: '0.1s'}}>
+                  <div
+                    className="flex items-center text-gray-500 text-sm animate-slide-in-left"
+                    style={{ animationDelay: "0.1s" }}
+                  >
                     <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span>{time}</span>
                   </div>
-                  <div className="flex items-center text-gray-500 text-sm animate-slide-in-left" style={{animationDelay: '0.2s'}}>
+                  <div
+                    className="flex items-center text-gray-500 text-sm animate-slide-in-left"
+                    style={{ animationDelay: "0.2s" }}
+                  >
                     <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
                     <span className="break-words">{event.location}</span>
                   </div>
@@ -203,12 +217,15 @@ const EventDetail = () => {
 
               {/* Event Images Slider */}
               {event.images && event.images.length > 0 && (
-                <div className="mb-8 relative animate-fade-in-up"  style={{animationDelay: '0.3s'}}>
+                <div
+                  className="mb-8 relative animate-fade-in-up"
+                  style={{ animationDelay: "0.3s" }}
+                >
                   <div className="relative w-full h-48 sm:h-56 md:h-64 overflow-hidden rounded-lg">
                     {event.images.map((image, index) => (
                       <img
                         key={index}
-                        src={typeof image === 'string' ? image : image.image}
+                        src={typeof image === "string" ? image : image.image}
                         alt={`Event image ${index + 1}`}
                         className={`w-full h-48 sm:h-56 md:h-64 object-cover absolute top-0 left-0 transition-opacity duration-500 ${
                           index === currentImageIndex
@@ -251,11 +268,14 @@ const EventDetail = () => {
               )}
 
               {/* Event Content */}
-              <div className="prose max-w-none animate-fade-in-up" style={{animationDelay: '0.4s'}}>
+              <div
+                className="prose max-w-none animate-fade-in-up"
+                style={{ animationDelay: "0.4s" }}
+              >
                 <div
                   className="text-gray-700 leading-relaxed text-sm sm:text-base"
                   dangerouslySetInnerHTML={{
-                    __html: event.description.replace(/\n/g, "<br />"),
+                    __html: event.description,
                   }}
                 />
               </div>

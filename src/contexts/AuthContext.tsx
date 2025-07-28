@@ -1,14 +1,25 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { authUtils, User } from '@/utils/auth';
-import { authAPI } from '@/utils/api';
-import { useToast } from '@/hooks/use-toast';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { authUtils, User } from "@/utils/auth";
+import { authAPI } from "@/utils/api";
+import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, confirmPassword: string) => Promise<void>;
+  register: (
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) => Promise<void>;
   logout: () => void;
   loading: boolean;
 }
@@ -18,42 +29,64 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 };
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const initAuth = () => {
+    const initAuth = async () => {
       const userData = authUtils.getUser();
-      setUser(userData);
+      if (userData && authUtils.getAccessToken()) {
+        try {
+          // Verify user profile to ensure tokens are valid
+          const profile = (await authAPI.getUserProfile()) as User;
+          setUser({ ...profile, is_superuser: userData.is_superuser });
+        } catch (error) {
+          authUtils.logout();
+          toast({
+            title: "Session expired",
+            description: "Please log in again.",
+            variant: "destructive",
+          });
+          navigate("/login");
+        }
+      }
       setLoading(false);
     };
 
     initAuth();
-  }, []);
+  }, [navigate, toast]);
 
   const login = async (email: string, password: string) => {
     try {
-      const response = await authAPI.login(email, password) as { access: string; refresh: string; is_superuser: boolean };
+      const response = (await authAPI.login(email, password)) as {
+        access: string;
+        refresh: string;
+        is_superuser: boolean;
+      };
       authUtils.setTokens(response);
-      
+
       // Fetch user data after login
-      const userData = await authAPI.getUserProfile() as User;
+      const userData = (await authAPI.getUserProfile()) as User;
       // Override with is_superuser from login response
       userData.is_superuser = response.is_superuser;
       authUtils.setUser(userData);
       setUser(userData);
-      
+
       toast({
         title: "Login successful",
         description: "Welcome back!",
       });
+      navigate("/");
     } catch (error) {
       toast({
         title: "Login failed",
@@ -64,20 +97,29 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (email: string, password: string, confirmPassword: string) => {
+  const register = async (
+    email: string,
+    password: string,
+    confirmPassword: string
+  ) => {
     try {
-      const response = await authAPI.register(email, password, confirmPassword) as { access: string; refresh: string };
+      const response = (await authAPI.register(
+        email,
+        password,
+        confirmPassword
+      )) as { access: string; refresh: string };
       authUtils.setTokens(response);
-      
+
       // Fetch user data after registration
-      const userData = await authAPI.getUserProfile() as User;
+      const userData = (await authAPI.getUserProfile()) as User;
       authUtils.setUser(userData);
       setUser(userData);
-      
+
       toast({
         title: "Registration successful",
         description: "Welcome to MediCare Plus!",
       });
+      navigate("/");
     } catch (error) {
       toast({
         title: "Registration failed",
@@ -95,6 +137,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       title: "Logged out",
       description: "You have been logged out successfully.",
     });
+    navigate("/login");
   };
 
   return (

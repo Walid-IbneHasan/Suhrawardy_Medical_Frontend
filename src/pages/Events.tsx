@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import {
@@ -18,12 +18,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const Events = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -40,19 +42,30 @@ const Events = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
+  const quillRef = useRef<ReactQuill>(null);
+
+  // Quill toolbar configuration (same as Blogs.tsx)
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
+    ],
+  };
 
   // Default events for demo
-  const defaultEvents = [
+  const defaultEvents: Event[] = [
     {
       id: 1,
       title: "Free Health Screening Camp",
       description:
-        "Join us for a comprehensive health screening including blood pressure, diabetes, and cholesterol checks. Our medical team will be available for consultations.",
+        "<p>Join us for a <strong>comprehensive health screening</strong> including blood pressure, diabetes, and cholesterol checks. Our medical team will be available for consultations.</p>",
       location: "MediCare Plus Main Campus",
       date: "2024-02-15T09:00:00Z",
       images: [
         {
-          id: 1,
           image:
             "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
@@ -62,12 +75,11 @@ const Events = () => {
       id: 2,
       title: "Blood Donation Drive",
       description:
-        "Help save lives by donating blood. All donors will receive free health checkups and refreshments. Every donation can help save up to three lives.",
+        "<p>Help <strong>save lives</strong> by donating blood. All donors will receive <em>free health checkups</em> and refreshments. Every donation can help save up to three lives.</p>",
       location: "Community Center Downtown",
       date: "2024-02-20T10:00:00Z",
       images: [
         {
-          id: 2,
           image:
             "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
@@ -77,12 +89,11 @@ const Events = () => {
       id: 3,
       title: "Vaccination Camp for Children",
       description:
-        "Ensure your children are protected with our vaccination camp. We'll provide all routine childhood vaccines in a comfortable, child-friendly environment.",
+        "<p>Ensure your children are protected with our <strong>vaccination camp</strong>. We'll provide all routine childhood vaccines in a <em>child-friendly environment</em>.</p>",
       location: "MediCare Plus Pediatric Wing",
       date: "2024-02-25T08:00:00Z",
       images: [
         {
-          id: 3,
           image:
             "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
@@ -115,13 +126,18 @@ const Events = () => {
       } catch (error) {
         console.error("Failed to fetch events:", error);
         setEvents(defaultEvents);
+        toast({
+          title: "Error",
+          description: "Failed to load events. Showing default events.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchEvents();
-  }, []);
+  }, [toast]);
 
   const handleCreateEvent = async () => {
     try {
@@ -147,9 +163,10 @@ const Events = () => {
       const data = await eventAPI.getEvents();
       setEvents(data);
     } catch (error) {
+      console.error("Error creating event:", error);
       toast({
         title: "Error",
-        description: "Failed to create event",
+        description: "Failed to create event. Please try again.",
         variant: "destructive",
       });
     }
@@ -181,9 +198,10 @@ const Events = () => {
       const data = await eventAPI.getEvents();
       setEvents(data);
     } catch (error) {
+      console.error("Error updating event:", error);
       toast({
         title: "Error",
-        description: "Failed to update event",
+        description: "Failed to update event. Please try again.",
         variant: "destructive",
       });
     }
@@ -197,9 +215,10 @@ const Events = () => {
       const data = await eventAPI.getEvents();
       setEvents(data);
     } catch (error) {
+      console.error("Error deleting event:", error);
       toast({
         title: "Error",
-        description: "Failed to delete event",
+        description: "Failed to delete event. Please try again.",
         variant: "destructive",
       });
     }
@@ -280,6 +299,7 @@ const Events = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -328,6 +348,11 @@ const Events = () => {
                       <DialogTitle>
                         {editingEvent ? "Edit Event" : "Create New Event"}
                       </DialogTitle>
+                      <DialogDescription>
+                        {editingEvent
+                          ? "Update the event details below."
+                          : "Fill in the details to create a new event."}
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Input
@@ -337,16 +362,15 @@ const Events = () => {
                           setFormData({ ...formData, title: e.target.value })
                         }
                       />
-                      <Textarea
-                        placeholder="Event description"
+                      <ReactQuill
+                        ref={quillRef}
                         value={formData.description}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            description: e.target.value,
-                          })
+                        onChange={(content) =>
+                          setFormData({ ...formData, description: content })
                         }
-                        rows={4}
+                        modules={quillModules}
+                        className="bg-white border border-gray-200 rounded"
+                        placeholder="Write your event description here..."
                       />
                       <Input
                         placeholder="Event location"
@@ -457,7 +481,11 @@ const Events = () => {
 
                     <CardContent className="flex-1 flex flex-col">
                       <CardDescription className="text-gray-600 leading-relaxed mb-4 flex-1">
-                        {event.description}
+                        <div
+                          dangerouslySetInnerHTML={{
+                            __html: event.description,
+                          }}
+                        />
                       </CardDescription>
                       <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center text-sm text-blue-600">

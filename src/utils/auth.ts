@@ -11,7 +11,7 @@ export interface User {
 
 export interface AuthTokens {
   access: string;
-  refresh: string;
+  refresh?: string; // Optional to handle cases where refresh isn't returned
 }
 
 // Cookie configuration
@@ -25,7 +25,9 @@ export const authUtils = {
   // Token management
   setTokens: (tokens: AuthTokens) => {
     Cookies.set('access_token', tokens.access, COOKIE_CONFIG);
-    Cookies.set('refresh_token', tokens.refresh, COOKIE_CONFIG);
+    if (tokens.refresh) {
+      Cookies.set('refresh_token', tokens.refresh, COOKIE_CONFIG);
+    }
   },
 
   getAccessToken: (): string | undefined => {

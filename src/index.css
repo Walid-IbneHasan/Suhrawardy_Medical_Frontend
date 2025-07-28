@@ -187,3 +187,8 @@
     @apply px-6 py-16;
   }
 }
+
+
+.ql-editor {
+  min-height: 150px;
+}

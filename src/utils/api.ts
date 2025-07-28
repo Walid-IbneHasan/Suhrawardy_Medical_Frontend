@@ -228,7 +228,7 @@ export const authAPI = {
   refreshToken: (refresh: string) => apiCall('/auth/token/refresh/', {
     method: 'POST',
     body: JSON.stringify({ refresh }),
-  }),
+  }) as Promise<{ access: string; refresh: string }>,
   getUserProfile: () => apiCall('/auth/profile/'),
   changePassword: (data: {
     old_password: string;

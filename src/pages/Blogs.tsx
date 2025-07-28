@@ -19,12 +19,14 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -44,14 +46,25 @@ const Blogs = () => {
   const { toast } = useToast();
   const location = useLocation();
 
-  // Extended default blogs for demo
-  const defaultBlogs = [
+  // Quill toolbar configuration
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
+    ],
+  };
+
+  // Extended default blogs with HTML formatting
+  const defaultBlogs: Blog[] = [
     {
       id: 1,
       title: "The Importance of Regular Health Checkups",
       slug: "importance-regular-health-checkups",
       content:
-        "Regular health checkups are essential for maintaining good health and preventing diseases. Early detection can save lives and reduce healthcare costs significantly. During routine checkups, healthcare providers can identify risk factors and provide preventive care recommendations.",
+        "<p><strong>Regular health checkups</strong> are essential for maintaining good health and preventing diseases.</p><p>Early detection can <em>save lives</em> and reduce healthcare costs significantly. During routine checkups, healthcare providers can identify risk factors and provide preventive care recommendations.</p>",
       created_at: "2024-01-15T10:00:00Z",
       published: true,
       images: [
@@ -67,7 +80,7 @@ const Blogs = () => {
       title: "Understanding Blood Donation: Benefits and Process",
       slug: "understanding-blood-donation",
       content:
-        "Blood donation is a noble act that can save lives. Learn about the benefits, process, and eligibility criteria for blood donation. One donation can help save up to three lives, making it one of the most impactful ways to contribute to your community's health.",
+        "<p><strong>Blood donation</strong> is a noble act that can save lives.</p><p>Learn about the <em>benefits</em>, process, and eligibility criteria for blood donation. One donation can help save up to <strong>three lives</strong>, making it one of the most impactful ways to contribute to your community's health.</p>",
       created_at: "2024-01-10T14:30:00Z",
       published: true,
       images: [
@@ -83,7 +96,7 @@ const Blogs = () => {
       title: "Vaccination Schedule: Protecting Your Family",
       slug: "vaccination-schedule-family",
       content:
-        "Staying up-to-date with vaccinations is crucial for protecting yourself and your loved ones from preventable diseases. Vaccines have been one of the greatest public health achievements, dramatically reducing the incidence of serious diseases.",
+        "<p>Staying up-to-date with <strong>vaccinations</strong> is crucial for protecting yourself and your loved ones from preventable diseases.</p><p>Vaccines have been one of the <em>greatest public health achievements</em>, dramatically reducing the incidence of serious diseases.</p>",
       created_at: "2024-01-05T09:15:00Z",
       published: true,
       images: [
@@ -99,7 +112,7 @@ const Blogs = () => {
       title: "Mental Health Awareness: Breaking the Stigma",
       slug: "mental-health-awareness",
       content:
-        "Mental health is just as important as physical health. Understanding common mental health conditions and knowing when to seek help can make a significant difference in overall well-being and quality of life.",
+        "<p><strong>Mental health</strong> is just as important as physical health.</p><p>Understanding common mental health conditions and knowing when to seek help can make a <em>significant difference</em> in overall well-being and quality of life.</p>",
       created_at: "2024-01-01T16:45:00Z",
       published: true,
       images: [
@@ -139,13 +152,18 @@ const Blogs = () => {
         console.error("Failed to fetch blogs:", error);
         setBlogs(defaultBlogs);
         setFilteredBlogs(defaultBlogs);
+        toast({
+          title: "Error",
+          description: "Failed to load blogs. Showing default blogs.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchBlogs();
-  }, []);
+  }, [toast]);
 
   const handleCreateBlog = async () => {
     try {
@@ -172,9 +190,10 @@ const Blogs = () => {
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
+      console.error("Error creating blog:", error);
       toast({
         title: "Error",
-        description: "Failed to create blog",
+        description: "Failed to create blog. Please try again.",
         variant: "destructive",
       });
     }
@@ -207,9 +226,10 @@ const Blogs = () => {
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
+      console.error("Error updating blog:", error);
       toast({
         title: "Error",
-        description: "Failed to update blog",
+        description: "Failed to update blog. Please try again.",
         variant: "destructive",
       });
     }
@@ -224,9 +244,10 @@ const Blogs = () => {
       setBlogs(data);
       setFilteredBlogs(data);
     } catch (error) {
+      console.error("Error deleting blog:", error);
       toast({
         title: "Error",
-        description: "Failed to delete blog",
+        description: "Failed to delete blog. Please try again.",
         variant: "destructive",
       });
     }
@@ -281,8 +302,11 @@ const Blogs = () => {
   };
 
   const truncateContent = (content: string, maxLength: number = 200) => {
-    if (content.length <= maxLength) return content;
-    return content.substr(0, maxLength) + "...";
+    const div = document.createElement("div");
+    div.innerHTML = content;
+    const text = div.textContent || div.innerText || "";
+    if (text.length <= maxLength) return text;
+    return text.substr(0, maxLength) + "...";
   };
 
   if (loading) {
@@ -315,6 +339,7 @@ const Blogs = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     );
   }
@@ -374,6 +399,11 @@ const Blogs = () => {
                       <DialogTitle>
                         {editingBlog ? "Edit Blog" : "Create New Blog"}
                       </DialogTitle>
+                      <DialogDescription>
+                        {editingBlog
+                          ? "Update the blog details below."
+                          : "Fill in the details to create a new blog post."}
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Input
@@ -390,13 +420,14 @@ const Blogs = () => {
                           setFormData({ ...formData, slug: e.target.value })
                         }
                       />
-                      <Textarea
-                        placeholder="Blog content"
+                      <ReactQuill
                         value={formData.content}
-                        onChange={(e) =>
-                          setFormData({ ...formData, content: e.target.value })
+                        onChange={(content) =>
+                          setFormData({ ...formData, content })
                         }
-                        rows={6}
+                        modules={quillModules}
+                        className="bg-white border border-gray-200 rounded"
+                        placeholder="Write your blog content here..."
                       />
                       <div className="flex items-center space-x-2">
                         <Checkbox
