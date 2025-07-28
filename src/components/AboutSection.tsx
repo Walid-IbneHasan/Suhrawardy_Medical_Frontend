@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -40,6 +41,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Plus, Edit, Trash2 } from "lucide-react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const AboutSection = () => {
   const [homeAbout, setHomeAbout] = useState<HomeAbout | null>(null);
@@ -62,9 +65,6 @@ const AboutSection = () => {
   const [homeAboutForm, setHomeAboutForm] = useState({
     title: "",
     description: "",
-    years_experience: 0,
-    patients_served: "",
-    satisfaction_rate: "",
   });
   const [missionForm, setMissionForm] = useState({ statement: "" });
   const [achievementForm, setAchievementForm] = useState({
@@ -74,16 +74,14 @@ const AboutSection = () => {
   });
   const { isAdmin } = useAuth();
   const { toast } = useToast();
+  const quillRef = useRef<ReactQuill>(null);
 
   // Default filler values
   const defaultHomeAbout: HomeAbout = {
     id: 0,
     title: "About MediCare Plus",
     description:
-      "For over 25 years, MediCare Plus has been at the forefront of providing exceptional healthcare services to our community.\nOur team of board-certified physicians, nurses, and healthcare professionals is dedicated to delivering personalized care.",
-    years_experience: 25,
-    patients_served: "10,000+",
-    satisfaction_rate: "95%",
+      "For over 25 years, MediCare Plus has been at the forefront of providing exceptional healthcare services to our community.<br>Our team of board-certified physicians, nurses, and healthcare professionals is dedicated to delivering personalized care.",
   };
 
   const defaultMissionStatement: MissionStatement = {
@@ -149,6 +147,17 @@ const AboutSection = () => {
     HeartPulse,
   };
 
+  // Quill toolbar configuration
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      ["link"],
+      ["clean"],
+    ],
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -164,7 +173,8 @@ const AboutSection = () => {
         setAchievements(
           achievementData.length > 0 ? achievementData : defaultAchievements
         );
-      } catch (error) {
+      } catch (error: any) {
+        console.error("Failed to fetch About section data:", error);
         toast({
           title: "Error",
           description:
@@ -183,10 +193,7 @@ const AboutSection = () => {
 
   const handleCreateHomeAbout = async () => {
     try {
-      await adminAPI.homeAbout.create({
-        ...homeAboutForm,
-        years_experience: Number(homeAboutForm.years_experience),
-      });
+      await adminAPI.homeAbout.create(homeAboutForm);
       toast({
         title: "Success",
         description: "Home About created successfully",
@@ -195,16 +202,16 @@ const AboutSection = () => {
       setHomeAboutForm({
         title: "",
         description: "",
-        years_experience: 0,
-        patients_served: "",
-        satisfaction_rate: "",
       });
       const data = await aboutAPI.getHomeAbout();
       setHomeAbout(data[0] || defaultHomeAbout);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to create Home About:", error);
       toast({
         title: "Error",
-        description: "Failed to create Home About",
+        description: `Failed to create Home About: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -213,10 +220,7 @@ const AboutSection = () => {
   const handleEditHomeAbout = async () => {
     if (!editingHomeAbout) return;
     try {
-      await adminAPI.homeAbout.update(editingHomeAbout.id, {
-        ...homeAboutForm,
-        years_experience: Number(homeAboutForm.years_experience),
-      });
+      await adminAPI.homeAbout.update(editingHomeAbout.id, homeAboutForm);
       toast({
         title: "Success",
         description: "Home About updated successfully",
@@ -226,16 +230,16 @@ const AboutSection = () => {
       setHomeAboutForm({
         title: "",
         description: "",
-        years_experience: 0,
-        patients_served: "",
-        satisfaction_rate: "",
       });
       const data = await aboutAPI.getHomeAbout();
       setHomeAbout(data[0] || defaultHomeAbout);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to update Home About:", error);
       toast({
         title: "Error",
-        description: "Failed to update Home About",
+        description: `Failed to update Home About: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -252,10 +256,13 @@ const AboutSection = () => {
       });
       const data = await aboutAPI.getHomeAbout();
       setHomeAbout(data[0] || defaultHomeAbout);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to delete Home About:", error);
       toast({
         title: "Error",
-        description: "Failed to delete Home About",
+        description: `Failed to delete Home About: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -272,10 +279,13 @@ const AboutSection = () => {
       setMissionForm({ statement: "" });
       const data = await aboutAPI.getMissionStatement();
       setMissionStatement(data[0] || defaultMissionStatement);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to create Mission Statement:", error);
       toast({
         title: "Error",
-        description: "Failed to create Mission Statement",
+        description: `Failed to create Mission Statement: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -294,10 +304,13 @@ const AboutSection = () => {
       setMissionForm({ statement: "" });
       const data = await aboutAPI.getMissionStatement();
       setMissionStatement(data[0] || defaultMissionStatement);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to update Mission Statement:", error);
       toast({
         title: "Error",
-        description: "Failed to update Mission Statement",
+        description: `Failed to update Mission Statement: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -314,10 +327,13 @@ const AboutSection = () => {
       });
       const data = await aboutAPI.getMissionStatement();
       setMissionStatement(data[0] || defaultMissionStatement);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to delete Mission Statement:", error);
       toast({
         title: "Error",
-        description: "Failed to delete Mission Statement",
+        description: `Failed to delete Mission Statement: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -334,10 +350,13 @@ const AboutSection = () => {
       setAchievementForm({ title: "", description: "", icon: "" });
       const data = await aboutAPI.getHomeAchievements();
       setAchievements(data.length > 0 ? data : defaultAchievements);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to create Achievement:", error);
       toast({
         title: "Error",
-        description: "Failed to create Achievement",
+        description: `Failed to create Achievement: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -359,10 +378,13 @@ const AboutSection = () => {
       setAchievementForm({ title: "", description: "", icon: "" });
       const data = await aboutAPI.getHomeAchievements();
       setAchievements(data.length > 0 ? data : defaultAchievements);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to update Achievement:", error);
       toast({
         title: "Error",
-        description: "Failed to update Achievement",
+        description: `Failed to update Achievement: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -378,10 +400,13 @@ const AboutSection = () => {
       });
       const data = await aboutAPI.getHomeAchievements();
       setAchievements(data.length > 0 ? data : defaultAchievements);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to delete Achievement:", error);
       toast({
         title: "Error",
-        description: "Failed to delete Achievement",
+        description: `Failed to delete Achievement: ${
+          error.message || "Unknown error"
+        }`,
         variant: "destructive",
       });
     }
@@ -395,12 +420,9 @@ const AboutSection = () => {
     setHomeAboutForm({
       title: "",
       description: "",
-      years_experience: 0,
-      patients_served: "",
-      satisfaction_rate: "",
     });
     setMissionForm({ statement: "" });
-    setAchievementForm({ title: "", description: "", icon: "" });
+    setAchievementForm({ title: "", description: "", icon: "Award" });
     setDialogOpen(true);
   };
 
@@ -410,9 +432,6 @@ const AboutSection = () => {
     setHomeAboutForm({
       title: item.title,
       description: item.description,
-      years_experience: item.years_experience,
-      patients_served: item.patients_served,
-      satisfaction_rate: item.satisfaction_rate,
     });
     setDialogOpen(true);
   };
@@ -480,7 +499,7 @@ const AboutSection = () => {
         {/* Admin Actions for Home About */}
         {isAdmin && (
           <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
               <h3 className="text-lg font-medium text-blue-800">
                 Admin Panel - Home About
               </h3>
@@ -491,7 +510,8 @@ const AboutSection = () => {
                 <DialogTrigger asChild>
                   <Button
                     onClick={() => openCreateDialog("homeAbout")}
-                    className="flex items-center space-x-2"
+                    className="flex items-center space-x-2 sm:w-auto w-full text-sm"
+                    size="sm"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Add Home About</span>
@@ -504,10 +524,15 @@ const AboutSection = () => {
                         ? "Edit Home About"
                         : "Create Home About"}
                     </DialogTitle>
+                    <DialogDescription>
+                      {editingHomeAbout
+                        ? "Update the Home About details below."
+                        : "Fill in the details to create a new Home About section."}
+                    </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4">
                     <Input
-                      placeholder="Title"
+                      placeholder="Enter Home About title (e.g., About MediCare Plus)"
                       value={homeAboutForm.title}
                       onChange={(e) =>
                         setHomeAboutForm({
@@ -516,47 +541,18 @@ const AboutSection = () => {
                         })
                       }
                     />
-                    <Textarea
-                      placeholder="Description"
+                    <ReactQuill
+                      ref={quillRef}
                       value={homeAboutForm.description}
-                      onChange={(e) =>
+                      onChange={(content) =>
                         setHomeAboutForm({
                           ...homeAboutForm,
-                          description: e.target.value,
+                          description: content,
                         })
                       }
-                      rows={4}
-                    />
-                    <Input
-                      type="number"
-                      placeholder="Years of Experience"
-                      value={homeAboutForm.years_experience}
-                      onChange={(e) =>
-                        setHomeAboutForm({
-                          ...homeAboutForm,
-                          years_experience: Number(e.target.value),
-                        })
-                      }
-                    />
-                    <Input
-                      placeholder="Patients Served"
-                      value={homeAboutForm.patients_served}
-                      onChange={(e) =>
-                        setHomeAboutForm({
-                          ...homeAboutForm,
-                          patients_served: e.target.value,
-                        })
-                      }
-                    />
-                    <Input
-                      placeholder="Satisfaction Rate"
-                      value={homeAboutForm.satisfaction_rate}
-                      onChange={(e) =>
-                        setHomeAboutForm({
-                          ...homeAboutForm,
-                          satisfaction_rate: e.target.value,
-                        })
-                      }
+                      modules={quillModules}
+                      className="bg-white border border-gray-200 rounded"
+                      placeholder="Write your Home About description here..."
                     />
                     <Button
                       onClick={
@@ -573,7 +569,7 @@ const AboutSection = () => {
               </Dialog>
             </div>
             {homeAbout && (
-              <div className="mt-4 flex space-x-2">
+              <div className="mt-4 flex space-x-2 flex-wrap gap-2">
                 <Button
                   size="sm"
                   variant="outline"
@@ -602,12 +598,21 @@ const AboutSection = () => {
               {homeAbout?.title}
             </h2>
             <div className="w-24 h-1 medical-gradient rounded-full mb-8"></div>
-            <p className="text-lg text-gray-600 mb-6 leading-relaxed">
-              {homeAbout?.description.split("\n")[0]}
-            </p>
-            <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-              {homeAbout?.description.split("\n")[1]}
-            </p>
+            <div className="text-lg text-gray-600 mb-6 leading-relaxed">
+              {homeAbout?.description ? (
+                <div
+                  dangerouslySetInnerHTML={{ __html: homeAbout.description }}
+                />
+              ) : (
+                <p>
+                  For over 25 years, MediCare Plus has been at the forefront of
+                  providing exceptional healthcare services to our community.
+                  <br />
+                  Our team of board-certified physicians, nurses, and healthcare
+                  professionals is dedicated to delivering personalized care.
+                </p>
+              )}
+            </div>
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/about">
                 <Button
@@ -633,7 +638,7 @@ const AboutSection = () => {
           <div className="animate-slide-in-left">
             {isAdmin && (
               <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between flex-wrap gap-2">
                   <h3 className="text-lg font-medium text-blue-800">
                     Admin Panel - Achievements
                   </h3>
@@ -644,7 +649,8 @@ const AboutSection = () => {
                     <DialogTrigger asChild>
                       <Button
                         onClick={() => openCreateDialog("achievement")}
-                        className="flex items-center space-x-2"
+                        className="flex items-center space-x-2 sm:w-auto w-full text-sm"
+                        size="sm"
                       >
                         <Plus className="w-4 h-4" />
                         <span>Add Achievement</span>
@@ -657,10 +663,15 @@ const AboutSection = () => {
                             ? "Edit Achievement"
                             : "Create Achievement"}
                         </DialogTitle>
+                        <DialogDescription>
+                          {editingAchievement
+                            ? "Update the achievement details below."
+                            : "Fill in the details to create a new achievement."}
+                        </DialogDescription>
                       </DialogHeader>
                       <div className="space-y-4">
                         <Input
-                          placeholder="Title"
+                          placeholder="Enter achievement title (e.g., Excellence Award)"
                           value={achievementForm.title}
                           onChange={(e) =>
                             setAchievementForm({
@@ -670,7 +681,7 @@ const AboutSection = () => {
                           }
                         />
                         <Textarea
-                          placeholder="Description"
+                          placeholder="Enter achievement description"
                           value={achievementForm.description}
                           onChange={(e) =>
                             setAchievementForm({
@@ -724,24 +735,27 @@ const AboutSection = () => {
                     key={achievement.id}
                     className="medical-card-hover border-0 shadow-lg text-center p-6"
                   >
-                    <CardContent className="p-0">
-                      <div className="medical-gradient w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
-                        <IconComponent className="w-8 h-8 text-white" />
+                    <CardContent className="p-0 flex flex-col h-full justify-between">
+                      <div>
+                        <div className="medical-gradient w-16 h-16 rounded-xl flex items-center justify-center mx-auto mb-4">
+                          <IconComponent className="w-8 h-8 text-white" />
+                        </div>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          {achievement.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          {achievement.description}
+                        </p>
                       </div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        {achievement.title}
-                      </h3>
-                      <p className="text-sm text-gray-600 leading-relaxed">
-                        {achievement.description}
-                      </p>
                       {isAdmin && (
-                        <div className="mt-4 flex space-x-2 justify-center">
+                        <div className="mt-4 flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2 justify-center">
                           <Button
                             size="sm"
                             variant="outline"
                             onClick={() =>
                               openEditAchievementDialog(achievement)
                             }
+                            className="w-full sm:w-auto"
                           >
                             <Edit className="w-3 h-3 mr-1" />
                             Edit
@@ -752,6 +766,7 @@ const AboutSection = () => {
                             onClick={() =>
                               handleDeleteAchievement(achievement.id)
                             }
+                            className="w-full sm:w-auto"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
                             Delete
@@ -770,7 +785,7 @@ const AboutSection = () => {
         <div className="mt-20 text-center">
           {isAdmin && (
             <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-lg font-medium text-blue-800">
                   Admin Panel - Mission Statement
                 </h3>
@@ -781,10 +796,11 @@ const AboutSection = () => {
                   <DialogTrigger asChild>
                     <Button
                       onClick={() => openCreateDialog("mission")}
-                      className="flex items-center space-x-2"
+                      className="flex items-center space-x-2 sm:w-auto w-full text-sm"
+                      size="sm"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Add Mission Statement</span>
+                      <span>Add Mission</span>
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
@@ -794,10 +810,15 @@ const AboutSection = () => {
                           ? "Edit Mission Statement"
                           : "Create Mission Statement"}
                       </DialogTitle>
+                      <DialogDescription>
+                        {editingMission
+                          ? "Update the mission statement below."
+                          : "Fill in the details to create a new mission statement."}
+                      </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
                       <Textarea
-                        placeholder="Mission Statement"
+                        placeholder="Enter mission statement"
                         value={missionForm.statement}
                         onChange={(e) =>
                           setMissionForm({
@@ -822,7 +843,7 @@ const AboutSection = () => {
                 </Dialog>
               </div>
               {missionStatement && (
-                <div className="mt-4 flex space-x-2 justify-center">
+                <div className="mt-4 flex space-x-2 flex-wrap gap-2 justify-center">
                   <Button
                     size="sm"
                     variant="outline"
