@@ -3,7 +3,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Medical organization design system with professional blue palette */
+/* Medical organization design system with blood red palette */
 
 @layer base {
   :root {
@@ -16,31 +16,31 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 210 100% 45%; /* Medical blue */
-    --primary-foreground: 210 40% 98%;
+    --primary: 0 84% 50%; /* Blood red */
+    --primary-foreground: 0 0% 98%;
 
-    --secondary: 210 40% 96.1%;
+    --secondary: 0 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 210 40% 96.1%;
+    --muted: 0 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 195 100% 50%; /* Light medical blue */
+    --accent: 15 100% 60%; /* Light blood red */
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 98%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 210 100% 45%;
+    --ring: 0 84% 50%;
 
     --radius: 0.75rem;
     
-    /* Medical specific colors */
-    --medical-blue: 210 100% 45%;
-    --medical-light-blue: 195 100% 50%;
-    --medical-green: 142 71% 45%;
+    /* Medical specific colors - blood themed */
+    --medical-blue: 0 84% 50%; /* Now blood red */
+    --medical-light-blue: 15 100% 60%; /* Light blood red */
+    --medical-green: 142 71% 45%; /* Keep green for health */
     --medical-gray: 215 16% 47%;
   }
 
@@ -77,7 +77,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold text-slate-800;
+    @apply font-semibold text-red-900;
   }
 }
 

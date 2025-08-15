@@ -82,6 +82,9 @@ const AboutSection = () => {
     title: "About MediCare Plus",
     description:
       "For over 25 years, MediCare Plus has been at the forefront of providing exceptional healthcare services to our community.<br>Our team of board-certified physicians, nurses, and healthcare professionals is dedicated to delivering personalized care.",
+    years_experience: 25,
+    patients_served: "50K+",
+    satisfaction_rate: "100%",
   };
 
   const defaultMissionStatement: MissionStatement = {
@@ -193,7 +196,12 @@ const AboutSection = () => {
 
   const handleCreateHomeAbout = async () => {
     try {
-      await adminAPI.homeAbout.create(homeAboutForm);
+      await adminAPI.homeAbout.create({
+        ...homeAboutForm,
+        years_experience: 25,
+        patients_served: "50K+",
+        satisfaction_rate: "100%",
+      });
       toast({
         title: "Success",
         description: "Home About created successfully",
@@ -220,7 +228,12 @@ const AboutSection = () => {
   const handleEditHomeAbout = async () => {
     if (!editingHomeAbout) return;
     try {
-      await adminAPI.homeAbout.update(editingHomeAbout.id, homeAboutForm);
+      await adminAPI.homeAbout.update(editingHomeAbout.id, {
+        ...homeAboutForm,
+        years_experience: editingHomeAbout.years_experience,
+        patients_served: editingHomeAbout.patients_served,
+        satisfaction_rate: editingHomeAbout.satisfaction_rate,
+      });
       toast({
         title: "Success",
         description: "Home About updated successfully",

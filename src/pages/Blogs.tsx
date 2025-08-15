@@ -69,7 +69,6 @@ const Blogs = () => {
       published: true,
       images: [
         {
-          id: 1,
           image:
             "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
@@ -85,7 +84,6 @@ const Blogs = () => {
       published: true,
       images: [
         {
-          id: 2,
           image:
             "https://images.unsplash.com/photo-1584515933487-779824d29309?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
@@ -101,7 +99,6 @@ const Blogs = () => {
       published: true,
       images: [
         {
-          id: 3,
           image:
             "https://images.unsplash.com/photo-1576091160399-112ba8d25d1f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
@@ -117,7 +114,6 @@ const Blogs = () => {
       published: true,
       images: [
         {
-          id: 4,
           image:
             "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80",
         },
