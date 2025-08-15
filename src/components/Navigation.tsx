@@ -48,7 +48,7 @@ const Navigation = () => {
             <div className="medical-gradient p-2 rounded-lg">
               <Activity className="h-6 w-6 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
               MediCare
             </span>
           </Link>
@@ -61,8 +61,8 @@ const Navigation = () => {
                 to={item.path}
                 className={`px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-md ${
                   isActive(item.path)
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                    ? "text-red-600 bg-red-50"
+                    : "text-gray-600 hover:text-red-600 hover:bg-gray-50"
                 }`}
               >
                 {item.name}
@@ -74,7 +74,7 @@ const Navigation = () => {
                 {isAdmin && (
                   <Link
                     to="/admin/users/"
-                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                   >
                     Users
                   </Link>
@@ -136,7 +136,7 @@ const Navigation = () => {
                       📞{" "}
                       <a
                         href="tel:+15551234567"
-                        className="text-blue-600 hover:underline"
+                        className="text-red-600 hover:underline"
                       >
                         +1 (555) 123-4567
                       </a>
@@ -180,8 +180,8 @@ const Navigation = () => {
                   onClick={() => setIsOpen(false)}
                   className={`block px-3 py-2 text-base font-medium transition-colors duration-200 rounded-md ${
                     isActive(item.path)
-                      ? "text-blue-600 bg-blue-50"
-                      : "text-gray-600 hover:text-blue-600 hover:bg-gray-50"
+                      ? "text-red-600 bg-red-50"
+                      : "text-gray-600 hover:text-red-600 hover:bg-gray-50"
                   }`}
                 >
                   {item.name}
@@ -194,7 +194,7 @@ const Navigation = () => {
                       <Link
                         to="/admin/users/"
                         onClick={() => setIsOpen(false)}
-                        className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                        className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                       >
                         Users
                       </Link>
@@ -246,7 +246,7 @@ const Navigation = () => {
                           📞{" "}
                           <a
                             href="tel:+15551234567"
-                            className="text-blue-600 hover:underline"
+                            className="text-red-600 hover:underline"
                           >
                             +1 (555) 123-4567
                           </a>
