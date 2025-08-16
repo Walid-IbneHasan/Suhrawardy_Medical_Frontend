@@ -513,7 +513,7 @@ const AboutSection = () => {
         {isAdmin && (
           <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <div className="flex items-center justify-between flex-wrap gap-2">
-              <h3 className="text-lg font-medium text-blue-800">
+              <h3 className="text-lg font-medium text-red-800">
                 Admin Panel - Home About
               </h3>
               <Dialog
@@ -639,7 +639,7 @@ const AboutSection = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="border-blue-200 text-blue-600 hover:bg-blue-50 px-8 py-3"
+                  className="border-red-200 text-red-600 hover:bg-red-50 px-8 py-3"
                 >
                   Blood Services
                 </Button>
@@ -650,9 +650,9 @@ const AboutSection = () => {
           {/* Achievements Grid */}
           <div className="animate-slide-in-left">
             {isAdmin && (
-              <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
                 <div className="flex items-center justify-between flex-wrap gap-2">
-                  <h3 className="text-lg font-medium text-blue-800">
+                  <h3 className="text-lg font-medium text-red-800">
                     Admin Panel - Achievements
                   </h3>
                   <Dialog
@@ -797,9 +797,9 @@ const AboutSection = () => {
         {/* Mission Statement */}
         <div className="mt-20 text-center">
           {isAdmin && (
-            <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div className="mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-lg font-medium text-blue-800">
+                <h3 className="text-lg font-medium text-red-800">
                   Admin Panel - Mission Statement
                 </h3>
                 <Dialog

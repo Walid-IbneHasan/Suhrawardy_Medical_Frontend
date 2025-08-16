@@ -38,8 +38,8 @@
     --radius: 0.75rem;
     
     /* Medical specific colors - blood themed */
-    --medical-blue: 0 84% 50%; /* Now blood red */
-    --medical-light-blue: 15 100% 60%; /* Light blood red */
+    --medical-blue: 0 84% 40%; /* Now blood red */
+    --medical-light-blue: 15 100% 40%; /* Light blood red */
     --medical-green: 142 71% 45%; /* Keep green for health */
     --medical-gray: 215 16% 47%;
   }

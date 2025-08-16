@@ -445,7 +445,7 @@ const About = () => {
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="animate-fade-in-up">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                {about?.title || "About MediCare Plus"}
+                {about?.title || "About "}
               </h1>
               <div className="w-24 h-1 medical-gradient rounded-full mb-8"></div>
 
@@ -456,7 +456,7 @@ const About = () => {
                   />
                 ) : (
                   <p>
-                    For over 25 years, MediCare Plus has been at the forefront
+                    For over 25 years, we have been at the forefront
                     of providing exceptional healthcare services to our
                     community.
                   </p>
@@ -465,19 +465,19 @@ const About = () => {
 
               <div className="grid grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                  <div className="text-3xl font-bold text-red-600 mb-2">
                     {about?.patients_served || "50K+"}
                   </div>
                   <div className="text-sm text-gray-600">Patients Served</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                  <div className="text-3xl font-bold text-red-600 mb-2">
                     {about?.years_experience || "25+"}
                   </div>
                   <div className="text-sm text-gray-600">Years Experience</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-2">
+                  <div className="text-3xl font-bold text-red-600 mb-2">
                     {about?.satisfaction_rate || "100%"}
                   </div>
                   <div className="text-sm text-gray-600">Satisfaction Rate</div>
@@ -629,7 +629,7 @@ const About = () => {
                   <CardTitle className="text-xl text-gray-900">
                     {member.name}
                   </CardTitle>
-                  <CardDescription className="text-blue-600 font-medium">
+                  <CardDescription className="text-red-600 font-medium">
                     {member.role}
                   </CardDescription>
                 </CardHeader>

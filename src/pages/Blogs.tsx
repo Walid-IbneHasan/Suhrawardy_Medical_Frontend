@@ -517,7 +517,7 @@ const Blogs = () => {
                       <Calendar className="w-4 h-4 mr-2" />
                       {formatDate(blog.created_at)}
                     </div>
-                    <CardTitle className="text-xl text-gray-900 leading-tight hover:text-blue-600 transition-colors">
+                    <CardTitle className="text-xl text-gray-900 leading-tight hover:text-red-600 transition-colors">
                       {blog.title}
                     </CardTitle>
                   </CardHeader>
@@ -529,7 +529,7 @@ const Blogs = () => {
                     <div className="flex justify-between items-center mt-auto">
                       <Link
                         to={`/blogs/${blog.slug}`}
-                        className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors inline-flex items-center"
+                        className="text-red-600 hover:text-red-800 font-medium text-sm transition-colors inline-flex items-center"
                       >
                         Read Full Article →
                       </Link>

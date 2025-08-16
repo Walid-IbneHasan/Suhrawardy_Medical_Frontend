@@ -345,13 +345,13 @@ const Services = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <h3 className="font-semibold text-gray-900 mb-2">Emergency</h3>
-              <p className="text-blue-600 text-xl font-bold">
+              <p className="text-red-600 text-xl font-bold">
                 +1 (555) 911-HELP
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
               <h3 className="font-semibold text-gray-900 mb-2">Appointments</h3>
-              <p className="text-blue-600 text-xl font-bold">
+              <p className="text-red-600 text-xl font-bold">
                 +1 (555) 123-4567
               </p>
             </div>
