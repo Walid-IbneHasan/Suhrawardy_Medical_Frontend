@@ -68,6 +68,21 @@ const milestones = [
   },
 ];
 const About = () => {
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
+
+  const openGalleryAt = (idx: number) => {
+    setActiveImgIndex(idx);
+    setGalleryOpen(true);
+  };
+
+  const nextImg = () =>
+    setActiveImgIndex((i) => (i + 1) % bloodGalleryFiles.length);
+
+  const prevImg = () =>
+    setActiveImgIndex((i) =>
+      i - 1 < 0 ? bloodGalleryFiles.length - 1 : i - 1
+    );
   const [about, setAbout] = useState<About | null>(null);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
   const [team, setTeam] = useState<TeamMember[]>([]);
@@ -96,7 +111,22 @@ const About = () => {
       Shield,
       Clock,
     };
+  const bloodGalleryFiles: string[] = [
+    "WhatsApp Image 2025-09-11 at 12.51.11 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.09 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.07 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.07 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM (3).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.18 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.18 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.18 PM.jpeg",
+  ];
 
+  const bloodImgUrl = (name: string) =>
+    `/gallery/${encodeURIComponent(name)}`;
   // Icon options for dropdown
   const iconOptions = Object.keys(iconMap);
 
@@ -1045,7 +1075,95 @@ const About = () => {
           </div>
         </DialogContent>
       </Dialog>
+      <section className="section-padding bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              আমাদের কার্যক্রম – ছবি
+            </h2>
+            <div className="w-24 h-1 medical-gradient mx-auto rounded-full mt-4"></div>
+            <p className="text-gray-600 mt-4">
+              সাম্প্রতিক ক্যাম্প ও প্রোগ্রামের কিছু মুহূর্ত।
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {bloodGalleryFiles.map((file, idx) => (
+              <button
+                key={file + idx}
+                onClick={() => openGalleryAt(idx)}
+                className="group block overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
+                aria-label={`Open image ${idx + 1}`}
+              >
+                <img
+                  src={bloodImgUrl(file)}
+                  alt={`Blood program ${idx + 1}`}
+                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
       <Footer />
+      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
+        <DialogContent className="max-w-5xl p-0 bg-black/90 border-0">
+          <div className="relative">
+            {/* Image */}
+            <img
+              src={bloodImgUrl(bloodGalleryFiles[activeImgIndex])}
+              alt={`Blood program large ${activeImgIndex + 1}`}
+              className="w-full max-h-[80vh] object-contain bg-black"
+            />
+
+            {/* Caption */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm px-4 py-2">
+              {bloodGalleryFiles[activeImgIndex]}
+            </div>
+
+            {/* Prev / Next */}
+            <button
+              onClick={prevImg}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
+              aria-label="Previous image"
+            >
+              ‹
+            </button>
+            <button
+              onClick={nextImg}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
+              aria-label="Next image"
+            >
+              ›
+            </button>
+
+            {/* Thumbnails (optional) */}
+            <div className="flex gap-2 overflow-x-auto p-3 bg-black/60">
+              {bloodGalleryFiles.map((file, i) => (
+                <button
+                  key={file + i}
+                  onClick={() => setActiveImgIndex(i)}
+                  className={`relative h-14 w-20 flex-shrink-0 rounded overflow-hidden border
+                    ${
+                      i === activeImgIndex
+                        ? "border-red-500"
+                        : "border-transparent"
+                    }`}
+                  aria-label={`Go to image ${i + 1}`}
+                >
+                  <img
+                    src={bloodImgUrl(file)}
+                    alt={`Thumb ${i + 1}`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

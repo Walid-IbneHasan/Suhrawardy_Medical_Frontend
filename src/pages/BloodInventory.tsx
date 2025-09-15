@@ -133,7 +133,7 @@ const BloodInventoryPage = () => {
     "WhatsApp Image 2025-09-11 at 12.51.17 PM (1).jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.17 PM (2).jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.17 PM (3).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.19 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM.jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.18 PM (1).jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.18 PM (2).jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.18 PM.jpeg",
@@ -512,7 +512,6 @@ const BloodInventoryPage = () => {
           </p>
         </div>
       </section>
-      {/* Blood Program Gallery */}
       {/* Blood Program Gallery */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto">
