@@ -116,17 +116,23 @@ const About = () => {
     "WhatsApp Image 2025-09-11 at 12.51.09 PM.jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.07 PM (1).jpeg",
     "WhatsApp Image 2025-09-11 at 12.51.07 PM (2).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.17 PM (1).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.17 PM (2).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.17 PM (3).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.17 PM.jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.18 PM (1).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.18 PM (2).jpeg",
-    "WhatsApp Image 2025-09-11 at 12.51.18 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.50.56 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.50.59 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.50.59 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.50.59 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.01 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.01 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.01 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.03 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.03 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.03 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.05 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.06 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.07 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.07 PM (1).jpeg",
   ];
 
-  const bloodImgUrl = (name: string) =>
-    `/gallery/${encodeURIComponent(name)}`;
+  const bloodImgUrl = (name: string) => `/gallery/${encodeURIComponent(name)}`;
   // Icon options for dropdown
   const iconOptions = Object.keys(iconMap);
 

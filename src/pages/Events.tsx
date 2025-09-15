@@ -178,11 +178,12 @@ const PastEventsSection: React.FC = () => {
     },
     {
       title: "অসহায় মানুষের পাশে 🤝",
-      description: "গরীব ও অসহায়দের মাঝে শীতবস্ত্র, ঔষধ ও খাদ্য বিতরণ।",
+      description: "গরীব ও অসহায়দের ঔষধ ও খাদ্য বিতরণ।",
       images: [
         "/gallery/WhatsApp Image 2025-09-11 at 12.50.59 PM.jpeg",
-        "/gallery/past/help2.jpg",
-        "/gallery/past/help3.jpg",
+        "/gallery/WhatsApp Image 2025-09-11 at 12.51.15 PM (1).jpeg",
+        "/gallery/WhatsApp Image 2025-09-11 at 12.51.15 PM (2).jpeg",
+        "/gallery/WhatsApp Image 2025-09-11 at 12.51.16 PM.jpeg",
       ],
     },
   ];
