@@ -223,7 +223,7 @@ const BlogDetail = () => {
               )}
 
               {/* Blog Content */}
-              <div className="prose max-w-none text-gray-700 leading-relaxed">
+              <div className="prose prose-lg max-w-none">
                 <div dangerouslySetInnerHTML={{ __html: blog.content }} />
               </div>
             </CardContent>

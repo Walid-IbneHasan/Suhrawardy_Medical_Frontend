@@ -137,6 +137,8 @@ const VaccineInventoryPage = () => {
     setDialogOpen(true);
   };
 
+  console.log("vaccineInventory:", vaccineInventory);
+
   if (loading) {
     return (
       <div className="min-h-screen">

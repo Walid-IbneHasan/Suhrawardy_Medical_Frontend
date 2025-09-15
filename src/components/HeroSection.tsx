@@ -30,9 +30,8 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-              Providing comprehensive healthcare services with cutting-edge
-              technology, compassionate care, and medical excellence. Your
-              well-being is our commitment.
+              Sandhani ShSMC Unit Dedicated to saving lives through voluntary
+              blood donation and raising awareness—because every drop counts.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">

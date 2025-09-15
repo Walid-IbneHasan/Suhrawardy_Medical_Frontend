@@ -27,6 +27,7 @@ import {
   Calendar,
   MapPin,
   Phone,
+  HelpCircle,
 } from "lucide-react";
 import {
   Dialog,
@@ -57,8 +58,27 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
+// import Image from "next/image"; // Next.js Image (recommended)
+// import { Images } from "lucide-react"; // optional icon for the section header
 
 const BloodInventoryPage = () => {
+  // --- Gallery state ---
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
+
+  const openGalleryAt = (idx: number) => {
+    setActiveImgIndex(idx);
+    setGalleryOpen(true);
+  };
+
+  const nextImg = () =>
+    setActiveImgIndex((i) => (i + 1) % bloodGalleryFiles.length);
+
+  const prevImg = () =>
+    setActiveImgIndex((i) =>
+      i - 1 < 0 ? bloodGalleryFiles.length - 1 : i - 1
+    );
+
   const [bloodInventory, setBloodInventory] = useState<BloodInventory[]>([]);
   const [bloodRequests, setBloodRequests] = useState<BloodRequest[]>([]);
   const [donationInterests, setDonationInterests] = useState<
@@ -66,7 +86,7 @@ const BloodInventoryPage = () => {
   >([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
-    "inventory" | "request" | "donate"
+    "inventory" | "request" | "donate" | "faq"
   >("inventory");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBlood, setEditingBlood] = useState<BloodInventory | null>(null);
@@ -105,7 +125,33 @@ const BloodInventoryPage = () => {
     { id: 8, group: "O-", available: false },
   ];
 
+  const bloodGalleryFiles: string[] = [
+    "WhatsApp Image 2025-09-11 at 12.50.57 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.04 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.16 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.16 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.17 PM (3).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.19 PM.jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.18 PM (1).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.18 PM (2).jpeg",
+    "WhatsApp Image 2025-09-11 at 12.51.18 PM.jpeg",
+  ];
+
+  const bloodImgUrl = (name: string) =>
+    `/gallery/blood/${encodeURIComponent(name)}`;
+
   const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+  useEffect(() => {
+    if (!galleryOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") nextImg();
+      if (e.key === "ArrowLeft") prevImg();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [galleryOpen]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -466,6 +512,39 @@ const BloodInventoryPage = () => {
           </p>
         </div>
       </section>
+      {/* Blood Program Gallery */}
+      {/* Blood Program Gallery */}
+      <section className="section-padding bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              আমাদের রক্তদান কার্যক্রম – ছবি
+            </h2>
+            <div className="w-24 h-1 medical-gradient mx-auto rounded-full mt-4"></div>
+            <p className="text-gray-600 mt-4">
+              সাম্প্রতিক রক্তদান ক্যাম্প ও প্রোগ্রামের কিছু মুহূর্ত।
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {bloodGalleryFiles.map((file, idx) => (
+              <button
+                key={file + idx}
+                onClick={() => openGalleryAt(idx)}
+                className="group block overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
+                aria-label={`Open image ${idx + 1}`}
+              >
+                <img
+                  src={bloodImgUrl(file)}
+                  alt={`Blood program ${idx + 1}`}
+                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Tab Navigation */}
       <section className="bg-white border-b border-gray-200">
@@ -475,13 +554,16 @@ const BloodInventoryPage = () => {
               { id: "inventory", label: "Blood Inventory", icon: Activity },
               { id: "request", label: "Request Blood", icon: Heart },
               { id: "donate", label: "Donate Blood", icon: User },
+              { id: "faq", label: "FAQ", icon: HelpCircle },
             ].map((tab) => {
               const IconComponent = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() =>
-                    setActiveTab(tab.id as "inventory" | "request" | "donate")
+                    setActiveTab(
+                      tab.id as "inventory" | "request" | "donate" | "faq"
+                    )
                   }
                   className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors ${
                     activeTab === tab.id
@@ -1239,9 +1321,249 @@ const BloodInventoryPage = () => {
               )}
             </div>
           )}
+
+          {/* FAQ Tab */}
+          {activeTab === "faq" && (
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+                রক্ত সংগ্রহ ও সংরক্ষণ সম্বন্ধে প্রশ্নোত্তর
+              </h2>
+              <div className="space-y-6">
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: রক্তদাতার নির্ধারিত বয়স কত?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: ১৮-৫৭ বছরের যে কোন সুস্থ পুরুষ বা মহিলা রক্তদান
+                      করতে পারবেন।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: সুস্থতা বলতে কী বোঝায়?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="text-gray-600 list-disc list-inside space-y-2">
+                      <li>পুরুষের ক্ষেত্রে ন্যূনতম ওজন ১০০ পাউন্ড</li>
+                      <li>মহিলার ক্ষেত্রে ন্যূনতম ওজন ৯৫ পাউন্ড</li>
+                      <li>সিস্টোলিক রক্তচাপ: ১০০ – ১৬০ মিঃ মিঃ পারদচাপ</li>
+                      <li>ডায়াস্টোলিক রক্তচাপ: ৬০ – ৯০ মিঃ মিঃ পারদচাপ</li>
+                      <li>সম্প্রতি কোনো রোগে আক্রান্ত না থাকা</li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: কোন কোন রোগে আক্রান্ত হলে রক্ত সংগ্রহ করা উচিত
+                      নয়?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: ম্যালেরিয়া, কালাজ্বর, সিফিলিস, গনোরিয়া,
+                      হেপাটাইটিস, এইডস ইত্যাদি রোগে আক্রান্ত হলে রক্ত সংগ্রহ করা
+                      উচিত নয়।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: একবার রক্তদানে শরীর থেকে কতটুকু রক্ত সংগ্রহ করা
+                      হয়?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: একজন মানুষের দেহে ৫-৬ লিটার রক্ত থাকে, যার মধ্যে
+                      মাত্র ৩৫০-৪৬০ সিসি রক্ত সংগ্রহ করা হয়। রক্ত দেওয়ার পর
+                      রক্তদাতাকে ১০ মিনিট শুয়ে বিশ্রাম নিতে হয় এবং দুই গ্লাস
+                      পানি খেতে হয়।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: রক্ত দেওয়ার পর অতিরিক্ত খাবার কি দরকার আছে?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: না। শুধু রক্তদানের দিন অতিরিক্ত পরিশ্রম হয় এমন কাজ
+                      না করাই ভালো।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: রক্ত সংগ্রহের সময় একটি সূঁচ কতবার ব্যবহার করা
+                      হয়?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: একটি মাত্র সূঁচ কেবল একবার ব্যবহার করা হয়।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: রক্ত সংরক্ষণের ব্যাগের মধ্যে তরল পদার্থের কাজ কী?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: তরল পদার্থটি রক্ত জমাট বাঁধতে দেয় না।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: কত তাপমাত্রায় রক্ত সংরক্ষণ করা হয়?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-gray-600">
+                      উত্তর: ২°-৮° সেলসিয়াস তাপমাত্রায় রক্ত সংরক্ষণ করা হয়।
+                    </p>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: সন্ধানীতে রক্তদানের সুবিধা কী?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="text-gray-600 list-disc list-inside space-y-2">
+                      <li>রক্তদাতাকে একটি রক্তদাতা কার্ড প্রদান করা হয়।</li>
+                      <li>
+                        প্রয়োজনে দেশের যেকোনো সন্ধানী ইউনিট থেকে সমপরিমাণ রক্ত
+                        সংগ্রহ করা যায়।
+                      </li>
+                      <li>
+                        বিনামূল্যে রোগ পরীক্ষার রিপোর্ট ও রক্তের গ্রুপ জানা
+                        যায়।
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: সংগৃহীত রক্ত সন্ধানী কিভাবে বিতরণ করে?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="text-gray-600 list-disc list-inside space-y-2">
+                      <li>
+                        হাসপাতালে, অসহায় গরীব রোগীদের মধ্যে বিনা শর্তে বিতরণ
+                        করা হয়।
+                      </li>
+                      <li>
+                        ডোনার কার্ডধারীদের যেকোনো সময় রক্ত সরবরাহ করা হয়।
+                      </li>
+                      <li>বিনিময় ভিত্তিতে রক্ত দেওয়া হয়।</li>
+                      <li>জরুরি প্রয়োজনে বিনা শর্তে সরবরাহ করা হয়।</li>
+                      <li>
+                        <strong>সন্ধানী কোনোভাবেই রক্ত কেনাবেচা করে না।</strong>
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle className="text-lg font-semibold">
+                      প্রশ্ন: পেশাদার রক্তদাতার রক্ত গ্রহণ করা উচিত নয় কেন?
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="text-gray-600 list-disc list-inside space-y-2">
+                      <li>তাদের অধিকাংশের হিমোগ্লোবিনের মাত্রা কম থাকে।</li>
+                      <li>
+                        অনেকে বিভিন্ন রোগে আক্রান্ত বা নেশাজাতীয় দ্রব্য গ্রহণ
+                        করে।
+                      </li>
+                      <li>অনেকেই ৪ মাসের বিরতি না দিয়ে ঘন ঘন রক্ত দেয়।</li>
+                      <li>
+                        ফলস্বরূপ, এ ধরনের রক্ত রোগীর উপকারের চেয়ে অপকার বেশি
+                        করে।
+                      </li>
+                    </ul>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          )}
         </div>
       </section>
       <Footer />
+      <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
+        <DialogContent className="max-w-5xl p-0 bg-black/90 border-0">
+          <div className="relative">
+            {/* Image */}
+            <img
+              src={bloodImgUrl(bloodGalleryFiles[activeImgIndex])}
+              alt={`Blood program large ${activeImgIndex + 1}`}
+              className="w-full max-h-[80vh] object-contain bg-black"
+            />
+
+            {/* Caption */}
+            <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm px-4 py-2">
+              {bloodGalleryFiles[activeImgIndex]}
+            </div>
+
+            {/* Prev / Next */}
+            <button
+              onClick={prevImg}
+              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
+              aria-label="Previous image"
+            >
+              ‹
+            </button>
+            <button
+              onClick={nextImg}
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
+              aria-label="Next image"
+            >
+              ›
+            </button>
+
+            {/* Thumbnails (optional) */}
+            <div className="flex gap-2 overflow-x-auto p-3 bg-black/60">
+              {bloodGalleryFiles.map((file, i) => (
+                <button
+                  key={file + i}
+                  onClick={() => setActiveImgIndex(i)}
+                  className={`relative h-14 w-20 flex-shrink-0 rounded overflow-hidden border
+              ${
+                i === activeImgIndex ? "border-red-500" : "border-transparent"
+              }`}
+                  aria-label={`Go to image ${i + 1}`}
+                >
+                  <img
+                    src={bloodImgUrl(file)}
+                    alt={`Thumb ${i + 1}`}
+                    className="h-full w-full object-cover"
+                    loading="lazy"
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
