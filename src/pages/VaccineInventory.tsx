@@ -171,7 +171,6 @@ const VaccineInventoryPage = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Navigation />
-
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
@@ -186,6 +185,21 @@ const VaccineInventoryPage = () => {
         </div>
       </section>
 
+      {/* Vaccination Info section */}
+      <section className="section-padding">
+        <div className="max-w-3xl mx-auto text-center space-y-4 p-6 rounded-lg border border-yellow-200">
+          <h2 className="text-3xl font-bold text-gray-800">
+            Vaccination Info
+          </h2>
+          <p className="text-gray-700">
+            HBV (সাধারণ ৫০০, শিক্ষার্থীদের জন্য ৪৫০) <br />
+            HPV (২৫০০/)
+          </p>
+          <p className="text-gray-700 font-medium">
+            ভ্যাক্সিনেশন এর জন্য যোগাযোগ: ০১৮৬৭৪৮৩৬৩১
+          </p>
+        </div>
+      </section>
       <section className="section-padding">
         <div className="max-w-7xl mx-auto">
           {/* Admin Actions */}
