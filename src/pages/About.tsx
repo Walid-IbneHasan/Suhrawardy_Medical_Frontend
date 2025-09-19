@@ -41,6 +41,7 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
 import { Badge } from "@/components/ui/badge";
+
 const milestones = [
   {
     date: "৬ মে, ২০০৬",
@@ -67,6 +68,53 @@ const milestones = [
       "কলেজের নাম পরিবর্তনের পর সন্ধানী কেন্দ্রীয় পরিষদের ২০০৯–১০ কার্যকরী পরিষদের ৩য় মাসিক সভায় ইউনিটের নাম পরিবর্তিত হয়— বেগম খালেদা জিয়া মেডিকেল কলেজ ইউনিট থেকে শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট।",
   },
 ];
+
+/* ------------------------------ Hall of Fame Data ------------------------------ */
+const leadersColumns = ["কার্যকাল", "সভাপতি", "সাধারণ সম্পাদক"];
+const leadersRows: string[][] = [
+  ["২০০৭-০৮", "তানভির রহমান", "কে.এম.ইসতিয়াক সাঈদ"],
+  ["২০০৮-০৯", "কে. এম ইসতিয়াক সাঈদ", "মেহেদী হাসান"],
+  ["২০০৯-১০", "মোঃ এনায়েত করিম মজুমদার", "দীপালোকে বণিক"],
+  ["২০১০-১১", "সৈয়দ মাহমুদ আলী", "মাহমুদুর রহমান তন্ময়"],
+  ["২০১১-১২", "এস.এম আহসান হাবীব", "শামসুল আরেফীন"],
+  ["২০১২-১৩", "শাহরিয়ার হোসেন শান্ত", "মুস্তাফিজুর রহমান রুপম"],
+  ["২০১৩-১৪", "জে.এস আমজাদ হোসাইন চৌধুরী", "জ্ঞানব্রত ভদ্র"],
+  ["২০১৪-১৫", "তানজিদ হোসাইন", "রমেশ পোদ্দার"],
+  ["২০১৫-১৬", "মোহাম্মদ এনায়েত উল্লাহ", "মুহাম্মদ মেহেদী হাসান"],
+  ["২০১৬-১৭", "আশিক রেজা রিয়াদ", "ডিপি রায়"],
+  ["২০১৭-১৮", "ফিরোজ মাহমুদ", "তাসনীমুর রহমান"],
+  ["২০১৮-১৯", "মোঃ আবু রায়হান", "মোঃ রিফাত উজ-জামান সজীব"],
+  ["২০১৯-২০", "মোঃ ফাইজুর রহমান", "মোঃ হাসানুল হক হিমেল"],
+  ["২০২০-২১", "অনির্বাণ রায়", "মারুফ আবদুল্লাহ তুষ"],
+  ["২০২১-২২", "মোঃ কাওছার আলম নীরব", "আহসান হাবিব"],
+  ["২০২২-২৩", "মোস্তফা আল মিজান", "তাইয়্যেবা বিনতে রফিক রীম"],
+];
+
+const centralColumns = ["কার্যকাল", "কেন্দ্রীয় প্রতিনিধি", "কেন্দ্রীয় পদ"];
+const centralRows: string[][] = [
+  ["২০০৭-০৮", "মোঃ হাবিবুর রহমান", "সদস্য"],
+  ["২০০৮-০৯", "তানভির রহমান", "সদস্য"],
+  ["২০০৯-১০", "মোঃ সাব্বির আহমেদ", "সদস্য"],
+  ["২০১০-১১", "মোঃ মাইদুল ইসলাম", "প্রচার প্রকাশনা সম্পাদক"],
+  ["২০১১-১২", "কাজী মাহবুব", "দপ্তর ও যোগাযোগ সম্পাদক"],
+  ["২০১২-১৩", "এস.এম আহসান হাবীব", "সহ-সাধারণ সম্পাদক"],
+  ["২০১৩-১৪", "ফেরদৌস রহমান প্রলেস্ক", "অর্থ সম্পাদক"],
+  ["২০১৪-১৫", "আমিনুল ইসলাম শাওন", "সাংগঠনিক সম্পাদক"],
+  ["২০১৫-১৬", "প্রতাপ রায়", "অর্থ সম্পাদক"],
+  ["২০১৬-১৭", "সিয়াম আহসান", "সহ-সাধারণ সম্পাদক"],
+  ["২০১৭-১৮", "আশিক রেজা রিয়াদ", "সদস্য"],
+  ["২০১৮-১৯", "প্রণয় দেবনাথ", "সহ-সভাপতি-১"],
+  ["২০১৯-২০", "মোহাম্মদ নাঈম মাহমুদ", "অর্থ সম্পাদক"],
+  ["২০২০-২১", "রায়হান আহমেদ", "যুগ্ম সাংগঠনিক সম্পাদক-২"],
+  ["২০২১-২২", "মোঃ ফাহাদ আল মাহবুব", "সদস্য"],
+  [
+    "২০২২-২৩",
+    "মোঃ কাওছার আলম নীরব",
+    "যুগ্ম শিক্ষা গবেষণা ও পরিসংখ্যান সম্পাদক",
+  ],
+];
+/* ----------------------------------------------------------------------------- */
+
 const About = () => {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [activeImgIndex, setActiveImgIndex] = useState<number>(0);
@@ -710,11 +758,41 @@ const About = () => {
         </div>
       </section>
 
+      {/* ------------------------- NEW: হল অব ফেম ------------------------- */}
+      <section className="section-padding bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              হল অব ফেম
+            </h2>
+            <div className="w-24 h-1 medical-gradient mx-auto rounded-full mt-4"></div>
+            <p className="text-gray-600 mt-4">
+              যাঁদের হাতে গড়ে উঠেছে আমাদের ঐতিহ্য—বছরভিত্তিক নেতৃত্ব ও কেন্দ্রীয়
+              পরিষদে প্রাপ্ত সম্মাননা।
+            </p>
+          </div>
+
+          <HallTable
+            title="যাদের সুযোগ্য নেতৃত্বে সন্ধানী, শ.সো.মে.ক ইউনিট আজ এই পর্যায়ে"
+            columns={leadersColumns}
+            rows={leadersRows}
+          />
+
+          <div className="h-10" />
+
+          <HallTable
+            title="সন্ধানী কেন্দ্রীয় পরিষদে আমাদের অর্জন"
+            columns={centralColumns}
+            rows={centralRows}
+          />
+        </div>
+      </section>
+
       {/* Leadership Team */}
       <section className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3ল md:text-4xl font-bold text-gray-900 mb-4">
               আমাদের নেতৃত্ব ও দিকনির্দেশনা দল
             </h2>
             <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
@@ -733,7 +811,7 @@ const About = () => {
                   size="sm"
                   onClick={() => openCreateDialog("teamMember")}
                 >
-                  <Plus className="w-3 h-3 mr-2" />
+                  <Plus className="w-3 হ-3 mr-2" />
                   Create Team Member
                 </Button>
               </div>
@@ -752,7 +830,7 @@ const About = () => {
                       "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
                     }
                     alt={member.name}
-                    className="w-full h-64 object-cover"
+                    className="w-full হ-64 object-cover"
                   />
                 </div>
                 <CardHeader className="pb-2">
@@ -772,7 +850,7 @@ const About = () => {
                         variant="outline"
                         onClick={() => openEditDialog("teamMember", member)}
                       >
-                        <Edit className="w-3 h-3 mr-2" />
+                        <Edit className="w-3 হ-3 mr-2" />
                         Edit
                       </Button>
                       <Button
@@ -780,7 +858,7 @@ const About = () => {
                         variant="destructive"
                         onClick={() => handleDelete("teamMember", member.id)}
                       >
-                        <Trash2 className="w-3 h-3 mr-2" />
+                        <Trash2 className="w-3 হ-3 mr-2" />
                         Delete
                       </Button>
                     </div>
@@ -809,7 +887,7 @@ const About = () => {
                         variant="outline"
                         onClick={() => openEditDialog("mission", mission)}
                       >
-                        <Edit className="w-3 h-3 mr-2" />
+                        <Edit className="w-3 হ-3 mr-2" />
                         Edit Mission
                       </Button>
                       <Button
@@ -817,7 +895,7 @@ const About = () => {
                         variant="destructive"
                         onClick={() => handleDelete("mission", mission.id)}
                       >
-                        <Trash2 className="w-3 h-3 mr-2" />
+                        <Trash2 className="w-3 হ-3 mr-2" />
                         Delete Mission
                       </Button>
                     </>
@@ -827,7 +905,7 @@ const About = () => {
                       size="sm"
                       onClick={() => openCreateDialog("mission")}
                     >
-                      <Plus className="w-3 h-3 mr-2" />
+                      <Plus className="w-3 হ-3 mr-2" />
                       Create Mission
                     </Button>
                   )}
@@ -1119,6 +1197,87 @@ const About = () => {
         </DialogContent>
       </Dialog>
     </div>
+  );
+};
+
+/* ---------- Reusable, modern & responsive table card ---------- */
+const HallTable = ({
+  title,
+  columns,
+  rows,
+}: {
+  title: string;
+  columns: string[];
+  rows: string[][];
+}) => {
+  const [query, setQuery] = useState("");
+
+  const filtered = rows.filter((r) =>
+    r.join(" ").toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <Card className="border-0 shadow-xl overflow-hidden">
+      <CardHeader className="pb-3">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <CardTitle className="text-2xl text-gray-900">{title}</CardTitle>
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="সার্চ করুন..."
+            className="w-full md:w-64"
+          />
+        </div>
+        <CardDescription className="mt-1">
+          মোট {rows.length} রেকর্ড • দেখানো হচ্ছে {filtered.length}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="overflow-x-auto">
+          <table className="min-w-full text-sm">
+            <thead className="sticky top-0 z-10">
+              <tr className="bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50 border-b">
+                {columns.map((c, i) => (
+                  <th
+                    key={i}
+                    className="px-4 py-3 text-left font-semibold text-gray-700 whitespace-nowrap"
+                  >
+                    {c}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td
+                    colSpan={columns.length}
+                    className="text-center text-gray-500 py-8"
+                  >
+                    কিছুই পাওয়া যায়নি।
+                  </td>
+                </tr>
+              )}
+              {filtered.map((row, ri) => (
+                <tr
+                  key={ri}
+                  className="odd:bg-white even:bg-gray-50 hover:bg-red-50/60 transition-colors"
+                >
+                  {row.map((cell, ci) => (
+                    <td
+                      key={ci}
+                      className="px-4 py-3 text-gray-800 whitespace-nowrap"
+                    >
+                      {cell}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

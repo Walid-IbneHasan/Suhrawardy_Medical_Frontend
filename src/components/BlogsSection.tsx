@@ -17,14 +17,14 @@ const BlogsSection = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Default blogs for demo purposes
-  const defaultBlogs = [
+  // ডিফল্ট ব্লগ (API ব্যর্থ হলে দেখাবে)
+  const defaultBlogs: Blog[] = [
     {
       id: 1,
-      title: "The Importance of Regular Health Checkups",
+      title: "নিয়মিত স্বাস্থ্য পরীক্ষা কেন জরুরি",
       slug: "importance-regular-health-checkups",
       content:
-        "Regular health checkups are essential for maintaining good health and preventing diseases. Early detection can save lives...",
+        "<p>শরীর ঠিক আছে মনে হলেও <strong>নিয়মিত স্বাস্থ্য পরীক্ষা</strong> করলে অনেক রোগ প্রাথমিক অবস্থায় ধরা পড়ে। সময়মতো চিকিৎসা নিলে ঝুঁকি কমে যায়…</p>",
       created_at: "2024-01-15T10:00:00Z",
       published: true,
       images: [
@@ -36,10 +36,10 @@ const BlogsSection = () => {
     },
     {
       id: 2,
-      title: "Understanding Blood Donation: Benefits and Process",
+      title: "স্বেচ্ছায় রক্তদান: উপকারিতা ও প্রক্রিয়া",
       slug: "understanding-blood-donation",
       content:
-        "Blood donation is a noble act that can save lives. Learn about the benefits, process, and eligibility criteria...",
+        "<p>রক্তদান একটি মানবিক কাজ। <em>কে, কিভাবে, কখন</em> রক্ত দেবেন—সবকিছু জানুন একসাথে। নিয়ম মানলে রক্তদান সম্পূর্ণ নিরাপদ…</p>",
       created_at: "2024-01-10T14:30:00Z",
       published: true,
       images: [
@@ -51,10 +51,10 @@ const BlogsSection = () => {
     },
     {
       id: 3,
-      title: "Vaccination Schedule: Protecting Your Family",
+      title: "ভ্যাকসিন সূচি: পরিবারকে সুরক্ষিত রাখুন",
       slug: "vaccination-schedule-family",
       content:
-        "Staying up-to-date with vaccinations is crucial for protecting yourself and your loved ones from preventable diseases...",
+        "<p>বাচ্চা ও বড়দের জন্য <strong>ভ্যাকসিন</strong> খুবই গুরুত্বপূর্ণ। কোন বয়সে কোন ভ্যাকসিন দরকার—সহজ তালিকা দেখে নিন…</p>",
       created_at: "2024-01-05T09:15:00Z",
       published: true,
       images: [
@@ -73,7 +73,6 @@ const BlogsSection = () => {
         setBlogs(data);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
-        // Use default blogs if API fails
         setBlogs(defaultBlogs);
       } finally {
         setLoading(false);
@@ -85,20 +84,20 @@ const BlogsSection = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("bn-BD", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   };
 
-  // 🔧 FIX: convert HTML to plain text first, then truncate
+  // HTML → plain text, তারপর ট্রাঙ্কেট
   const truncateContent = (html: string, maxLength: number = 150) => {
     const div = document.createElement("div");
-    div.innerHTML = html; // strip tags by letting the browser parse it
+    div.innerHTML = html;
     const text = div.textContent || div.innerText || "";
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + "...";
+    return text.substring(0, maxLength) + "…";
   };
 
   if (loading) {
@@ -107,7 +106,7 @@ const BlogsSection = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Latest Health Insights
+              সাম্প্রতিক স্বাস্থ্য লেখা
             </h2>
             <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
           </div>
@@ -137,59 +136,60 @@ const BlogsSection = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 animate-fade-in-up">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Latest Health Insights
+            সাম্প্রতিক স্বাস্থ্য লেখা
           </h2>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Stay informed with the latest healthcare news, tips, and insights
-            from our medical experts.
+            স্বাস্থ্য বিষয়ক খবর, টিপস আর অভিজ্ঞতার সহজ ব্যাখ্যা—আমাদের
+            বিশেষজ্ঞদের কাছ থেকে।
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {blogs.slice(0, 3).map((blog) => (
-            <Card
+            <Link
               key={blog.id}
-              className="medical-card-hover border-0 shadow-lg overflow-hidden"
+              to={`/blogs/${blog.slug}`}
+              className="group block cursor-pointer"
+              aria-label={`${blog.title} ব্লগটি পড়ুন`}
             >
-              <div className="relative">
-                <img
-                  src={
-                    blog.images[0]?.image ||
-                    "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  }
-                  alt={blog.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-4 left-4">
-                  <Badge className="medical-gradient text-white">
-                    Health Tips
-                  </Badge>
+              <Card className="medical-card-hover border-0 shadow-lg overflow-hidden transition-transform duration-200 group-hover:scale-[1.01] group-active:scale-[0.99]">
+                <div className="relative">
+                  <img
+                    src={
+                      blog.images[0]?.image ||
+                      "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                    }
+                    alt={blog.title}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="absolute top-4 left-4">
+                    <Badge className="medical-gradient text-white">
+                      স্বাস্থ্য টিপস
+                    </Badge>
+                  </div>
                 </div>
-              </div>
 
-              <CardHeader className="pb-4">
-                <div className="flex items-center text-sm text-gray-500 mb-2">
-                  <Calendar className="w-4 h-4 mr-2" />
-                  {formatDate(blog.created_at)}
-                </div>
-                <CardTitle className="text-xl text-gray-900 leading-tight hover:text-red-600 transition-colors">
-                  <Link to={`/blogs/${blog.slug}`}>{blog.title}</Link>
-                </CardTitle>
-              </CardHeader>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center text-sm text-gray-500 mb-2">
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {formatDate(blog.created_at)}
+                  </div>
+                  <CardTitle className="text-xl text-gray-900 leading-tight group-hover:text-red-600 transition-colors">
+                    {blog.title}
+                  </CardTitle>
+                </CardHeader>
 
-              <CardContent>
-                <CardDescription className="text-gray-600 leading-relaxed mb-4">
-                  {truncateContent(blog.content)}
-                </CardDescription>
-                <Link
-                  to={`/blogs/${blog.slug}`}
-                  className="text-red-600 hover:text-red-800 font-medium text-sm transition-colors"
-                >
-                  Read More →
-                </Link>
-              </CardContent>
-            </Card>
+                <CardContent>
+                  <CardDescription className="text-gray-600 leading-relaxed mb-4">
+                    {truncateContent(blog.content)}
+                  </CardDescription>
+                  <div className="text-red-600 group-hover:text-red-800 font-medium text-sm transition-colors">
+                    আরও পড়ুন →
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 
@@ -200,7 +200,7 @@ const BlogsSection = () => {
               variant="outline"
               className="border-red-200 text-red-600 hover:bg-red-50 px-8 py-3"
             >
-              View All Articles
+              সব আর্টিকেল দেখুন
             </Button>
           </Link>
         </div>

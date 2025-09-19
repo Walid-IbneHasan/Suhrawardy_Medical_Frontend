@@ -18,20 +18,21 @@ const HeroSection = () => {
           <div className="animate-fade-in-up">
             <div className="inline-flex items-center px-4 py-2 bg-red-100 rounded-full text-red-800 text-sm font-medium mb-6">
               <Activity className="w-4 h-4 mr-2" />
-              Trusted Healthcare Partner
+              বিশ্বস্ত স্বাস্থ্যসেবার সঙ্গী
             </div>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-              Your Health is Our
+              আপনার স্বাস্থ্যই আমাদের
               <span className="bg-gradient-to-r from-red-600 to-red-400 bg-clip-text text-transparent">
                 {" "}
-                Priority
+                অগ্রাধিকার
               </span>
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-              Sandhani ShSMC Unit Dedicated to saving lives through voluntary
-              blood donation and raising awareness—because every drop counts.
+              সন্ধানী ShSMC ইউনিট—স্বেচ্ছায় রক্তদান, ভ্যাকসিন সহায়তা আর
+              স্বাস্থ্যসচেতনতা নিয়ে কাজ করি। কারণ, এক ফোঁটা রক্তও কারও জীবন
+              বাঁচাতে পারে।
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
@@ -40,55 +41,18 @@ const HeroSection = () => {
                   size="lg"
                   className="medical-gradient text-white hover:opacity-90 px-8 py-3 w-full sm:w-auto transition-all duration-200 hover:scale-105"
                 >
-                  Our Services
+                  আমাদের সেবা
                 </Button>
               </Link>
-              <Link to="/blood-services" className="w-full sm:w-auto">
+              <Link to="/blood-inventory" className="w-full sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
                   className="border-red-200 text-red-600 hover:bg-red-50 px-8 py-3 w-full sm:w-auto transition-all duration-200 hover:scale-105"
                 >
-                  Blood Services
+                  রক্ত সেবা
                 </Button>
               </Link>
-            </div>
-
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
-              <div
-                className="text-center animate-fade-in-up"
-                style={{ animationDelay: "0.1s" }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">
-                  50K+
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  Patients Served
-                </div>
-              </div>
-              <div
-                className="text-center animate-fade-in-up"
-                style={{ animationDelay: "0.2s" }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">
-                  25+
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  Years Experience
-                </div>
-              </div>
-              <div
-                className="text-center animate-fade-in-up"
-                style={{ animationDelay: "0.3s" }}
-              >
-                <div className="text-2xl sm:text-3xl font-bold text-red-600 mb-2">
-                  100%
-                </div>
-                <div className="text-xs sm:text-sm text-gray-600">
-                  Satisfaction Rate
-                </div>
-              </div>
             </div>
           </div>
 
@@ -98,7 +62,7 @@ const HeroSection = () => {
               <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-4 sm:p-6 lg:p-8 shadow-2xl">
                 <img
                   src="https://images.unsplash.com/photo-1615461066159-fea0960485d5?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
-                  alt="Blood donation and medical care"
+                  alt="রক্তদান ও চিকিৎসাসেবা"
                   className="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-xl"
                 />
 
@@ -109,7 +73,7 @@ const HeroSection = () => {
                 >
                   <Heart className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 mb-1 sm:mb-2 mx-auto" />
                   <div className="text-xs sm:text-sm font-semibold text-center">
-                    24/7 Care
+                    ২৪/৭ সেবা
                   </div>
                 </div>
 
@@ -119,7 +83,7 @@ const HeroSection = () => {
                 >
                   <Users className="w-6 h-6 sm:w-8 sm:h-8 text-red-500 mb-1 sm:mb-2 mx-auto" />
                   <div className="text-xs sm:text-sm font-semibold text-center">
-                    Expert Team
+                    দক্ষ জনবল
                   </div>
                 </div>
               </div>

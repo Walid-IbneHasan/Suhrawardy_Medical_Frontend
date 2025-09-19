@@ -251,7 +251,7 @@ const Services = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Our Services
+                আমাদের সেবা
               </h1>
               <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
             </div>
@@ -283,13 +283,12 @@ const Services = () => {
       <section className="bg-gradient-to-br from-blue-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Our Services
+            আমাদের সেবা
           </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Comprehensive healthcare services designed to meet all your medical
-            needs with the highest standards of care and cutting-edge
-            technology.
+            আপনার সব ধরনের চিকিৎসা প্রয়োজন পূরণে সর্বোচ্চ মানের যত্নসহ আমাদের
+            সমন্বিত সেবাসমূহ।
           </p>
         </div>
       </section>
@@ -494,22 +493,16 @@ const Services = () => {
               </ul>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-sm border">
-              <h4 className="text-xl font-semibold mb-2">
-                দ্রুত যোগাযোগ (উদাহরণ)
-              </h4>
+              <h4 className="text-xl font-semibold mb-2">দ্রুত যোগাযোগ</h4>
               <p className="text-gray-700">
-                সন্ধানী চক্ষু ব্যাংক (ঢাকা):{" "}
+                সন্ধানী :
                 <a className="text-blue-600 underline" href="tel:+880000000000">
-                  +880-XXXXXXXXXX
+                  ০১৮৬৭৪৮৩৬৩১
                 </a>
               </p>
               <p className="text-gray-700">
                 নিকটস্থ মেডিকেল কলেজ হাসপাতাল:{" "}
                 <span className="text-gray-500">ইমারজেন্সি ডেস্কে জানান</span>
-              </p>
-              <p className="text-xs text-gray-500 mt-2">
-                ※ উপরের নম্বরগুলো স্থলাভিষিক্ত করুন—আপনার প্রতিষ্ঠানের অফিসিয়াল
-                নম্বর/লিংক যুক্ত করুন।
               </p>
             </div>
           </div>
@@ -520,33 +513,6 @@ const Services = () => {
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
-      </section>
-
-      {/* Contact Section */}
-      <section className="section-padding bg-gray-50">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Need Medical Assistance?
-          </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Contact us today to schedule an appointment or learn more about our
-            services.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="font-semibold text-gray-900 mb-2">Emergency</h3>
-              <p className="text-red-600 text-xl font-bold">
-                +1 (555) 911-HELP
-              </p>
-            </div>
-            <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h3 className="font-semibold text-gray-900 mb-2">Appointments</h3>
-              <p className="text-red-600 text-xl font-bold">
-                +1 (555) 123-4567
-              </p>
-            </div>
-          </div>
-        </div>
       </section>
 
       <Footer />

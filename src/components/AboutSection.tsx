@@ -632,7 +632,7 @@ const AboutSection = () => {
                   size="lg"
                   className="medical-gradient text-white hover:opacity-90 px-8 py-3"
                 >
-                  Learn More About Us
+                  বিস্তারিত জানুন
                 </Button>
               </Link>
               <Link to="/blood-inventory">
@@ -641,7 +641,7 @@ const AboutSection = () => {
                   variant="outline"
                   className="border-red-200 text-red-600 hover:bg-red-50 px-8 py-3"
                 >
-                  Blood Services
+                  রক্ত সেবা
                 </Button>
               </Link>
             </div>
@@ -791,99 +791,6 @@ const AboutSection = () => {
                 );
               })}
             </div>
-          </div>
-        </div>
-
-        {/* Mission Statement */}
-        <div className="mt-20 text-center">
-          {isAdmin && (
-            <div className="mb-8 p-4 bg-red-50 rounded-lg border border-red-200">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h3 className="text-lg font-medium text-red-800">
-                  Admin Panel - Mission Statement
-                </h3>
-                <Dialog
-                  open={dialogOpen && dialogType === "mission"}
-                  onOpenChange={setDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button
-                      onClick={() => openCreateDialog("mission")}
-                      className="flex items-center space-x-2 sm:w-auto w-full text-sm"
-                      size="sm"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Mission</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingMission
-                          ? "Edit Mission Statement"
-                          : "Create Mission Statement"}
-                      </DialogTitle>
-                      <DialogDescription>
-                        {editingMission
-                          ? "Update the mission statement below."
-                          : "Fill in the details to create a new mission statement."}
-                      </DialogDescription>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Textarea
-                        placeholder="Enter mission statement"
-                        value={missionForm.statement}
-                        onChange={(e) =>
-                          setMissionForm({
-                            ...missionForm,
-                            statement: e.target.value,
-                          })
-                        }
-                        rows={4}
-                      />
-                      <Button
-                        onClick={
-                          editingMission
-                            ? handleEditMission
-                            : handleCreateMission
-                        }
-                        className="w-full"
-                      >
-                        {editingMission ? "Update" : "Create"}
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-              {missionStatement && (
-                <div className="mt-4 flex space-x-2 flex-wrap gap-2 justify-center">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openEditMissionDialog(missionStatement)}
-                  >
-                    <Edit className="w-3 h-3 mr-1" />
-                    Edit
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDeleteMission(missionStatement.id)}
-                  >
-                    <Trash2 className="w-3 h-3 mr-1" />
-                    Delete
-                  </Button>
-                </div>
-              )}
-            </div>
-          )}
-          <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 max-w-4xl mx-auto">
-            <h3 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">
-              Our Mission
-            </h3>
-            <p className="text-xl text-gray-600 leading-relaxed">
-              {missionStatement?.statement}
-            </p>
           </div>
         </div>
       </div>

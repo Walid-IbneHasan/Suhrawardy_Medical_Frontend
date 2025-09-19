@@ -294,7 +294,7 @@ const Blogs = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Health Blog
+                স্বাস্থ্য কথা
               </h1>
               <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
             </div>
@@ -329,12 +329,13 @@ const Blogs = () => {
       <section className="bg-gradient-to-br from-blue-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Health Blog
+            স্বাস্থ্য কথা
           </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-            Stay informed with the latest healthcare news, tips, and insights
-            from our medical experts. Your health journey starts with knowledge.
+            আমাদের মেডিকেল বিশেষজ্ঞদের কাছ থেকে স্বাস্থ্য বিষয়ক সর্বশেষ খবর,
+            টিপস এবং পরামর্শ সম্পর্কে জেনে নিন। জ্ঞান দিয়েই আপনার সুস্থ থাকার
+            যাত্রা শুরু হয়।
           </p>
 
           {/* Search Bar */}

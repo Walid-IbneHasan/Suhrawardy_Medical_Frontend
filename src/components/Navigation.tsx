@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Activity, User, LogOut, Settings } from "lucide-react";
@@ -26,18 +26,22 @@ const Navigation = () => {
   const { user, isAuthenticated, isAdmin, logout } = useAuth();
 
   const navItems = [
-    { name: "Home", path: "/" },
-    { name: "Services", path: "/services" },
-    { name: "Blogs", path: "/blogs" },
-    { name: "Events", path: "/events" },
-    { name: "Blood", path: "/blood-inventory" },
-    { name: "Vaccines", path: "/vaccine-inventory" },
-    { name: "About", path: "/about" },
+    { name: "হোম", path: "/" },
+    { name: "সার্ভিস", path: "/services" },
+    { name: "ব্লগ", path: "/blogs" },
+    { name: "ইভেন্টস", path: "/events" },
+    { name: "রক্ত", path: "/blood-inventory" },
+    { name: "টিকা", path: "/vaccine-inventory" },
+    { name: "আমাদের সম্পর্কে", path: "/about" },
   ];
 
-  const isActive = (path: string) => {
-    return location.pathname === path;
-  };
+  const isActive = (path: string) => location.pathname === path;
+
+  // Get the first letter of email (uppercase); fallback to "U"
+  const userInitial = useMemo(
+    () => user?.email?.[0]?.toUpperCase() ?? "U",
+    [user?.email]
+  );
 
   return (
     <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -45,11 +49,9 @@ const Navigation = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="medical-gradient p-2 rounded-lg">
-              <Activity className="h-6 w-6 text-white" />
-            </div>
+            <img src="/public/logo.png" alt="logo" className="h-10 w-10" />
             <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
-              MediCare
+              সন্ধানী
             </span>
           </Link>
 
@@ -76,82 +78,86 @@ const Navigation = () => {
                     to="/admin/users/"
                     className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                   >
-                    Users
+                    ব্যবহারকারীরা
                   </Link>
                 )}
+
+                {/* Avatar-only user menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="flex items-center space-x-2"
+                      className="p-0 h-9 w-9 rounded-full"
+                      aria-label="অ্যাকাউন্ট মেনু"
                     >
-                      <User className="h-4 w-4" />
-                      <span>{user?.email}</span>
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center font-semibold">
+                        {userInitial}
+                      </div>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
                       <Settings className="h-4 w-4 mr-2" />
-                      Profile
+                      প্রোফাইল
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout}>
                       <LogOut className="h-4 w-4 mr-2" />
-                      Logout
+                      লগআউট
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+
+                <Dialog
+                  open={isEmergencyModalOpen}
+                  onOpenChange={setIsEmergencyModalOpen}
+                >
+                  <DialogTrigger asChild>
+                    <Button className="medical-gradient text-white hover:opacity-90">
+                      জরুরি যোগাযোগ
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>জরুরি যোগাযোগ</DialogTitle>
+                      <DialogDescription>
+                        <p className="text-red-600 font-semibold mb-4">
+                          শুধুমাত্র প্রকৃত জরুরি চিকিৎসা সহায়তার ক্ষেত্রে এই
+                          নম্বরে কল করুন।
+                        </p>
+                        <p className="text-lg">
+                          📞{" "}
+                          <a
+                            href="tel:+8801867483631"
+                            className="text-red-600 hover:underline"
+                          >
+                            ০১৮৬৭৪৮৩৬৩১
+                          </a>
+                        </p>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsEmergencyModalOpen(false)}
+                      className="mt-4"
+                    >
+                      বন্ধ করুন
+                    </Button>
+                  </DialogContent>
+                </Dialog>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
                 <Link to="/login">
-                  <Button variant="outline">Login</Button>
+                  <Button variant="outline">লগইন</Button>
                 </Link>
                 <Link to="/register">
                   <Button className="medical-gradient text-white hover:opacity-90">
-                    Register
+                    রেজিস্টার
                   </Button>
                 </Link>
               </div>
             )}
-
-            <Dialog
-              open={isEmergencyModalOpen}
-              onOpenChange={setIsEmergencyModalOpen}
-            >
-              <DialogTrigger asChild>
-                <Button className="medical-gradient text-white hover:opacity-90">
-                  Emergency Contact
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Emergency Contact</DialogTitle>
-                  <DialogDescription>
-                    <p className="text-red-600 font-semibold mb-4">
-                      Please call this number only in case of a true medical
-                      emergency.
-                    </p>
-                    <p className="text-lg">
-                      📞{" "}
-                      <a
-                        href="tel:+15551234567"
-                        className="text-red-600 hover:underline"
-                      >
-                        +1 (555) 123-4567
-                      </a>
-                    </p>
-                  </DialogDescription>
-                </DialogHeader>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsEmergencyModalOpen(false)}
-                  className="mt-4"
-                >
-                  Close
-                </Button>
-              </DialogContent>
-            </Dialog>
           </div>
 
           {/* Mobile menu button */}
@@ -159,6 +165,7 @@ const Navigation = () => {
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-600 hover:text-gray-800 focus:outline-none"
+              aria-label="মেনু টগল করুন"
             >
               {isOpen ? (
                 <X className="h-6 w-6" />
@@ -187,68 +194,79 @@ const Navigation = () => {
                   {item.name}
                 </Link>
               ))}
-              <div className="pt-2 space-y-2">
+
+              <div className="pt-3 space-y-3">
                 {isAuthenticated ? (
                   <>
+                    {/* Small avatar row instead of showing the full email */}
+                    <div className="flex items-center gap-3 px-3">
+                      <div className="h-9 w-9 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center font-semibold">
+                        {userInitial}
+                      </div>
+                      <span className="text-sm text-gray-700">অ্যাকাউন্ট</span>
+                    </div>
+
                     {isAdmin && (
                       <Link
                         to="/admin/users/"
                         onClick={() => setIsOpen(false)}
                         className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
                       >
-                        Users
+                        ব্যবহারকারীরা
                       </Link>
                     )}
-                    <div className="px-3 py-2 text-sm text-gray-500">
-                      {user?.email}
-                    </div>
+
                     <Button
                       variant="outline"
-                      onClick={logout}
+                      onClick={() => {
+                        setIsOpen(false);
+                        logout();
+                      }}
                       className="w-full text-left justify-start"
                     >
                       <LogOut className="h-4 w-4 mr-2" />
-                      Logout
+                      লগআউট
                     </Button>
                   </>
                 ) : (
                   <div className="space-y-2">
                     <Link to="/login" onClick={() => setIsOpen(false)}>
                       <Button variant="outline" className="w-full">
-                        Login
+                        লগইন
                       </Button>
                     </Link>
                     <Link to="/register" onClick={() => setIsOpen(false)}>
                       <Button className="medical-gradient text-white w-full">
-                        Register
+                        রেজিস্টার
                       </Button>
                     </Link>
                   </div>
                 )}
+
                 <Dialog
                   open={isEmergencyModalOpen}
                   onOpenChange={setIsEmergencyModalOpen}
                 >
                   <DialogTrigger asChild>
                     <Button className="medical-gradient text-white w-full">
-                      Emergency Contact
+                      জরুরি যোগাযোগ
                     </Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader>
-                      <DialogTitle>Emergency Contact</DialogTitle>
+                      <DialogTitle>জরুরি যোগাযোগ</DialogTitle>
                       <DialogDescription>
                         <p className="text-red-600 font-semibold mb-4">
-                          Please call this number only in case of a true medical
-                          emergency.
+                          শুধুমাত্র প্রকৃত জরুরি চিকিৎসা সহায়তার ক্ষেত্রে এই
+                          নম্বরে কল করুন।
                         </p>
                         <p className="text-lg">
                           📞{" "}
                           <a
-                            href="tel:+15551234567"
+                            href="tel:+8801867483631"
                             className="text-red-600 hover:underline"
                           >
-                            +1 (555) 123-4567
+                            ০১৮৬৭৪৮৩৬৩১
                           </a>
                         </p>
                       </DialogDescription>
@@ -258,7 +276,7 @@ const Navigation = () => {
                       onClick={() => setIsEmergencyModalOpen(false)}
                       className="mt-4"
                     >
-                      Close
+                      বন্ধ করুন
                     </Button>
                   </DialogContent>
                 </Dialog>

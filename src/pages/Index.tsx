@@ -10,6 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Link } from "react-router-dom";
 const Index = () => {
   return (
     <div className="min-h-screen">
@@ -17,6 +18,7 @@ const Index = () => {
       <HeroSection />
       <ServicesSection />
       <BlogsSection />
+
       {/* Our Anthem */}
       <section className="section-padding">
         <div className="max-w-6xl mx-auto grid gap-6 md:gap-8 lg:grid-cols-3 items-start">
@@ -78,7 +80,7 @@ const Index = () => {
               <CardContent>
                 <pre className="text-gray-700 leading-relaxed font-noto-sans-bengali whitespace-pre-wrap sm:text-base md:text-lg">
                   আমি সৃষ্টিকর্তার নামে শপথ করছি যে— <br />
-                  আমি সন্ধানীর লক্ষ্য ও উদ্দেশ্য বাস্তবায়নের জন্য পরিশ্রম করবো।{" "}
+                  আমি সন্ধানীর লক্ষ্য ও উদ্দেশ্য বাস্তবায়নের জন্য পরিশ্রম করবো.{" "}
                   <br />
                   ব্যক্তিস্বার্থ ও সকল প্রকার রাজনীতির ঊর্ধ্বে থেকে মানবতার
                   সেবার ব্রতে আমার জীবন উৎসর্গ করবো। <br />
@@ -87,77 +89,148 @@ const Index = () => {
                 </pre>
               </CardContent>
             </Card>
+          </div>
+        </div>
+      </section>
 
-            {/* <Card className="shadow-xl">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-gray-900">
-            সন্ধানীর কর্মসূচী
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <pre className="text-gray-700 leading-relaxed font-noto-sans-bengali whitespace-pre-wrap sm:text-base md:text-lg">
-            ১. জনগণকে স্বেচ্ছায় রক্তদানে উৎসাহ প্রদান ও উদ্বুদ্ধকরণ।
-            <br />
-            ২. জনগণকে মরণোত্তর চক্ষুদানে উৎসাহ প্রদান ও উদ্বুদ্ধকরণ।
-            <br />
-            ৩. হাসপাতালের গরীব ও অসহায় রোগীদের আর্থিক ও অন্যান্য সাহায্য
-            প্রদান (যেমন: রক্ত, ঔষধ, পথ্য ইত্যাদি)।
-            <br />
-            ৪. মেডিকেল ও ডেন্টাল কলেজের গরীব ছাত্র-ছাত্রীদের মাসিক বা
-            এককালীন আর্থিক ও অন্যান্য সাহায্য প্রদান।
-          </pre>
-        </CardContent>
-      </Card> */}
+      {/* Courtesy & Acknowledgements */}
+      <section className="section-padding bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          {/* Courtesy banner */}
+          <Card className="border-0 shadow-xl overflow-hidden mb-8">
+            <div className="h-1 w-full medical-gradient" />
+            <CardHeader className="pb-0">
+              <CardTitle className="text-2xl md:text-3xl text-gray-900 font-bold">
+                সৌজন্যে
+              </CardTitle>
+              <CardDescription className="text-base md:text-lg text-gray-600">
+                সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
+                পরিষদ-২০২৪-২৫
+              </CardDescription>
+            </CardHeader>
+            <CardContent />
+          </Card>
+
+          {/* Acknowledgement grid */}
+          <div className="mb-6">
+            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
+              কৃতজ্ঞতা
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {/* Person 1 */}
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <CardTitle className="text-lg md:text-xl text-gray-900">
+                        সাদিকুর রহমান ইফাত
+                      </CardTitle>
+                      <CardDescription className="text-gray-600">
+                        কেন্দ্রীয় সাধারণ সম্পাদক <br />
+                        সন্ধানী কেন্দ্রীয় কার্যকরী পরিষদ-২০২৪-২৫
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {/* Person 2 */}
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <CardTitle className="text-lg md:text-xl text-gray-900">
+                        সাইদ মোরশেদ
+                      </CardTitle>
+                      <CardDescription className="text-gray-600">
+                        সভাপতি <br />
+                        সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
+                        পরিষদ-২০২৪-২৫
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+
+              {/* Person 3 */}
+              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+                <CardHeader>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <CardTitle className="text-lg md:text-xl text-gray-900">
+                        মো. জিহাদ হোসেন
+                      </CardTitle>
+                      <CardDescription className="text-gray-600">
+                        সাধারণ সম্পাদক <br />
+                        সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
+                        পরিষদ-২০২৪-২৫
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+              </Card>
+            </div>
           </div>
         </div>
       </section>
 
       <AboutSection />
 
-      {/* Footer */}
+      {/* Footer (left as-is) */}
+      {/* Footer (Bangla version) */}
       <footer className="bg-gray-900 text-white section-padding">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">MediCare Plus</h3>
+              <h3 className="text-xl font-bold mb-4">সন্ধানী </h3>
               <p className="text-gray-400 leading-relaxed">
-                Your trusted healthcare partner committed to providing
-                exceptional medical services with compassion and excellence.
+                আপনার বিশ্বস্ত স্বাস্থ্যসেবা অংশীদার, যা করুণা এবং উৎকর্ষতার
+                সাথে ব্যতিক্রমী চিকিৎসা সেবা প্রদানে প্রতিশ্রুতিবদ্ধ।
               </p>
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold mb-4">Services</h4>
+              <h4 className="text-lg font-semibold mb-4">সেবাসমূহ</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>Emergency Care</li>
-                <li>General Medicine</li>
-                <li>Specialized Consultations</li>
-                <li>Diagnostic Services</li>
+                <li>জরুরি সেবা</li>
+                <li>সাধারণ চিকিৎসা</li>
+                <li>বিশেষজ্ঞ পরামর্শ</li>
+                <li>রোগ নির্ণয় সেবা</li>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold mb-4">Quick Links</h4>
+              <h4 className="text-lg font-semibold mb-4">দ্রুত লিংক</h4>
               <ul className="space-y-2 text-gray-400">
-                <li>About Us</li>
-                <li>Our Services</li>
-                <li>Blood Services</li>
-                <li>Contact</li>
+                <Link to="/about">
+                  <li>আমাদের সম্পর্কে</li>
+                </Link>
+                <Link to="/services">
+                  <li>আমাদের সেবা</li>
+                </Link>
+                <Link to="/blood-inventory">
+                  <li>রক্ত সেবা</li>
+                </Link>
+                <Link to="/vaccine-inventory">
+                  <li>টিকার তালিকা</li>
+                </Link>
               </ul>
             </div>
 
             <div>
-              <h4 className="text-lg font-semibold mb-4">Contact Info</h4>
+              <h4 className="text-lg font-semibold mb-4">যোগাযোগের তথ্য</h4>
               <div className="space-y-2 text-gray-400">
-                <p>📞 +1 (555) 123-4567</p>
-                <p>✉️ info@medicareplus.com</p>
-                <p>📍 123 Healthcare Ave, Medical City</p>
+                <p>📞 ০১৮৬৭৪৮৩৬ৣ১</p>
+                <p>✉️ info@sandhani.org</p>
+                <p>📍 শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ, ঢাকা</p>
               </div>
             </div>
           </div>
 
           <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 MediCare Plus. All rights reserved.</p>
+            <p>
+              &copy; {new Date().getFullYear()} সন্ধানী। সর্বস্বত্ব সংরক্ষিত।
+            </p>
           </div>
         </div>
       </footer>

@@ -23,6 +23,7 @@ export interface Event {
   description: string;
   location: string;
   date: string;
+  is_active: boolean;  
   images: { image: string }[];
 }
 
@@ -181,10 +182,14 @@ export const blogAPI = {
   getBlog: (slug: string): Promise<Blog> => apiCall(`/blogs/${slug}/`),
 };
 
-// Event API
+//Event API
 export const eventAPI = {
-  getEvents: (): Promise<Event[]> => apiCall('/events/'),
+  getEvents: (): Promise<Event[]> => apiCall('/events/'),                
   getEvent: (id: number): Promise<Event> => apiCall(`/events/${id}/`),
+
+  // NEW: split lists
+  getUpcoming: (): Promise<Event[]> => apiCall('/events/upcoming/'),
+  getPast: (): Promise<Event[]> => apiCall('/events/past/'),
 };
 
 // Blood Inventory API
