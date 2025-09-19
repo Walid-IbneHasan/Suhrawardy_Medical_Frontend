@@ -22,6 +22,7 @@ interface AuthContextType {
   ) => Promise<void>;
   logout: () => void;
   loading: boolean;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -42,12 +43,27 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const refreshUser = async () => {
+    try {
+      const profile = (await authAPI.getUserProfile()) as User;
+      // preserve is_superuser if your /auth/profile doesn't include it
+      const stored = authUtils.getUser();
+      const merged = {
+        ...profile,
+        is_superuser: stored?.is_superuser ?? profile?.is_superuser,
+      };
+      authUtils.setUser(merged);
+      setUser(merged);
+    } catch (e) {
+      // swallow here; caller may handle UX
+    }
+  };
+
   useEffect(() => {
     const initAuth = async () => {
       const userData = authUtils.getUser();
       if (userData && authUtils.getAccessToken()) {
         try {
-          // Verify user profile to ensure tokens are valid
           const profile = (await authAPI.getUserProfile()) as User;
           setUser({ ...profile, is_superuser: userData.is_superuser });
         } catch (error) {
@@ -75,10 +91,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       };
       authUtils.setTokens(response);
 
-      // Fetch user data after login
       const userData = (await authAPI.getUserProfile()) as User;
-      // Override with is_superuser from login response
-      userData.is_superuser = response.is_superuser;
+      userData.is_superuser = response.is_superuser; // ensure flag present
       authUtils.setUser(userData);
       setUser(userData);
 
@@ -110,7 +124,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       )) as { access: string; refresh: string };
       authUtils.setTokens(response);
 
-      // Fetch user data after registration
       const userData = (await authAPI.getUserProfile()) as User;
       authUtils.setUser(userData);
       setUser(userData);
@@ -150,6 +163,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         register,
         logout,
         loading,
+        refreshUser,
       }}
     >
       {children}

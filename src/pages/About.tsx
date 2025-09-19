@@ -527,34 +527,13 @@ const About = () => {
                   </p>
                 )}
               </div>
-
-              <div className="grid grid-cols-3 gap-8">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600 mb-2">
-                    {about?.patients_served || "50K+"}
-                  </div>
-                  <div className="text-sm text-gray-600">Patients Served</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600 mb-2">
-                    {about?.years_experience || "25+"}
-                  </div>
-                  <div className="text-sm text-gray-600">Years Experience</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-red-600 mb-2">
-                    {about?.satisfaction_rate || "100%"}
-                  </div>
-                  <div className="text-sm text-gray-600">Satisfaction Rate</div>
-                </div>
-              </div>
             </div>
 
             <div className="animate-slide-in-left">
               <img
                 src={
                   about?.image ||
-                  "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80"
+                  "/public/gallery/WhatsApp Image 2025-09-11 at 12.50.59 PM (2).jpeg"
                 }
                 alt="Sandhani team"
                 className="w-full h-96 object-cover rounded-2xl shadow-2xl"
@@ -656,12 +635,11 @@ const About = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Our Values & Achievements
+              আমাদের মূল্যবোধ ও অর্জন
             </h2>
             <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              We are committed to excellence in everything we do, from patient
-              care to community service.
+              রোগীসেবা থেকে সমাজসেবা—প্রতিটি কাজে আমরা উৎকর্ষের প্রতিশ্রুতিবদ্ধ।
             </p>
           </div>
           {isAdmin && (
@@ -737,12 +715,12 @@ const About = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Our Leadership Team
+              আমাদের নেতৃত্ব ও দিকনির্দেশনা দল
             </h2>
             <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Meet the dedicated medical students who lead Sandhani’s mission to
-              serve humanity.
+              মানবসেবায় সন্ধানী–র মিশনকে নেতৃত্ব দিচ্ছেন যে নিবেদিতপ্রাণ
+              মেডিকেল শিক্ষার্থীরা—তাঁদের সঙ্গে পরিচিত হোন।
             </p>
           </div>
           {isAdmin && (
@@ -925,37 +903,7 @@ const About = () => {
                   className="bg-white border border-gray-200 rounded"
                   placeholder="Write your About description here..."
                 />
-                <Input
-                  type="number"
-                  placeholder="Enter years of experience (e.g., 25)"
-                  value={formData.years_experience || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      years_experience: parseInt(e.target.value) || 0,
-                    })
-                  }
-                />
-                <Input
-                  placeholder="Enter patients served (e.g., 50K+)"
-                  value={formData.patients_served || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      patients_served: e.target.value,
-                    })
-                  }
-                />
-                <Input
-                  placeholder="Enter satisfaction rate (e.g., 98%)"
-                  value={formData.satisfaction_rate || ""}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      satisfaction_rate: e.target.value,
-                    })
-                  }
-                />
+
                 <Input
                   type="file"
                   accept="image/*"

@@ -1,3 +1,4 @@
+// src/components/BlogsSection.tsx
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -10,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
 import { blogAPI, Blog } from "@/utils/api";
-import { Calendar, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 const BlogsSection = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -68,7 +69,6 @@ const BlogsSection = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        console.log("Fetching blogs...");
         const data = await blogAPI.getBlogs();
         setBlogs(data);
       } catch (error) {
@@ -92,9 +92,13 @@ const BlogsSection = () => {
     });
   };
 
-  const truncateContent = (content: string, maxLength: number = 150) => {
-    if (content.length <= maxLength) return content;
-    return content.substr(0, maxLength) + "...";
+  // 🔧 FIX: convert HTML to plain text first, then truncate
+  const truncateContent = (html: string, maxLength: number = 150) => {
+    const div = document.createElement("div");
+    div.innerHTML = html; // strip tags by letting the browser parse it
+    const text = div.textContent || div.innerText || "";
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + "...";
   };
 
   if (loading) {

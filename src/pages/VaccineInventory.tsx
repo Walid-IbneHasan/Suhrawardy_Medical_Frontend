@@ -175,12 +175,11 @@ const VaccineInventoryPage = () => {
       <section className="bg-gradient-to-br from-blue-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Vaccine Inventory
+          ভ্যাকসিন মজুত
           </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Check the current availability of vaccines in our inventory for
-            immunization services.
+          আমাদের কাছে বর্তমানে কোন কোন ভ্যাকসিন উপলভ্য—এখানেই দেখুন।
           </p>
         </div>
       </section>
@@ -189,7 +188,7 @@ const VaccineInventoryPage = () => {
       <section className="section-padding">
         <div className="max-w-3xl mx-auto text-center space-y-4 p-6 rounded-lg border border-yellow-200">
           <h2 className="text-3xl font-bold text-gray-800">
-            Vaccination Info
+          ভ্যাকসিন তথ্য
           </h2>
           <p className="text-gray-700">
             HBV (সাধারণ ৫০০, শিক্ষার্থীদের জন্য ৪৫০) <br />

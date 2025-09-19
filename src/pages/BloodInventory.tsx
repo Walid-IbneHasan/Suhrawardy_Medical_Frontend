@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+// src/pages/BloodInventory.tsx
+import React, { useEffect, useMemo, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import {
@@ -13,9 +14,11 @@ import { Badge } from "@/components/ui/badge";
 import {
   bloodAPI,
   adminAPI,
+  meAPI,
   BloodInventory,
   BloodRequest,
   BloodDonationInterest,
+  Donation,
 } from "@/utils/api";
 import {
   Heart,
@@ -28,6 +31,7 @@ import {
   MapPin,
   Phone,
   HelpCircle,
+  Medal,
 } from "lucide-react";
 import {
   Dialog,
@@ -58,8 +62,6 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { Link } from "react-router-dom";
-// import Image from "next/image"; // Next.js Image (recommended)
-// import { Images } from "lucide-react"; // optional icon for the section header
 
 const BloodInventoryPage = () => {
   // --- Gallery state ---
@@ -79,22 +81,30 @@ const BloodInventoryPage = () => {
       i - 1 < 0 ? bloodGalleryFiles.length - 1 : i - 1
     );
 
+  // Data state
   const [bloodInventory, setBloodInventory] = useState<BloodInventory[]>([]);
   const [bloodRequests, setBloodRequests] = useState<BloodRequest[]>([]);
   const [donationInterests, setDonationInterests] = useState<
     BloodDonationInterest[]
   >([]);
+  const [myDonations, setMyDonations] = useState<Donation[]>([]);
+  const [allDonations, setAllDonations] = useState<Donation[]>([]); // admin-only
+
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<
     "inventory" | "request" | "donate" | "faq"
   >("inventory");
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Admin edit states
   const [editingBlood, setEditingBlood] = useState<BloodInventory | null>(null);
   const [editingRequest, setEditingRequest] = useState<BloodRequest | null>(
     null
   );
   const [editingDonation, setEditingDonation] =
     useState<BloodDonationInterest | null>(null);
+
+  // Forms
   const [bloodFormData, setBloodFormData] = useState({
     group: "",
     available: false,
@@ -110,10 +120,16 @@ const BloodInventoryPage = () => {
     available_date: "",
     contact_info: "",
   });
+
+  // Eligibility inputs (NEW)
+  const [lastDonationDate, setLastDonationDate] = useState<string>("");
+  const [recordLastDonationNow, setRecordLastDonationNow] =
+    useState<boolean>(true);
+
   const { isAdmin, isAuthenticated } = useAuth();
   const { toast } = useToast();
 
-  // Default data for demo
+  // Default data for demo fallback
   const defaultBloodInventory = [
     { id: 1, group: "A+", available: true },
     { id: 2, group: "A-", available: false },
@@ -143,6 +159,8 @@ const BloodInventoryPage = () => {
     `/gallery/blood/${encodeURIComponent(name)}`;
 
   const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+  // Keyboard nav for gallery
   useEffect(() => {
     if (!galleryOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -153,18 +171,39 @@ const BloodInventoryPage = () => {
     return () => window.removeEventListener("keydown", onKey);
   }, [galleryOpen]);
 
+  // Initial fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Fetching blood inventory and related data...");
-        const [bloodData, requestData, donationData] = await Promise.all([
-          bloodAPI.getBloodInventory(),
-          isAdmin ? adminAPI.bloodRequests.getAll() : Promise.resolve([]),
-          isAdmin ? adminAPI.donationInterests.getAll() : Promise.resolve([]),
-        ]);
+        const [bloodData, requestData, donationInterestData] =
+          await Promise.all([
+            bloodAPI.getBloodInventory(),
+            isAdmin ? adminAPI.bloodRequests.getAll() : Promise.resolve([]),
+            isAdmin ? adminAPI.donationInterests.getAll() : Promise.resolve([]),
+          ]);
         setBloodInventory(bloodData);
         setBloodRequests(requestData);
-        setDonationInterests(donationData);
+        setDonationInterests(donationInterestData);
+
+        if (isAdmin) {
+          const d = await adminAPI.donations.getAll();
+          setAllDonations(d);
+        } else if (isAuthenticated) {
+          const mine = await meAPI.myDonations();
+          setMyDonations(mine);
+
+          // Prefill last donation date from latest record (if any)
+          if (mine.length) {
+            const latest = [...mine].sort(
+              (a, b) =>
+                new Date(b.donation_date).getTime() -
+                new Date(a.donation_date).getTime()
+            )[0];
+            if (latest?.donation_date) {
+              setLastDonationDate(latest.donation_date.slice(0, 10));
+            }
+          }
+        }
       } catch (error) {
         console.error("Failed to fetch data:", error);
         setBloodInventory(defaultBloodInventory);
@@ -176,23 +215,64 @@ const BloodInventoryPage = () => {
     };
 
     fetchData();
-  }, [isAdmin]);
+  }, [isAdmin, isAuthenticated]);
 
+  // --- Helpers: eligibility (90 days ~ 3 months) ---
+  const addDays = (dateStr: string, days: number) => {
+    const d = new Date(dateStr);
+    d.setDate(d.getDate() + days);
+    return d;
+  };
+
+  const daysBetween = (from: Date, to: Date) => {
+    const ms = to.getTime() - from.getTime();
+    return Math.floor(ms / (1000 * 60 * 60 * 24));
+  };
+
+  // If user picked a future available_date, use that as the "target date".
+  const targetDonationDate = useMemo(() => {
+    return donateFormData.available_date
+      ? new Date(donateFormData.available_date)
+      : new Date();
+  }, [donateFormData.available_date]);
+
+  const eligibility = useMemo(() => {
+    if (!lastDonationDate) {
+      return {
+        eligible: false,
+        reason: "অনুগ্রহ করে আপনার শেষ রক্তদানের তারিখ দিন।",
+      };
+    }
+    const last = new Date(lastDonationDate);
+    const diff = daysBetween(last, targetDonationDate);
+    if (diff >= 90) {
+      return { eligible: true, reason: "" };
+    }
+    const eligibleFrom = addDays(lastDonationDate, 90);
+    return {
+      eligible: false,
+      reason: `আপনি ${eligibleFrom.toLocaleDateString()} তারিখ থেকে আবার রক্তদান করতে পারবেন। (বাকি ${
+        90 - diff
+      } দিন)`,
+    };
+  }, [lastDonationDate, targetDonationDate]);
+
+  // --- Admin Handlers (unchanged) ---
   const handleCreateBloodInventory = async () => {
     try {
       await adminAPI.bloodInventory.create(bloodFormData);
       toast({
-        title: "Success",
-        description: "Blood inventory created successfully",
+        title: "সফল",
+        description: "রক্তের মজুত সফলভাবে তৈরি হয়েছে।",
       });
       setDialogOpen(false);
       setBloodFormData({ group: "", available: false });
       const data = await bloodAPI.getBloodInventory();
       setBloodInventory(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to create blood inventory",
+        title: "ত্রুটি",
+        description: "রক্তের মজুত তৈরি করতে ব্যর্থ।",
         variant: "destructive",
       });
     }
@@ -203,38 +283,37 @@ const BloodInventoryPage = () => {
     try {
       await adminAPI.bloodInventory.update(editingBlood.id, bloodFormData);
       toast({
-        title: "Success",
-        description: "Blood inventory updated successfully",
+        title: "সফল",
+        description: "রক্তের মজুত সফলভাবে আপডেট হয়েছে।",
       });
       setDialogOpen(false);
       setEditingBlood(null);
       setBloodFormData({ group: "", available: false });
       const data = await bloodAPI.getBloodInventory();
       setBloodInventory(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to update blood inventory",
+        title: "ত্রুটি",
+        description: "রক্তের মজুত আপডেট করতে ব্যর্থ।",
         variant: "destructive",
       });
     }
   };
 
   const handleDeleteBloodInventory = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this blood inventory?"))
-      return;
+    if (!confirm("আপনি কি নিশ্চিত যে এই মজুত মুছে ফেলতে চান?")) return;
     try {
       await adminAPI.bloodInventory.delete(id);
       toast({
-        title: "Success",
-        description: "Blood inventory deleted successfully",
+        title: "সফল",
+        description: "রক্তের মজুত সফলভাবে মুছে ফেলা হয়েছে।",
       });
       const data = await bloodAPI.getBloodInventory();
       setBloodInventory(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to delete blood inventory",
+        title: "ত্রুটি",
+        description: "রক্তের মজুত মুছতে ব্যর্থ।",
         variant: "destructive",
       });
     }
@@ -245,14 +324,14 @@ const BloodInventoryPage = () => {
       if (isAdmin) {
         await adminAPI.bloodRequests.create(requestFormData);
         toast({
-          title: "Success",
-          description: "Blood request created successfully",
+          title: "সফল",
+          description: "রক্তের অনুরোধ সফলভাবে তৈরি হয়েছে।",
         });
       } else {
         await bloodAPI.requestBlood(requestFormData);
         toast({
-          title: "Success",
-          description: "Blood request submitted successfully",
+          title: "সফল",
+          description: "রক্তের অনুরোধ সফলভাবে জমা হয়েছে।",
         });
       }
       setDialogOpen(false);
@@ -266,10 +345,10 @@ const BloodInventoryPage = () => {
         const data = await adminAPI.bloodRequests.getAll();
         setBloodRequests(data);
       }
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to create blood request",
+        title: "ত্রুটি",
+        description: "রক্তের অনুরোধ তৈরি করতে ব্যর্থ।",
         variant: "destructive",
       });
     }
@@ -280,8 +359,8 @@ const BloodInventoryPage = () => {
     try {
       await adminAPI.bloodRequests.update(editingRequest.id, requestFormData);
       toast({
-        title: "Success",
-        description: "Blood request updated successfully",
+        title: "সফল",
+        description: "রক্তের অনুরোধ সফলভাবে আপডেট হয়েছে।",
       });
       setDialogOpen(false);
       setEditingRequest(null);
@@ -293,29 +372,29 @@ const BloodInventoryPage = () => {
       });
       const data = await adminAPI.bloodRequests.getAll();
       setBloodRequests(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to update blood request",
+        title: "ত্রুটি",
+        description: "রক্তের অনুরোধ আপডেট করতে ব্যর্থ।",
         variant: "destructive",
       });
     }
   };
 
   const handleDeleteBloodRequest = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this blood request?")) return;
+    if (!confirm("আপনি কি নিশ্চিত যে এই অনুরোধ মুছে ফেলতে চান?")) return;
     try {
       await adminAPI.bloodRequests.delete(id);
       toast({
-        title: "Success",
-        description: "Blood request deleted successfully",
+        title: "সফল",
+        description: "রক্তের অনুরোধ সফলভাবে মুছে ফেলা হয়েছে।",
       });
       const data = await adminAPI.bloodRequests.getAll();
       setBloodRequests(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to delete blood request",
+        title: "ত্রুটি",
+        description: "রক্তের অনুরোধ মুছতে ব্যর্থ।",
         variant: "destructive",
       });
     }
@@ -323,33 +402,119 @@ const BloodInventoryPage = () => {
 
   const handleCreateDonationInterest = async () => {
     try {
+      // ----- ADMIN FLOW -----
       if (isAdmin) {
+        // Minimal validation for admin form fields
+        if (
+          !donateFormData.blood_group ||
+          !donateFormData.available_date ||
+          !donateFormData.contact_info
+        ) {
+          toast({
+            title: "তথ্য অসম্পূর্ণ",
+            description: "রক্তের গ্রুপ, উপস্থিতির তারিখ ও যোগাযোগের তথ্য দিন।",
+            variant: "destructive",
+          });
+          return;
+        }
+
         await adminAPI.donationInterests.create(donateFormData);
+
         toast({
-          title: "Success",
-          description: "Donation interest created successfully",
+          title: "সফল",
+          description: "রক্তদানের আগ্রহ সফলভাবে তৈরি হয়েছে।",
         });
-      } else {
-        await bloodAPI.donateInterest(donateFormData);
+
+        setDialogOpen(false);
+        setDonateFormData({
+          blood_group: "",
+          available_date: "",
+          contact_info: "",
+        });
+
+        // Refresh admin table
+        const data = await adminAPI.donationInterests.getAll();
+        setDonationInterests(data);
+        return;
+      }
+
+      // ----- USER FLOW -----
+      if (!isAuthenticated) {
         toast({
-          title: "Success",
-          description: "Donation interest registered successfully",
+          title: "লগইন প্রয়োজন",
+          description: "রক্তদানে নিবন্ধনের জন্য অনুগ্রহ করে লগইন করুন।",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!donateFormData.blood_group) {
+        toast({
+          title: "তথ্য অসম্পূর্ণ",
+          description: "অনুগ্রহ করে আপনার রক্তের গ্রুপ নির্বাচন করুন।",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!lastDonationDate) {
+        toast({
+          title: "তারিখ প্রয়োজন",
+          description: "শেষ কবে রক্ত দিয়েছেন তা দিন।",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (!eligibility.eligible) {
+        toast({
+          title: "এখনও যোগ্য নন",
+          description:
+            eligibility.reason ||
+            "দুই দানের মধ্যে ন্যূনতম ৯০ দিন বিরতি রাখা জরুরি।",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Optionally record last donation first
+      if (recordLastDonationNow) {
+        await meAPI.createDonation({
+          blood_group: donateFormData.blood_group,
+          donation_date: lastDonationDate,
+          notes: "রক্তদানের আগ্রহ দেওয়ার আগে ব্যবহারকারী নিজে রেকর্ড করেছেন।",
         });
       }
-      setDialogOpen(false);
+
+      await bloodAPI.donateInterest(donateFormData);
+
+      toast({
+        title: "ধন্যবাদ!",
+        description: "আপনার রক্তদানের আগ্রহ সফলভাবে নিবন্ধিত হয়েছে।",
+      });
+
+      if (!recordLastDonationNow) {
+        await meAPI.createDonation({
+          blood_group: donateFormData.blood_group,
+          donation_date: lastDonationDate,
+          notes:
+            "রক্তদানের আগ্রহ জমা দেওয়ার সময় স্বপ্রণোদিত শেষ দানের তারিখ রেকর্ড।",
+        });
+      }
+
       setDonateFormData({
         blood_group: "",
         available_date: "",
         contact_info: "",
       });
-      if (isAdmin) {
-        const data = await adminAPI.donationInterests.getAll();
-        setDonationInterests(data);
-      }
+
+      const mine = await meAPI.myDonations();
+      setMyDonations(mine);
     } catch (error) {
+      console.error(error);
       toast({
-        title: "Error",
-        description: "Failed to create donation interest",
+        title: "ত্রুটি",
+        description: "রক্তদানের আগ্রহ জমা দিতে ব্যর্থ।",
         variant: "destructive",
       });
     }
@@ -363,8 +528,8 @@ const BloodInventoryPage = () => {
         donateFormData
       );
       toast({
-        title: "Success",
-        description: "Donation interest updated successfully",
+        title: "সফল",
+        description: "রক্তদানের আগ্রহ সফলভাবে আপডেট হয়েছে।",
       });
       setDialogOpen(false);
       setEditingDonation(null);
@@ -375,35 +540,35 @@ const BloodInventoryPage = () => {
       });
       const data = await adminAPI.donationInterests.getAll();
       setDonationInterests(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to update donation interest",
+        title: "ত্রুটি",
+        description: "রক্তদানের আগ্রহ আপডেট করতে ব্যর্থ।",
         variant: "destructive",
       });
     }
   };
 
   const handleDeleteDonationInterest = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this donation interest?"))
-      return;
+    if (!confirm("আপনি কি নিশ্চিত যে এই আগ্রহ মুছে ফেলতে চান?")) return;
     try {
       await adminAPI.donationInterests.delete(id);
       toast({
-        title: "Success",
-        description: "Donation interest deleted successfully",
+        title: "সফল",
+        description: "রক্তদানের আগ্রহ সফলভাবে মুছে ফেলা হয়েছে।",
       });
       const data = await adminAPI.donationInterests.getAll();
       setDonationInterests(data);
-    } catch (error) {
+    } catch {
       toast({
-        title: "Error",
-        description: "Failed to delete donation interest",
+        title: "ত্রুটি",
+        description: "রক্তদানের আগ্রহ মুছতে ব্যর্থ।",
         variant: "destructive",
       });
     }
   };
 
+  // Dialog openers
   const openCreateBloodDialog = () => {
     setEditingBlood(null);
     setBloodFormData({ group: "", available: false });
@@ -459,12 +624,27 @@ const BloodInventoryPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("bn-BD", {
       year: "numeric",
       month: "long",
       day: "numeric",
     });
   };
+
+  // Admin: top donors (by total donation records)
+  const topDonors = useMemo(() => {
+    if (!isAdmin || !allDonations.length) return [];
+    const map = new Map<string, number>();
+    for (const d of allDonations) {
+      const email = d.user?.email || "অজানা";
+      map.set(email, (map.get(email) || 0) + 1);
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 10);
+  }, [isAdmin, allDonations]);
+
+  const todayISO = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   if (loading) {
     return (
@@ -474,7 +654,7 @@ const BloodInventoryPage = () => {
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-16">
               <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Blood Services
+                রক্ত সেবা
               </h1>
               <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
             </div>
@@ -503,15 +683,16 @@ const BloodInventoryPage = () => {
       <section className="bg-gradient-to-br from-red-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            Blood Services
+            রক্ত সেবা
           </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Check the current availability of different blood types, request
-            blood, or register to donate blood.
+            বিভিন্ন রক্তের গ্রুপের বর্তমান প্রাপ্যতা দেখুন, রক্তের জন্য অনুরোধ
+            করুন, অথবা রক্তদানের জন্য নিবন্ধন করুন।
           </p>
         </div>
       </section>
+
       {/* Blood Program Gallery */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto">
@@ -531,11 +712,11 @@ const BloodInventoryPage = () => {
                 key={file + idx}
                 onClick={() => openGalleryAt(idx)}
                 className="group block overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
-                aria-label={`Open image ${idx + 1}`}
+                aria-label={`ছবি ${idx + 1} খুলুন`}
               >
                 <img
                   src={bloodImgUrl(file)}
-                  alt={`Blood program ${idx + 1}`}
+                  alt={`রক্তদান ছবি ${idx + 1}`}
                   className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
                   loading="lazy"
                 />
@@ -550,10 +731,10 @@ const BloodInventoryPage = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {[
-              { id: "inventory", label: "Blood Inventory", icon: Activity },
-              { id: "request", label: "Request Blood", icon: Heart },
-              { id: "donate", label: "Donate Blood", icon: User },
-              { id: "faq", label: "FAQ", icon: HelpCircle },
+              { id: "inventory", label: "রক্তের মজুত", icon: Activity },
+              { id: "request", label: "রক্তের অনুরোধ", icon: Heart },
+              { id: "donate", label: "রক্তদান", icon: User },
+              { id: "faq", label: "প্রশ্নোত্তর", icon: HelpCircle },
             ].map((tab) => {
               const IconComponent = tab.icon;
               return (
@@ -585,13 +766,13 @@ const BloodInventoryPage = () => {
           {activeTab === "inventory" && (
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                Blood Inventory
+                রক্তের মজুত
               </h2>
               {isAdmin && (
                 <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium text-blue-800">
-                      Admin Panel
+                      অ্যাডমিন প্যানেল
                     </h3>
                     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                       <DialogTrigger asChild>
@@ -607,13 +788,13 @@ const BloodInventoryPage = () => {
                         <DialogHeader>
                           <DialogTitle>
                             {editingBlood
-                              ? "Edit Blood Inventory"
-                              : "Create New Blood Inventory"}
+                              ? "রক্তের মজুত সম্পাদনা"
+                              : "নতুন রক্তের মজুত তৈরি"}
                           </DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4">
                           <Input
-                            placeholder="Blood group (e.g., A+, O-)"
+                            placeholder="রক্তের গ্রুপ (যেমন: A+, O-)"
                             value={bloodFormData.group}
                             onChange={(e) =>
                               setBloodFormData({
@@ -648,9 +829,7 @@ const BloodInventoryPage = () => {
                             }
                             className="w-full"
                           >
-                            {editingBlood
-                              ? "Update Inventory"
-                              : "Create Inventory"}
+                            {editingBlood ? "আপডেট করুন" : "তৈরি করুন"}
                           </Button>
                         </div>
                       </DialogContent>
@@ -680,7 +859,7 @@ const BloodInventoryPage = () => {
                           blood.available ? "bg-green-500" : ""
                         }`}
                       >
-                        {blood.available ? "Available" : "Not Available"}
+                        {blood.available ? "Available" : "অনুপলভ্য"}
                       </Badge>
                       {isAdmin && (
                         <div className="flex flex-col space-y-1">
@@ -715,14 +894,14 @@ const BloodInventoryPage = () => {
           {activeTab === "request" && (
             <div className="max-w-2xl mx-auto">
               <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                Request Blood
+                রক্তের অনুরোধ
               </h2>
               {isAdmin ? (
                 <>
                   <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-medium text-blue-800">
-                        Admin Panel
+                        অ্যাডমিন প্যানেল
                       </h3>
                       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                         <DialogTrigger asChild>
@@ -731,20 +910,20 @@ const BloodInventoryPage = () => {
                             className="flex items-center space-x-2"
                           >
                             <Plus className="w-4 h-4" />
-                            <span>Add Blood Request</span>
+                            <span>নতুন অনুরোধ যোগ করুন</span>
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>
                               {editingRequest
-                                ? "Edit Blood Request"
-                                : "Create New Blood Request"}
+                                ? "রক্তের অনুরোধ সম্পাদনা"
+                                : "নতুন রক্তের অনুরোধ তৈরি"}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <Label htmlFor="blood_group">Blood Group</Label>
+                              <Label htmlFor="blood_group">রক্তের গ্রুপ</Label>
                               <Select
                                 value={requestFormData.blood_group}
                                 onValueChange={(value) =>
@@ -755,7 +934,7 @@ const BloodInventoryPage = () => {
                                 }
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select blood group" />
+                                  <SelectValue placeholder="রক্তের গ্রুপ নির্বাচন করুন" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {bloodGroups.map((group) => (
@@ -767,11 +946,11 @@ const BloodInventoryPage = () => {
                               </Select>
                             </div>
                             <div>
-                              <Label htmlFor="location">Location</Label>
+                              <Label htmlFor="location">অবস্থান</Label>
                               <Input
                                 id="location"
                                 type="text"
-                                placeholder="Enter location"
+                                placeholder="আপনার অবস্থান লিখুন"
                                 value={requestFormData.location}
                                 onChange={(e) =>
                                   setRequestFormData((prev) => ({
@@ -783,13 +962,11 @@ const BloodInventoryPage = () => {
                               />
                             </div>
                             <div>
-                              <Label htmlFor="contact">
-                                Contact Information
-                              </Label>
+                              <Label htmlFor="contact">যোগাযোগের তথ্য</Label>
                               <Input
                                 id="contact"
                                 type="text"
-                                placeholder="Phone number or email"
+                                placeholder="ফোন নম্বর বা ইমেইল"
                                 value={requestFormData.contact}
                                 onChange={(e) =>
                                   setRequestFormData((prev) => ({
@@ -802,7 +979,7 @@ const BloodInventoryPage = () => {
                             </div>
                             <div>
                               <Label htmlFor="date_required">
-                                Date Required
+                                প্রয়োজনের তারিখ
                               </Label>
                               <Input
                                 id="date_required"
@@ -825,9 +1002,7 @@ const BloodInventoryPage = () => {
                               }
                               className="w-full"
                             >
-                              {editingRequest
-                                ? "Update Request"
-                                : "Create Request"}
+                              {editingRequest ? "আপডেট করুন" : "তৈরি করুন"}
                             </Button>
                           </div>
                         </DialogContent>
@@ -836,23 +1011,23 @@ const BloodInventoryPage = () => {
                   </div>
                   <Card>
                     <CardHeader>
-                      <CardTitle>Blood Requests</CardTitle>
+                      <CardTitle>রক্তের অনুরোধসমূহ</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {bloodRequests.length === 0 ? (
                         <p className="text-center text-gray-600">
-                          No blood requests found.
+                          কোনো রক্তের অনুরোধ পাওয়া যায়নি।
                         </p>
                       ) : (
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>User</TableHead>
-                              <TableHead>Blood Group</TableHead>
-                              <TableHead>Location</TableHead>
-                              <TableHead>Contact</TableHead>
-                              <TableHead>Date Required</TableHead>
-                              <TableHead>Actions</TableHead>
+                              <TableHead>ব্যবহারকারী</TableHead>
+                              <TableHead>রক্তের গ্রুপ</TableHead>
+                              <TableHead>অবস্থান</TableHead>
+                              <TableHead>যোগাযোগ</TableHead>
+                              <TableHead>প্রয়োজনের তারিখ</TableHead>
+                              <TableHead>অ্যাকশন</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -905,13 +1080,13 @@ const BloodInventoryPage = () => {
                     <Card className="shadow-xl">
                       <CardContent className="p-8 text-center">
                         <h3 className="text-xl font-semibold mb-4">
-                          Login Required
+                          লগইন প্রয়োজন
                         </h3>
                         <p className="text-gray-600 mb-6">
-                          Please login to request blood services.
+                          রক্তের অনুরোধ করতে লগইন করুন।
                         </p>
                         <Button>
-                          <Link to="/login">Login</Link>
+                          <Link to="/login">লগইন</Link>
                         </Button>
                       </CardContent>
                     </Card>
@@ -920,11 +1095,11 @@ const BloodInventoryPage = () => {
                       <CardHeader>
                         <CardTitle className="flex items-center space-x-2">
                           <Heart className="w-6 h-6 text-red-500" />
-                          <span>Blood Request Form</span>
+                          <span>রক্তের অনুরোধ ফর্ম</span>
                         </CardTitle>
                         <CardDescription>
-                          Fill out this form to request blood. We will contact
-                          you as soon as possible.
+                          রক্তের প্রয়োজন জানাতে ফর্মটি পূরণ করুন। আমরা দ্রুত
+                          যোগাযোগ করব।
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
@@ -937,7 +1112,7 @@ const BloodInventoryPage = () => {
                         >
                           <div>
                             <Label htmlFor="blood_group">
-                              Blood Group Required
+                              প্রয়োজনীয় রক্তের গ্রুপ
                             </Label>
                             <Select
                               value={requestFormData.blood_group}
@@ -949,7 +1124,7 @@ const BloodInventoryPage = () => {
                               }
                             >
                               <SelectTrigger>
-                                <SelectValue placeholder="Select blood group" />
+                                <SelectValue placeholder="রক্তের গ্রুপ নির্বাচন করুন" />
                               </SelectTrigger>
                               <SelectContent>
                                 {bloodGroups.map((group) => (
@@ -961,13 +1136,13 @@ const BloodInventoryPage = () => {
                             </Select>
                           </div>
                           <div>
-                            <Label htmlFor="location">Location</Label>
+                            <Label htmlFor="location">অবস্থান</Label>
                             <div className="relative">
                               <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                               <Input
                                 id="location"
                                 type="text"
-                                placeholder="Enter your location"
+                                placeholder="আপনার অবস্থান লিখুন"
                                 value={requestFormData.location}
                                 onChange={(e) =>
                                   setRequestFormData((prev) => ({
@@ -981,13 +1156,13 @@ const BloodInventoryPage = () => {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="contact">Contact Information</Label>
+                            <Label htmlFor="contact">যোগাযোগের তথ্য</Label>
                             <div className="relative">
                               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                               <Input
                                 id="contact"
                                 type="text"
-                                placeholder="Phone number or email"
+                                placeholder="ফোন নম্বর বা ইমেইল"
                                 value={requestFormData.contact}
                                 onChange={(e) =>
                                   setRequestFormData((prev) => ({
@@ -1001,7 +1176,9 @@ const BloodInventoryPage = () => {
                             </div>
                           </div>
                           <div>
-                            <Label htmlFor="date_required">Date Required</Label>
+                            <Label htmlFor="date_required">
+                              প্রয়োজনের তারিখ
+                            </Label>
                             <div className="relative">
                               <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                               <Input
@@ -1023,7 +1200,7 @@ const BloodInventoryPage = () => {
                             type="submit"
                             className="w-full medical-gradient text-white hover:opacity-90 py-3"
                           >
-                            Submit Blood Request
+                            রক্তের অনুরোধ জমা দিন
                           </Button>
                         </form>
                       </CardContent>
@@ -1036,16 +1213,18 @@ const BloodInventoryPage = () => {
 
           {/* Donate Blood Tab */}
           {activeTab === "donate" && (
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                Donate Blood
+                রক্তদান
               </h2>
+
               {isAdmin ? (
                 <>
+                  {/* Admin Panel for Donation Interests */}
                   <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-medium text-blue-800">
-                        Admin Panel
+                        অ্যাডমিন প্যানেল
                       </h3>
                       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
                         <DialogTrigger asChild>
@@ -1054,20 +1233,20 @@ const BloodInventoryPage = () => {
                             className="flex items-center space-x-2"
                           >
                             <Plus className="w-4 h-4" />
-                            <span>Add Donation Interest</span>
+                            <span>রক্তদানের আগ্রহ যোগ করুন</span>
                           </Button>
                         </DialogTrigger>
                         <DialogContent>
                           <DialogHeader>
                             <DialogTitle>
                               {editingDonation
-                                ? "Edit Donation Interest"
-                                : "Create New Donation Interest"}
+                                ? "রক্তদানের আগ্রহ সম্পাদনা"
+                                : "নতুন রক্তদানের আগ্রহ তৈরি"}
                             </DialogTitle>
                           </DialogHeader>
                           <div className="space-y-4">
                             <div>
-                              <Label htmlFor="blood_group">Blood Group</Label>
+                              <Label htmlFor="blood_group">রক্তের গ্রুপ</Label>
                               <Select
                                 value={donateFormData.blood_group}
                                 onValueChange={(value) =>
@@ -1078,7 +1257,7 @@ const BloodInventoryPage = () => {
                                 }
                               >
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Select blood group" />
+                                  <SelectValue placeholder="রক্তের গ্রুপ নির্বাচন করুন" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {bloodGroups.map((group) => (
@@ -1091,7 +1270,7 @@ const BloodInventoryPage = () => {
                             </div>
                             <div>
                               <Label htmlFor="available_date">
-                                Available Date
+                                উপস্থিতির তারিখ
                               </Label>
                               <Input
                                 id="available_date"
@@ -1108,11 +1287,11 @@ const BloodInventoryPage = () => {
                             </div>
                             <div>
                               <Label htmlFor="contact_info">
-                                Contact Information
+                                যোগাযোগের তথ্য
                               </Label>
                               <Textarea
                                 id="contact_info"
-                                placeholder="Phone number, email, etc."
+                                placeholder="ফোন নম্বর, ইমেইলসহ প্রয়োজনীয় তথ্য লিখুন"
                                 value={donateFormData.contact_info}
                                 onChange={(e) =>
                                   setDonateFormData((prev) => ({
@@ -1132,33 +1311,33 @@ const BloodInventoryPage = () => {
                               }
                               className="w-full"
                             >
-                              {editingDonation
-                                ? "Update Donation Interest"
-                                : "Create Donation Interest"}
+                              {editingDonation ? "আপডেট করুন" : "তৈরি করুন"}
                             </Button>
                           </div>
                         </DialogContent>
                       </Dialog>
                     </div>
                   </div>
-                  <Card>
+
+                  {/* Admin: Donation Interests table */}
+                  <Card className="mb-8">
                     <CardHeader>
-                      <CardTitle>Blood Donation Interests</CardTitle>
+                      <CardTitle>রক্তদানের আগ্রহসমূহ</CardTitle>
                     </CardHeader>
                     <CardContent>
                       {donationInterests.length === 0 ? (
                         <p className="text-center text-gray-600">
-                          No donation interests found.
+                          কোনো রক্তদানের আগ্রহ পাওয়া যায়নি।
                         </p>
                       ) : (
                         <Table>
                           <TableHeader>
                             <TableRow>
-                              <TableHead>User</TableHead>
-                              <TableHead>Blood Group</TableHead>
-                              <TableHead>Available Date</TableHead>
-                              <TableHead>Contact Info</TableHead>
-                              <TableHead>Actions</TableHead>
+                              <TableHead>ব্যবহারকারী</TableHead>
+                              <TableHead>রক্তের গ্রুপ</TableHead>
+                              <TableHead>উপস্থিতির তারিখ</TableHead>
+                              <TableHead>যোগাযোগের তথ্য</TableHead>
+                              <TableHead>অ্যাকশন</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -1205,6 +1384,90 @@ const BloodInventoryPage = () => {
                       )}
                     </CardContent>
                   </Card>
+
+                  {/* Admin: All Donations + Top Donors */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <Card className="lg:col-span-2">
+                      <CardHeader>
+                        <CardTitle>সব রেকর্ডকৃত রক্তদান</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        {allDonations.length === 0 ? (
+                          <p className="text-center text-gray-600">
+                            কোনো রক্তদানের রেকর্ড নেই।
+                          </p>
+                        ) : (
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>ব্যবহারকারী</TableHead>
+                                <TableHead>রক্তের গ্রুপ</TableHead>
+                                <TableHead>রক্তদানের তারিখ</TableHead>
+                                <TableHead>নোট</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {allDonations
+                                .slice()
+                                .sort(
+                                  (a, b) =>
+                                    new Date(b.donation_date).getTime() -
+                                    new Date(a.donation_date).getTime()
+                                )
+                                .map((d) => (
+                                  <TableRow key={d.id}>
+                                    <TableCell>
+                                      {d.user?.email || "N/A"}
+                                    </TableCell>
+                                    <TableCell>{d.blood_group}</TableCell>
+                                    <TableCell>
+                                      {formatDate(d.donation_date)}
+                                    </TableCell>
+                                    <TableCell className="max-w-[360px] truncate">
+                                      {d.notes || "-"}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                            </TableBody>
+                          </Table>
+                        )}
+                      </CardContent>
+                    </Card>
+
+                    <Card>
+                      <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                          <Medal className="w-5 h-5 text-yellow-500" />
+                          সেরা দাতা
+                        </CardTitle>
+                        <CardDescription>
+                          সর্বাধিক রক্তদান রেকর্ড রয়েছে যাদের
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {topDonors.length === 0 ? (
+                          <p className="text-gray-600">ডাটা নেই।</p>
+                        ) : (
+                          <ol className="space-y-2">
+                            {topDonors.map(([email, count], idx) => (
+                              <li
+                                key={email}
+                                className="flex items-center justify-between"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="w-6 text-right font-semibold">
+                                    {idx + 1}.
+                                  </span>
+                                  <span>{email}</span>
+                                </span>
+                                <Badge>{count} বার</Badge>
+                              </li>
+                            ))}
+                          </ol>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
                 </>
               ) : (
                 <>
@@ -1212,109 +1475,223 @@ const BloodInventoryPage = () => {
                     <Card className="shadow-xl">
                       <CardContent className="p-8 text-center">
                         <h3 className="text-xl font-semibold mb-4">
-                          Login Required
+                          লগইন প্রয়োজন
                         </h3>
                         <p className="text-gray-600 mb-6">
-                          Please login to register for blood donation.
+                          রক্তদানে নিবন্ধনের জন্য লগইন করুন।
                         </p>
                         <Button>
-                          <Link to="/login">Login</Link>
+                          <Link to="/login">লগইন</Link>
                         </Button>
                       </CardContent>
                     </Card>
                   ) : (
-                    <Card className="shadow-xl">
-                      <CardHeader>
-                        <CardTitle className="flex items-center space-x-2">
-                          <Heart className="w-6 h-6 text-red-500" />
-                          <span>Blood Donation Interest</span>
-                        </CardTitle>
-                        <CardDescription>
-                          Register your interest in donating blood. Your
-                          contribution can save lives.
-                        </CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <form
-                          onSubmit={(e) => {
-                            e.preventDefault();
-                            handleCreateDonationInterest();
-                          }}
-                          className="space-y-6"
-                        >
+                    <>
+                      {/* NEW: Donation Eligibility Section */}
+                      <Card className="mb-6">
+                        <CardHeader>
+                          <CardTitle>রক্তদানের যোগ্যতা</CardTitle>
+                          <CardDescription>
+                            আপনার সুরক্ষার জন্য দুই দানের মধ্যে অন্তত ৯০ দিন
+                            বিরতি থাকা জরুরি।
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
                           <div>
-                            <Label htmlFor="donor_blood_group">
-                              Your Blood Group
+                            <Label htmlFor="last_donation_date">
+                              আপনার শেষ রক্তদান কবে হয়েছিল?
                             </Label>
-                            <Select
-                              value={donateFormData.blood_group}
-                              onValueChange={(value) =>
-                                setDonateFormData((prev) => ({
-                                  ...prev,
-                                  blood_group: value,
-                                }))
-                              }
-                            >
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select your blood group" />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {bloodGroups.map((group) => (
-                                  <SelectItem key={group} value={group}>
-                                    {group}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                          </div>
-                          <div>
-                            <Label htmlFor="available_date">
-                              Available Date
-                            </Label>
-                            <div className="relative">
-                              <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                              <Input
-                                id="available_date"
-                                type="date"
-                                value={donateFormData.available_date}
-                                onChange={(e) =>
-                                  setDonateFormData((prev) => ({
-                                    ...prev,
-                                    available_date: e.target.value,
-                                  }))
-                                }
-                                className="pl-10"
-                                required
-                              />
-                            </div>
-                          </div>
-                          <div>
-                            <Label htmlFor="contact_info">
-                              Contact Information
-                            </Label>
-                            <Textarea
-                              id="contact_info"
-                              placeholder="Please provide your phone number, email, and any other relevant contact information"
-                              value={donateFormData.contact_info}
+                            <Input
+                              id="last_donation_date"
+                              type="date"
+                              value={lastDonationDate}
                               onChange={(e) =>
-                                setDonateFormData((prev) => ({
-                                  ...prev,
-                                  contact_info: e.target.value,
-                                }))
+                                setLastDonationDate(e.target.value)
                               }
-                              rows={4}
+                              max={todayISO}
                               required
                             />
                           </div>
-                          <Button
-                            type="submit"
-                            className="w-full medical-gradient text-white hover:opacity-90 py-3"
+
+                          <div className="flex items-center space-x-2">
+                            <Checkbox
+                              id="record_last_now"
+                              checked={recordLastDonationNow}
+                              onCheckedChange={(c) =>
+                                setRecordLastDonationNow(!!c)
+                              }
+                            />
+                            <Label htmlFor="record_last_now">
+                              শেষ রক্তদানের রেকর্ড সংরক্ষণ করতে চান?
+                            </Label>
+                          </div>
+
+                          {lastDonationDate && (
+                            <div
+                              className={`text-sm p-3 rounded-lg ${
+                                eligibility.eligible
+                                  ? "bg-green-50 text-green-700 border border-green-200"
+                                  : "bg-amber-50 text-amber-700 border border-amber-200"
+                              }`}
+                            >
+                              {eligibility.eligible ? (
+                                <>আপনি রক্তদানের জন্য যোগ্য।</>
+                              ) : (
+                                <>{eligibility.reason}</>
+                              )}
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      {/* Donation Interest Form */}
+                      <Card className="shadow-xl">
+                        <CardHeader>
+                          <CardTitle className="flex items-center space-x-2">
+                            <Heart className="w-6 h-6 text-red-500" />
+                            <span>রক্তদানের আগ্রহ</span>
+                          </CardTitle>
+                          <CardDescription>
+                            রক্তদানে আপনার আগ্রহ নিবন্ধন করুন—আপনার অবদানই কারও
+                            জীবন বাঁচাতে পারে।
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          <form
+                            onSubmit={(e) => {
+                              e.preventDefault();
+                              handleCreateDonationInterest();
+                            }}
+                            className="space-y-6"
                           >
-                            Register Donation Interest
-                          </Button>
-                        </form>
-                      </CardContent>
-                    </Card>
+                            <div>
+                              <Label htmlFor="donor_blood_group">
+                                আপনার রক্তের গ্রুপ
+                              </Label>
+                              <Select
+                                value={donateFormData.blood_group}
+                                onValueChange={(value) =>
+                                  setDonateFormData((prev) => ({
+                                    ...prev,
+                                    blood_group: value,
+                                  }))
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="রক্তের গ্রুপ নির্বাচন করুন" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {bloodGroups.map((group) => (
+                                    <SelectItem key={group} value={group}>
+                                      {group}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="available_date">
+                                উপস্থিতির তারিখ
+                              </Label>
+                              <div className="relative">
+                                <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <Input
+                                  id="available_date"
+                                  type="date"
+                                  value={donateFormData.available_date}
+                                  onChange={(e) =>
+                                    setDonateFormData((prev) => ({
+                                      ...prev,
+                                      available_date: e.target.value,
+                                    }))
+                                  }
+                                  className="pl-10"
+                                  min={todayISO}
+                                  required
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="contact_info">
+                                যোগাযোগের তথ্য
+                              </Label>
+                              <Textarea
+                                id="contact_info"
+                                placeholder="ফোন নম্বর, ইমেইলসহ প্রয়োজনীয় তথ্য লিখুন"
+                                value={donateFormData.contact_info}
+                                onChange={(e) =>
+                                  setDonateFormData((prev) => ({
+                                    ...prev,
+                                    contact_info: e.target.value,
+                                  }))
+                                }
+                                rows={4}
+                                required
+                              />
+                            </div>
+                            <Button
+                              type="submit"
+                              className="w-full medical-gradient text-white hover:opacity-90 py-3"
+                              disabled={!eligibility.eligible}
+                              title={
+                                !eligibility.eligible
+                                  ? eligibility.reason
+                                  : undefined
+                              }
+                            >
+                              রক্তদানের আগ্রহ জমা দিন
+                            </Button>
+                          </form>
+                        </CardContent>
+                      </Card>
+
+                      {/* My Donation History */}
+                      <Card className="mt-8">
+                        <CardHeader>
+                          <CardTitle>আমার রক্তদানের ইতিহাস</CardTitle>
+                          <CardDescription>
+                            আপনি আমাদের সাথে যে যে রক্তদানের রেকর্ড করেছেন।
+                          </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                          {myDonations.length === 0 ? (
+                            <p className="text-gray-600">
+                              এখনও কোনো রক্তদানের রেকর্ড নেই।
+                            </p>
+                          ) : (
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>রক্তদানের তারিখ</TableHead>
+                                  <TableHead>রক্তের গ্রুপ</TableHead>
+                                  <TableHead>নোট</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {myDonations
+                                  .slice()
+                                  .sort(
+                                    (a, b) =>
+                                      new Date(b.donation_date).getTime() -
+                                      new Date(a.donation_date).getTime()
+                                  )
+                                  .map((d) => (
+                                    <TableRow key={d.id}>
+                                      <TableCell>
+                                        {formatDate(d.donation_date)}
+                                      </TableCell>
+                                      <TableCell>{d.blood_group}</TableCell>
+                                      <TableCell className="max-w-[360px] truncate">
+                                        {d.notes || "-"}
+                                      </TableCell>
+                                    </TableRow>
+                                  ))}
+                              </TableBody>
+                            </Table>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </>
                   )}
                 </>
               )}
@@ -1507,53 +1884,50 @@ const BloodInventoryPage = () => {
           )}
         </div>
       </section>
+
       <Footer />
+
+      {/* Gallery Lightbox */}
       <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
         <DialogContent className="max-w-5xl p-0 bg-black/90 border-0">
           <div className="relative">
-            {/* Image */}
             <img
               src={bloodImgUrl(bloodGalleryFiles[activeImgIndex])}
-              alt={`Blood program large ${activeImgIndex + 1}`}
+              alt={`বড় ছবি ${activeImgIndex + 1}`}
               className="w-full max-h-[80vh] object-contain bg-black"
             />
-
-            {/* Caption */}
             <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-sm px-4 py-2">
               {bloodGalleryFiles[activeImgIndex]}
             </div>
-
-            {/* Prev / Next */}
             <button
               onClick={prevImg}
               className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
-              aria-label="Previous image"
+              aria-label="পূর্ববর্তী ছবি"
             >
               ‹
             </button>
             <button
               onClick={nextImg}
               className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white rounded-full p-3"
-              aria-label="Next image"
+              aria-label="পরবর্তী ছবি"
             >
               ›
             </button>
-
-            {/* Thumbnails (optional) */}
             <div className="flex gap-2 overflow-x-auto p-3 bg-black/60">
               {bloodGalleryFiles.map((file, i) => (
                 <button
                   key={file + i}
                   onClick={() => setActiveImgIndex(i)}
-                  className={`relative h-14 w-20 flex-shrink-0 rounded overflow-hidden border
-              ${
-                i === activeImgIndex ? "border-red-500" : "border-transparent"
-              }`}
-                  aria-label={`Go to image ${i + 1}`}
+                  className={`relative h-14 w-20 flex-shrink-0 rounded overflow-hidden border ${
+                    i === activeImgIndex
+                      ? "border-red-500"
+                      : "border-transparent"
+                  }`}
+                  aria-label={`ছবি ${i + 1}-এ যান`}
                 >
                   <img
                     src={bloodImgUrl(file)}
-                    alt={`Thumb ${i + 1}`}
+                    alt={`থাম্ব ${i + 1}`}
                     className="h-full w-full object-cover"
                     loading="lazy"
                   />

@@ -1,3 +1,4 @@
+// src/pages/Blogs.tsx
 import { useEffect, useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -35,9 +36,10 @@ const Blogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+
+  // NOTE: slug removed from local form state
   const [formData, setFormData] = useState({
     title: "",
-    slug: "",
     content: "",
     published: false,
   });
@@ -46,7 +48,6 @@ const Blogs = () => {
   const { toast } = useToast();
   const location = useLocation();
 
-  // Quill toolbar configuration
   const quillModules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -57,7 +58,6 @@ const Blogs = () => {
     ],
   };
 
-  // Extended default blogs with HTML formatting
   const defaultBlogs: Blog[] = [
     {
       id: 1,
@@ -121,14 +121,13 @@ const Blogs = () => {
     },
   ];
 
-  // Handle navigation from BlogDetail for editing
+  // If navigated from BlogDetail → edit
   useEffect(() => {
     const state = location.state as { blog?: Blog };
     if (state?.blog) {
       setEditingBlog(state.blog);
       setFormData({
         title: state.blog.title,
-        slug: state.blog.slug,
         content: state.blog.content,
         published: state.blog.published,
       });
@@ -140,7 +139,6 @@ const Blogs = () => {
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
-        console.log("Fetching blogs...");
         const data = await blogAPI.getBlogs();
         setBlogs(data);
         setFilteredBlogs(data);
@@ -157,7 +155,6 @@ const Blogs = () => {
         setLoading(false);
       }
     };
-
     fetchBlogs();
   }, [toast]);
 
@@ -165,22 +162,16 @@ const Blogs = () => {
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("title", formData.title);
-      formDataPayload.append("slug", formData.slug);
+      // slug removed – backend generates it
       formDataPayload.append("content", formData.content);
       formDataPayload.append("published", String(formData.published));
-      imageFiles.forEach((file) => {
-        formDataPayload.append("image_files", file);
-      });
-
-      console.log("FormData contents:");
-      for (const [key, value] of formDataPayload.entries()) {
-        console.log(`${key}: ${value}`);
-      }
+      imageFiles.forEach((file) => formDataPayload.append("image_files", file));
 
       await adminAPI.blogs.create(formDataPayload);
       toast({ title: "Success", description: "Blog created successfully" });
       setDialogOpen(false);
-      setFormData({ title: "", slug: "", content: "", published: false });
+      setEditingBlog(null);
+      setFormData({ title: "", content: "", published: false });
       setImageFiles([]);
       const data = await blogAPI.getBlogs();
       setBlogs(data);
@@ -200,23 +191,16 @@ const Blogs = () => {
     try {
       const formDataPayload = new FormData();
       formDataPayload.append("title", formData.title);
-      formDataPayload.append("slug", formData.slug);
+      // slug removed – backend keeps existing slug stable
       formDataPayload.append("content", formData.content);
       formDataPayload.append("published", String(formData.published));
-      imageFiles.forEach((file) => {
-        formDataPayload.append("image_files", file);
-      });
-
-      console.log("FormData contents for update:");
-      for (const [key, value] of formDataPayload.entries()) {
-        console.log(`${key}: ${value}`);
-      }
+      imageFiles.forEach((file) => formDataPayload.append("image_files", file));
 
       await adminAPI.blogs.update(editingBlog.slug, formDataPayload);
       toast({ title: "Success", description: "Blog updated successfully" });
       setDialogOpen(false);
       setEditingBlog(null);
-      setFormData({ title: "", slug: "", content: "", published: false });
+      setFormData({ title: "", content: "", published: false });
       setImageFiles([]);
       const data = await blogAPI.getBlogs();
       setBlogs(data);
@@ -251,7 +235,7 @@ const Blogs = () => {
 
   const openCreateDialog = () => {
     setEditingBlog(null);
-    setFormData({ title: "", slug: "", content: "", published: false });
+    setFormData({ title: "", content: "", published: false });
     setImageFiles([]);
     setDialogOpen(true);
   };
@@ -260,7 +244,6 @@ const Blogs = () => {
     setEditingBlog(blog);
     setFormData({
       title: blog.title,
-      slug: blog.slug,
       content: blog.content,
       published: blog.published,
     });
@@ -270,9 +253,7 @@ const Blogs = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (files) {
-      setImageFiles((prev) => [...prev, ...Array.from(files)]);
-    }
+    if (files) setImageFiles((prev) => [...prev, ...Array.from(files)]);
   };
 
   const removeImage = (index: number) => {
@@ -409,13 +390,7 @@ const Blogs = () => {
                           setFormData({ ...formData, title: e.target.value })
                         }
                       />
-                      <Input
-                        placeholder="Blog slug (URL-friendly)"
-                        value={formData.slug}
-                        onChange={(e) =>
-                          setFormData({ ...formData, slug: e.target.value })
-                        }
-                      />
+                      {/* Slug input removed – it is auto-generated server-side */}
                       <ReactQuill
                         value={formData.content}
                         onChange={(content) =>
@@ -483,6 +458,7 @@ const Blogs = () => {
               </div>
             </div>
           )}
+
           {filteredBlogs.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-xl text-gray-600">
@@ -534,7 +510,6 @@ const Blogs = () => {
                         Read Full Article →
                       </Link>
 
-                      {/* Admin Actions */}
                       {isAdmin && (
                         <div className="flex space-x-1">
                           <Button

@@ -9,7 +9,6 @@ import Index from "./pages/Index";
 import Services from "./pages/Services";
 import Blogs from "./pages/Blogs";
 import Events from "./pages/Events";
-import BloodServices from "./pages/BloodServices";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -36,14 +35,6 @@ const App = () => (
             <Route path="/services" element={<Services />} />
             <Route path="/blogs" element={<Blogs />} />
             <Route path="/events" element={<Events />} />
-            <Route
-              path="/blood-services"
-              element={
-                <ProtectedRoute>
-                  <BloodServices />
-                </ProtectedRoute>
-              }
-            />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

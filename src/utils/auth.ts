@@ -16,7 +16,7 @@ export interface AuthTokens {
 
 // Cookie configuration
 const COOKIE_CONFIG = {
-  secure: true,
+  secure: window.location.protocol === "https:",
   sameSite: 'strict' as const,
   path: '/',
 };

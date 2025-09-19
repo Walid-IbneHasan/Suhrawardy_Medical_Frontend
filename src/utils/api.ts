@@ -47,6 +47,16 @@ export interface BloodDonationInterest {
   available_date: string;
   contact_info: string;
 }
+export interface Donation {
+  id: number;
+  user?: { email: string };
+  blood_group: string;
+  donation_date: string;
+  contact_info: string;
+  notes: string;
+  created_at: string;
+}
+
 
 export interface VaccineInventory {
   id: number;
@@ -199,6 +209,16 @@ export const bloodAPI = {
   }),
 };
 
+// User-scoped
+export const meAPI = {
+  myBloodRequests: (): Promise<BloodRequest[]> => apiCall('/my/blood-requests/'),
+  myDonationInterests: (): Promise<BloodDonationInterest[]> => apiCall('/my/donation-interests/'),
+  myDonations: (): Promise<Donation[]> => apiCall('/my/donations/'),
+  createDonation: (data: { blood_group: string; donation_date: string; contact_info?: string; notes?: string }) =>
+    apiCall('/my/donations/', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+
 // Vaccine Inventory API
 export const vaccineAPI = {
   getVaccineInventory: (): Promise<VaccineInventory[]> => apiCall('/vaccine-inventory/'),
@@ -346,6 +366,15 @@ export const adminAPI = {
       delete: (id: number) => apiCall(`/admin/donation-interests/${id}/`, {
         method: 'DELETE',
       }),
+    },
+
+    donations: {
+      getAll: (): Promise<Donation[]> => apiCall('/admin/donations/'),
+      create: (data: { blood_group: string; donation_date: string; contact_info?: string; notes?: string }) =>
+        apiCall('/admin/donations/', { method: 'POST', body: JSON.stringify(data) }),
+      update: (id: number, data: Partial<{ blood_group: string; donation_date: string; contact_info: string; notes: string }>) =>
+        apiCall(`/admin/donations/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
+      delete: (id: number) => apiCall(`/admin/donations/${id}/`, { method: 'DELETE' }),
     },
   // Vaccine Inventory
   vaccineInventory: {
