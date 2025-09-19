@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Activity, User, LogOut, Settings } from "lucide-react";
+import { Menu, X, LogOut, Settings } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
@@ -37,7 +37,7 @@ const Navigation = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
-  // Get the first letter of email (uppercase); fallback to "U"
+  // Avatar initial from email (fallback "U")
   const userInitial = useMemo(
     () => user?.email?.[0]?.toUpperCase() ?? "U",
     [user?.email]
@@ -46,37 +46,50 @@ const Navigation = () => {
   return (
     <nav className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img src="/public/logo.png" alt="logo" className="h-10 w-10" />
-            <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
+        {/* Top bar */}
+        <div className="flex items-center justify-between h-16">
+          {/* LEFT: Logo */}
+          <Link to="/" className="flex items-center gap-2 shrink-0">
+            {/* NOTE: files inside /public are served from the root. Use /gallery/logo.png (not /public/...) */}
+            <img
+              src="/gallery/logo.png"
+              alt="সন্ধানী লোগো"
+              className="h-8 w-auto sm:h-12"
+              loading="eager"
+              decoding="async"
+            />
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-red-600 to-red-800 bg-clip-text text-transparent">
               সন্ধানী
             </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`px-3 py-2 text-sm font-medium transition-colors duration-200 rounded-md ${
-                  isActive(item.path)
-                    ? "text-red-600 bg-red-50"
-                    : "text-gray-600 hover:text-red-600 hover:bg-gray-50"
-                }`}
-              >
-                {item.name}
-              </Link>
-            ))}
+          {/* CENTER: Nav items (desktop and up) */}
+          <div className="hidden md:flex flex-1 justify-center">
+            <div className="flex items-center gap-4 lg:gap-6 xl:gap-8">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className={`px-3 py-2 text-md font-medium rounded-md transition-colors ${
+                    isActive(item.path)
+                      ? "text-red-600 bg-red-50"
+                      : "text-gray-600 hover:text-red-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
+          </div>
 
+          {/* RIGHT: Auth & actions (desktop and up) */}
+          <div className="hidden md:flex items-center gap-3 lg:gap-4 shrink-0">
             {isAuthenticated ? (
-              <div className="flex items-center space-x-4">
+              <>
                 {isAdmin && (
                   <Link
                     to="/admin/users/"
-                    className="px-3 py-2 text-sm font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                    className="px-3 py-2 text-md font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors"
                   >
                     ব্যবহারকারীরা
                   </Link>
@@ -97,8 +110,12 @@ const Navigation = () => {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem>
-                      <Settings className="h-4 w-4 mr-2" />
-                      প্রোফাইল
+                      <Link to="/profile">
+                        <div className="flex items-center ">
+                          <Settings className="h-4 w-4 mr-2" />
+                          প্রোফাইল
+                        </div>
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={logout}>
@@ -145,9 +162,9 @@ const Navigation = () => {
                     </Button>
                   </DialogContent>
                 </Dialog>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center space-x-4">
+              <div className="flex items-center gap-3 lg:gap-4">
                 <Link to="/login">
                   <Button variant="outline">লগইন</Button>
                 </Link>
@@ -163,7 +180,7 @@ const Navigation = () => {
           {/* Mobile menu button */}
           <div className="md:hidden">
             <button
-              onClick={() => setIsOpen(!isOpen)}
+              onClick={() => setIsOpen((v) => !v)}
               className="text-gray-600 hover:text-gray-800 focus:outline-none"
               aria-label="মেনু টগল করুন"
             >
@@ -185,7 +202,7 @@ const Navigation = () => {
                   key={item.name}
                   to={item.path}
                   onClick={() => setIsOpen(false)}
-                  className={`block px-3 py-2 text-base font-medium transition-colors duration-200 rounded-md ${
+                  className={`block px-3 py-2 text-base font-medium rounded-md transition-colors ${
                     isActive(item.path)
                       ? "text-red-600 bg-red-50"
                       : "text-gray-600 hover:text-red-600 hover:bg-gray-50"
@@ -198,7 +215,7 @@ const Navigation = () => {
               <div className="pt-3 space-y-3">
                 {isAuthenticated ? (
                   <>
-                    {/* Small avatar row instead of showing the full email */}
+                    {/* Small avatar row */}
                     <div className="flex items-center gap-3 px-3">
                       <div className="h-9 w-9 rounded-full bg-gradient-to-br from-red-500 to-red-700 text-white flex items-center justify-center font-semibold">
                         {userInitial}
@@ -210,7 +227,7 @@ const Navigation = () => {
                       <Link
                         to="/admin/users/"
                         onClick={() => setIsOpen(false)}
-                        className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors duration-200"
+                        className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-red-600 hover:bg-gray-50 rounded-md transition-colors"
                       >
                         ব্যবহারকারীরা
                       </Link>

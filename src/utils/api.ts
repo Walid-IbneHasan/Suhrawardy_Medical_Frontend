@@ -128,6 +128,20 @@ export interface User {
   date_joined: string;
 }
 
+// (near the top with other interfaces)
+export interface UserProfile {
+  id: number;
+  email: string;
+  username: string | null;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  blood_group: string;
+  address: string;
+  last_donation_date: string | null;
+}
+
+
 // Helper function to get auth headers
 const getAuthHeaders = (): Record<string, string> => {
   const token = document.cookie
@@ -255,6 +269,12 @@ export const authAPI = {
     body: JSON.stringify({ refresh }),
   }) as Promise<{ access: string; refresh: string }>,
   getUserProfile: () => apiCall('/auth/profile/'),
+  updateUserProfile: (data: Partial<Pick<UserProfile,
+    'first_name' | 'last_name' | 'phone' | 'blood_group' | 'address' | 'last_donation_date'
+  >>) => apiCall<UserProfile>('/auth/profile/', {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
   changePassword: (data: {
     old_password: string;
     new_password: string;

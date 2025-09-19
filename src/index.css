@@ -192,3 +192,39 @@
 .ql-editor {
   min-height: 150px;
 }
+
+
+/* Global Tiro Bangla helpers */
+.tiro-bangla-regular {
+  font-family: "Tiro Bangla", serif;
+  font-weight: 200;
+  font-style: normal;
+}
+
+.tiro-bangla-regular-italic {
+  font-family: "Tiro Bangla", serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* Optional: make Quill editor content use Tiro Bangla */
+.ql-editor {
+  font-family: "Tiro Bangla", serif;
+}
+
+/* Optional: keep your old class working as an alias */
+.font-noto-sans-bengali {
+  font-family: "Tiro Bangla", serif;
+}
+
+
+/* Base Noto Serif Bengali */
+.noto-serif-bengali {
+  font-family: "Noto Serif Bengali", serif;
+  font-optical-sizing: auto;       /* works with variable fonts */
+  font-weight: 400;                 /* regular */
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+

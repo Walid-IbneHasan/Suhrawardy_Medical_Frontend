@@ -20,6 +20,8 @@ import BlogDetail from "./pages/BlogDetail";
 import BloodInventoryPage from "./pages/BloodInventory";
 import VaccineInventoryPage from "./pages/VaccineInventory";
 import EventDetail from "./pages/EventDetail";
+import Profile from "./pages/Profile";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +41,15 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/admin"
               element={
