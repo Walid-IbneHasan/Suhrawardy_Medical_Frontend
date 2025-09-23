@@ -55,7 +55,7 @@ const Register: React.FC = () => {
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <img src="/gallery/logo.png" alt="logo" className="h-32 w-32" />
+              <img src="/gallery/logo.jpg" alt="logo" className="h-32 w-32" />
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">
               একাউন্ট তৈরি করুন

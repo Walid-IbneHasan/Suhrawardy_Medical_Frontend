@@ -50,7 +50,7 @@ const Navigation = () => {
         <div className="flex items-center justify-between h-16">
           {/* LEFT: Logo */}
           <Link to="/" className="flex items-center gap-2 shrink-0">
-            {/* NOTE: files inside /public are served from the root. Use /gallery/logo.png (not /public/...) */}
+            {/* NOTE: files inside /public are served from the root. Use /gallery/logo.jpg (not /public/...) */}
             <img
               src="/gallery/logo.jpg"
               alt="সন্ধানী লোগো"

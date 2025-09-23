@@ -73,7 +73,7 @@ const ResetPassword: React.FC = () => {
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
               <div className="flex justify-center">
-                <img src="/gallery/logo.png" alt="logo" className="h-32 w-32" />
+                <img src="/gallery/logo.jpg" alt="logo" className="h-32 w-32" />
               </div>
             </div>
             <CardTitle className="text-2xl font-bold text-foreground">
