@@ -68,6 +68,13 @@
 }
 
 @layer base {
+  
+  #lovable-badge {
+    display: none !important;
+  }
+}
+
+@layer base {
   * {
     @apply border-border;
   }

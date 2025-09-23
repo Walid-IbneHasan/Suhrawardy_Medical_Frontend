@@ -1,3 +1,5 @@
+// lib/api.ts
+
 const API_BASE_URL = 'http://localhost:8000/api';
 
 // Types
@@ -32,25 +34,28 @@ export interface BloodInventory {
   group: string;
   available: boolean;
 }
+
 export interface BloodRequest {
   id: number;
-  user?: { email: string };
+  user?: { email: string; name:string; };
   blood_group: string;
   location: string;
   contact: string;
   date_required: string;
+  collection_location?: string; 
+  reason?:string;
 }
 
 export interface BloodDonationInterest {
   id: number;
-  user?: { email: string };
+  user?: { email: string; name:string; };
   blood_group: string;
   available_date: string;
   contact_info: string;
 }
 export interface Donation {
   id: number;
-  user?: { email: string };
+  user?: { email: string; name:string; };
   blood_group: string;
   donation_date: string;
   contact_info: string;
@@ -58,6 +63,23 @@ export interface Donation {
   created_at: string;
 }
 
+export interface BloodDonor {
+  id: number;
+  name: string;
+  batch: string;
+  blood_group: string;
+  phone: string;
+  last_donated_date: string | null;
+  gender: "Male" | "Female" | "Other";
+}
+
+export interface PDFDocument {
+  id: number;
+  description: string;
+  file: string; 
+  created_at: string;
+  updated_at: string;
+}
 
 export interface VaccineInventory {
   id: number;
@@ -214,6 +236,8 @@ export const bloodAPI = {
     location: string;
     contact: string;
     date_required: string;
+    collection_location?: string;
+    reason?: string;
   }) => apiCall('/request-blood/', {
     method: 'POST',
     body: JSON.stringify(data),
@@ -365,11 +389,11 @@ export const adminAPI = {
     // Blood Requests
     bloodRequests: {
       getAll: (): Promise<BloodRequest[]> => apiCall('/admin/blood-requests/'),
-      create: (data: { blood_group: string; location: string; contact: string; date_required: string }) => apiCall('/admin/blood-requests/', {
+      create: (data: { blood_group: string; location: string; contact: string; date_required: string; collection_location?: string; reason?: string; }) => apiCall('/admin/blood-requests/', {
         method: 'POST',
         body: JSON.stringify(data),
       }),
-      update: (id: number, data: { blood_group: string; location: string; contact: string; date_required: string }) => apiCall(`/admin/blood-requests/${id}/`, {
+      update: (id: number, data: { blood_group: string; location: string; contact: string; date_required: string; collection_location?: string; reason?: string; }) => apiCall(`/admin/blood-requests/${id}/`, {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -388,7 +412,7 @@ export const adminAPI = {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
-      delete: (id: number) => apiCall(`/admin/donation-interests/${id}/`, {
+      delete: (id: number) => apiCall('/admin/donation-interests/${id}/', {
         method: 'DELETE',
       }),
     },
@@ -400,6 +424,31 @@ export const adminAPI = {
       update: (id: number, data: Partial<{ blood_group: string; donation_date: string; contact_info: string; notes: string }>) =>
         apiCall(`/admin/donations/${id}/`, { method: 'PATCH', body: JSON.stringify(data) }),
       delete: (id: number) => apiCall(`/admin/donations/${id}/`, { method: 'DELETE' }),
+    },
+
+    donors: {
+      getAll: (): Promise<BloodDonor[]> => apiCall('/admin/donors/'),
+      create: (data: Omit<BloodDonor, 'id'>) => apiCall('/admin/donors/', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
+      update: (id: number, data: Omit<BloodDonor, 'id'>) => apiCall(`/admin/donors/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+      delete: (id: number) => apiCall(`/admin/donors/${id}/`, {
+        method: 'DELETE',
+      }),
+    },
+    pdfDocuments: {
+      getAll: (): Promise<PDFDocument[]> => apiCall('/admin/pdfs/'),
+      create: (data: FormData): Promise<PDFDocument> => apiCall('/admin/pdfs/', {
+        method: 'POST',
+        body: data,
+      }),
+      delete: (id: number) => apiCall(`/admin/pdfs/${id}/`, {
+        method: 'DELETE',
+      }),
     },
   // Vaccine Inventory
   vaccineInventory: {
@@ -442,7 +491,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-    delete: (id: number) => apiCall(`/admin/mission-statement/${id}/`, {
+    delete: (id: number) => apiCall('/admin/mission-statement/${id}/', {
       method: 'DELETE',
     }),
   },
@@ -457,7 +506,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-    delete: (id: number) => apiCall(`/admin/home-achievements/${id}/`, {
+    delete: (id: number) => apiCall('/admin/home-achievements/${id}/', {
       method: 'DELETE',
     }),
   },
@@ -472,7 +521,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: data,
     }),
-    delete: (id: number) => apiCall(`/admin/about/${id}/`, {
+    delete: (id: number) => apiCall('/admin/about/${id}/', {
       method: 'DELETE',
     }),
   },
@@ -487,7 +536,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-    delete: (id: number) => apiCall(`/admin/achievements/${id}/`, {
+    delete: (id: number) => apiCall('/admin/achievements/${id}/', {
       method: 'DELETE',
     }),
   },
@@ -502,7 +551,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: data,
     }),
-    delete: (id: number) => apiCall(`/admin/team-members/${id}/`, {
+    delete: (id: number) => apiCall('/admin/team-members/${id}/', {
       method: 'DELETE',
     }),
   },
@@ -517,7 +566,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: JSON.stringify(data),
     }),
-    delete: (id: number) => apiCall(`/admin/mission/${id}/`, {
+    delete: (id: number) => apiCall('/admin/mission/${id}/', {
       method: 'DELETE',
     }),
   },

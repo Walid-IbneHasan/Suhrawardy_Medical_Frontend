@@ -52,9 +52,9 @@ const Navigation = () => {
           <Link to="/" className="flex items-center gap-2 shrink-0">
             {/* NOTE: files inside /public are served from the root. Use /gallery/logo.png (not /public/...) */}
             <img
-              src="/gallery/logo.png"
+              src="/gallery/logo.jpg"
               alt="সন্ধানী লোগো"
-              className="h-8 w-auto sm:h-12"
+              className="h-8 w-auto sm:h-14"
               loading="eager"
               decoding="async"
             />
@@ -109,16 +109,20 @@ const Navigation = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
-                      <Link to="/profile">
+                    <Link to="/profile" >
+                      <DropdownMenuItem className="hover:cursor-pointer">
                         <div className="flex items-center ">
                           <Settings className="h-4 w-4 mr-2" />
                           প্রোফাইল
                         </div>
-                      </Link>
-                    </DropdownMenuItem>
+                      </DropdownMenuItem>
+                    </Link>
+
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem
+                      onClick={logout}
+                      className="hover:cursor-pointer"
+                    >
                       <LogOut className="h-4 w-4 mr-2" />
                       লগআউট
                     </DropdownMenuItem>

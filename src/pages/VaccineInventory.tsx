@@ -175,21 +175,132 @@ const VaccineInventoryPage = () => {
       <section className="bg-gradient-to-br from-blue-50 to-white section-padding">
         <div className="max-w-7xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-          ভ্যাকসিন মজুত
+            ভ্যাকসিন মজুত
           </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
-          আমাদের কাছে বর্তমানে কোন কোন ভ্যাকসিন উপলভ্য—এখানেই দেখুন।
+            আমাদের কাছে বর্তমানে কোন কোন ভ্যাকসিন উপলভ্য—এখানেই দেখুন।
           </p>
+        </div>
+      </section>
+      {/* Why Vaccination section */}
+      <section className="section-padding">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">
+              কেন টিকা গুরুত্বপূর্ণ?
+            </h2>
+            <p className="text-gray-700 mb-4">
+              টিকা আমাদের শরীরকে ক্ষতিকর জীবাণুর বিরুদ্ধে প্রতিরোধ গড়ে তুলতে
+              সাহায্য করে। সময়মতো টিকা নিলে গুরুতর রোগের ঝুঁকি কমে, জটিলতা এড়ানো
+              যায় এবং সমাজব্যাপী রোগ ছড়ানো প্রতিরোধ করা সম্ভব হয়।
+            </p>
+            <ul className="space-y-2 text-gray-700 list-disc pl-5">
+              <li>রোগ প্রতিরোধে নিরাপদ ও কার্যকর উপায়</li>
+              <li>হাসপাতালে ভর্তি ও জটিলতার ঝুঁকি কমায়</li>
+              <li>পরিবার ও সমাজকে সুরক্ষা দেয় (হার্ড ইমিউনিটি)</li>
+              <li>দীর্ঘমেয়াদে স্বাস্থ্য খরচ কমাতে সাহায্য করে</li>
+            </ul>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              সাধারণ পার্শ্বপ্রতিক্রিয়া
+            </h3>
+            <p className="text-gray-700 mb-4">
+              অধিকাংশ টিকার পার্শ্বপ্রতিক্রিয়া সামান্য ও স্বল্পস্থায়ী হয়ে থাকে।
+              যেমন: ইনজেকশন স্থানে ব্যথা/লালচে ভাব, হালকা জ্বর, ক্লান্তি
+              ইত্যাদি। বেশিরভাগ ক্ষেত্রে ২৪-৪৮ ঘণ্টার মধ্যে স্বাভাবিক হয়ে যায়।
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3 text-gray-700">
+              <div className="p-3 rounded-lg bg-gray-50 border">
+                হালকা জ্বর বা শরীর ব্যথা
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 border">
+                ইনজেকশন স্থানে ফোলা/ব্যথা
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 border">
+                মাথাব্যথা/ক্লান্তি
+              </div>
+              <div className="p-3 rounded-lg bg-gray-50 border">
+                খাদ্য রুচি কমে যাওয়া
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Who and When section */}
+      <section className="section-padding">
+        <div className="max-w-7xl mx-auto bg-white rounded-xl p-6 shadow-sm border">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">
+            কারা ও কখন টিকা নেবেন?
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6 text-gray-700">
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">শিশু</h4>
+              <p>
+                জাতীয় কর্মসূচি অনুযায়ী (EPI) জন্মের পর থেকে নির্ধারিত সময়সূচিতে
+                সব টিকা।
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">কিশোর/তরুণ</h4>
+              <p>
+                HPV, টিটেনাস বুস্টার, হেপাটাইটিস বি (ডোজ মিস থাকলে পূরণ করুন)।
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-800 mb-2">প্রাপ্তবয়স্ক</h4>
+              <p>
+                ইনফ্লুয়েঞ্জা (বার্ষিক), টিটেনাস বুস্টার, হেপাটাইটিস বি, প্রয়োজন
+                অনুযায়ী অন্যান্য।
+              </p>
+            </div>
+          </div>
+          <div className="mt-6 p-4 rounded-lg bg-blue-50 border border-blue-200 text-blue-900">
+            ভ্রমণ, পেশাগত ঝুঁকি বা ক্রনিক রোগ থাকলে আপনার চিকিৎসকের সাথে পরামর্শ
+            করে টিকা নিন।
+          </div>
+        </div>
+      </section>
+
+      {/* Preparation and Aftercare */}
+      <section className="section-padding">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              টিকা নেওয়ার আগে করণীয়
+            </h3>
+            <ul className="space-y-2 text-gray-700 list-disc pl-5">
+              <li>বর্তমান ওষুধ/অ্যালার্জির তথ্য নিয়ে আসুন</li>
+              <li>আগের টিকার কার্ড/প্রমাণ সঙ্গে আনুন</li>
+              <li>জ্বর/অসুস্থতা থাকলে আগে জানান</li>
+              <li>পর্যাপ্ত পানি পান করুন ও হালকা খাবার খান</li>
+            </ul>
+          </div>
+          <div className="bg-white rounded-xl p-6 shadow-sm border">
+            <h3 className="text-xl font-semibold text-gray-800 mb-3">
+              টিকা নেওয়ার পর করণীয়
+            </h3>
+            <ul className="space-y-2 text-gray-700 list-disc pl-5">
+              <li>৩০ মিনিট পর্যবেক্ষণে থাকুন (সম্ভব হলে)</li>
+              <li>ইনজেকশন স্থানে ঠাণ্ডা সেঁক দিতে পারেন</li>
+              <li>
+                হালকা জ্বর হলে প্যারাসিটামল নিতে পারেন (প্রয়োজনে চিকিৎসকের
+                পরামর্শ)
+              </li>
+              <li>
+                অস্বাভাবিক প্রতিক্রিয়া হলে দ্রুত যোগাযোগ করুন: ০১৮৬৭৪৮৩৬৩১
+              </li>
+            </ul>
+          </div>
         </div>
       </section>
 
       {/* Vaccination Info section */}
       <section className="section-padding">
         <div className="max-w-3xl mx-auto text-center space-y-4 p-6 rounded-lg border border-yellow-200">
-          <h2 className="text-3xl font-bold text-gray-800">
-          ভ্যাকসিন তথ্য
-          </h2>
+          <h2 className="text-3xl font-bold text-gray-800">ভ্যাকসিন তথ্য</h2>
           <p className="text-gray-700">
             HBV (সাধারণ ৫০০, শিক্ষার্থীদের জন্য ৪৫০) <br />
             HPV (২৫০০/)
@@ -320,6 +431,48 @@ const VaccineInventoryPage = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+          {/* FAQs */}
+          <div className="mt-12 grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl p-6 shadow-sm border">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">
+                সাধারণ প্রশ্নোত্তর
+              </h3>
+              <div className="space-y-4 text-gray-700">
+                <div>
+                  <p className="font-medium text-gray-800">
+                    ১) এক সাথে একাধিক টিকা নেওয়া যায়?
+                  </p>
+                  <p>
+                    হ্যাঁ, ডাক্তারি পরামর্শ অনুযায়ী একই দিনে ভিন্ন টিকা নেওয়া
+                    নিরাপদ।
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">
+                    ২) টিকার কার্যকারিতা কবে থেকে শুরু হয়?
+                  </p>
+                  <p>
+                    বেশিরভাগ টিকার সুরক্ষা ১-২ সপ্তাহে গড়ে ওঠে, কিছু ক্ষেত্রে
+                    সিরিজ সম্পন্নের পর।
+                  </p>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-800">
+                    ৩) অ্যালার্জি থাকলে কী করবেন?
+                  </p>
+                  <p>
+                    আগে থেকে অ্যালার্জির ইতিহাস অবশ্যই জানান; প্রয়োজন হলে বিকল্প
+                    ব্যবস্থা নেওয়া হবে।
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* Disclaimer */}
+          <div className="mt-8 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-900">
+            এই তথ্য সাধারণ সচেতনতার জন্য। ব্যক্তিগত শারীরিক অবস্থার ভিত্তিতে
+            সিদ্ধান্ত নিতে যোগ্য চিকিৎসকের পরামর্শ নিন।
           </div>
         </div>
       </section>

@@ -3,6 +3,7 @@ import HeroSection from "@/components/HeroSection";
 import ServicesSection from "@/components/ServicesSection";
 import BlogsSection from "@/components/BlogsSection";
 import AboutSection from "@/components/AboutSection";
+import CourtesySection from "@/components/CourtesySection";
 import {
   Card,
   CardContent,
@@ -16,6 +17,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navigation />
       <HeroSection />
+      <CourtesySection />
       <ServicesSection />
       <BlogsSection />
 
@@ -93,87 +95,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Courtesy & Acknowledgements */}
-      <section className="section-padding bg-gray-50">
-        <div className="max-w-7xl mx-auto">
-          {/* Courtesy banner */}
-          <Card className="border-0 shadow-xl overflow-hidden mb-8">
-            <div className="h-1 w-full medical-gradient" />
-            <CardHeader className="pb-0">
-              <CardTitle className="text-2xl md:text-3xl text-gray-900 font-bold">
-                সৌজন্যে
-              </CardTitle>
-              <CardDescription className="text-base md:text-lg text-gray-600">
-                সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
-                পরিষদ-২০২৪-২৫
-              </CardDescription>
-            </CardHeader>
-            <CardContent />
-          </Card>
-
-          {/* Acknowledgement grid */}
-          <div className="mb-6">
-            <h3 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-              কৃতজ্ঞতা
-            </h3>
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {/* Person 1 */}
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <CardTitle className="text-lg md:text-xl text-gray-900">
-                        সাদিকুর রহমান ইফাত
-                      </CardTitle>
-                      <CardDescription className="text-gray-600">
-                        কেন্দ্রীয় সাধারণ সম্পাদক <br />
-                        সন্ধানী কেন্দ্রীয় কার্যকরী পরিষদ-২০২৪-২৫
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-
-              {/* Person 2 */}
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <CardTitle className="text-lg md:text-xl text-gray-900">
-                        সাইদ মোরশেদ
-                      </CardTitle>
-                      <CardDescription className="text-gray-600">
-                        সভাপতি <br />
-                        সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
-                        পরিষদ-২০২৪-২৫
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-
-              {/* Person 3 */}
-              <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-                <CardHeader>
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <CardTitle className="text-lg md:text-xl text-gray-900">
-                        মো. জিহাদ হোসেন
-                      </CardTitle>
-                      <CardDescription className="text-gray-600">
-                        সাধারণ সম্পাদক <br />
-                        সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
-                        পরিষদ-২০২৪-২৫
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <AboutSection />
 
       {/* Footer (left as-is) */}
@@ -220,7 +141,7 @@ const Index = () => {
             <div>
               <h4 className="text-lg font-semibold mb-4">যোগাযোগের তথ্য</h4>
               <div className="space-y-2 text-gray-400">
-                <p>📞 ০১৮৬৭৪৮৩৬ৣ১</p>
+                <p>📞 ০১৮৬৭৪৮৩৬৩১</p>
                 <p>✉️ info@sandhani.org</p>
                 <p>📍 শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ, ঢাকা</p>
               </div>

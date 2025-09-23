@@ -145,7 +145,7 @@ const BlogsSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12 ">
           {blogs.slice(0, 3).map((blog) => (
             <Link
               key={blog.id}
@@ -153,7 +153,7 @@ const BlogsSection = () => {
               className="group block cursor-pointer"
               aria-label={`${blog.title} ব্লগটি পড়ুন`}
             >
-              <Card className="medical-card-hover border-0 shadow-lg overflow-hidden transition-transform duration-200 group-hover:scale-[1.01] group-active:scale-[0.99]">
+              <Card className="medical-card-hover border-0 shadow-lg overflow-hidden transition-transform duration-200 group-hover:scale-[1.01] group-active:scale-[0.99] h-full">
                 <div className="relative">
                   <img
                     src={

@@ -30,9 +30,9 @@ const HeroSection = () => {
             </h1>
 
             <p className="text-lg sm:text-xl text-gray-600 mb-8 leading-relaxed">
-              সন্ধানী ShSMC ইউনিট—স্বেচ্ছায় রক্তদান, ভ্যাকসিন সহায়তা আর
-              স্বাস্থ্যসচেতনতা নিয়ে কাজ করি। কারণ, এক ফোঁটা রক্তও কারও জীবন
-              বাঁচাতে পারে।
+              <span className="text-primary">সন্ধানী</span> <span className="text-blue-700">শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট—</span> এক ফোঁটা রক্ত বাঁচায়
+              জীবন, এক ডোজ ভ্যাক্সিন গড়ে তোলে সুরক্ষিত ভবিষ্যৎ। মানবতার এই মহৎ
+              যাত্রায় সবসময় পাশে আছে সন্ধানী। ✨
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-12">
