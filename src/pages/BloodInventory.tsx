@@ -167,6 +167,27 @@ const BloodInventoryPage = () => {
 
   const bloodGroups = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
+  // Tabs config (mobile dropdown + desktop tabs)
+  const allTabs = useMemo(() => {
+    const tabs: {
+      id: "inventory" | "request" | "donate" | "faq" | "registry" | "pdfs";
+      label: string;
+      icon: any;
+    }[] = [
+      { id: "inventory", label: "রক্তের মজুত", icon: Activity },
+      { id: "request", label: "রক্তের অনুরোধ", icon: Heart },
+      { id: "donate", label: "রক্তদান", icon: User },
+      { id: "faq", label: "প্রশ্নোত্তর", icon: HelpCircle },
+    ];
+    if (isAdmin) {
+      tabs.push(
+        { id: "registry", label: "রক্তদাতা নিবন্ধন ", icon: List },
+        { id: "pdfs", label: "পিডিএফ ডকুমেন্ট ", icon: FileText }
+      );
+    }
+    return tabs;
+  }, [isAdmin]);
+
   // Keyboard nav for gallery
   useEffect(() => {
     if (!galleryOpen) return;
@@ -751,62 +772,76 @@ const BloodInventoryPage = () => {
 
       {/* Tab Navigation */}
       <section className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex space-x-8 overflow-x-auto">
-            {[
-              { id: "inventory", label: "রক্তের মজুত", icon: Activity },
-              { id: "request", label: "রক্তের অনুরোধ", icon: Heart },
-              { id: "donate", label: "রক্তদান", icon: User },
-              { id: "faq", label: "প্রশ্নোত্তর", icon: HelpCircle },
-            ].map((tab) => {
-              const IconComponent = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() =>
-                    setActiveTab(
-                      tab.id as "inventory" | "request" | "donate" | "faq"
-                    )
-                  }
-                  className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors whitespace-nowrap ${
-                    activeTab === tab.id
-                      ? "border-red-500 text-red-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  <IconComponent className="w-5 h-5" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
-            {isAdmin && (
-              <>
-                <button
-                  key="registry"
-                  onClick={() => setActiveTab("registry")}
-                  className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors whitespace-nowrap ${
-                    activeTab === "registry"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  <List className="w-5 h-5" />
-                  <span>রক্তদাতা নিবন্ধন </span>
-                </button>
-                <button
-                  key="pdfs"
-                  onClick={() => setActiveTab("pdfs")}
-                  className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors whitespace-nowrap ${
-                    activeTab === "pdfs"
-                      ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                  }`}
-                >
-                  <FileText className="w-5 h-5" />
-                  <span>পিডিএফ ডকুমেন্ট </span>
-                </button>
-              </>
-            )}
+        {/* Mobile: Dropdown selector for tabs */}
+        <div className="md:hidden px-4 sm:px-6 lg:px-8 py-3 max-w-7xl mx-auto">
+          <Select
+            value={activeTab}
+            onValueChange={(value) =>
+              setActiveTab(
+                value as
+                  | "inventory"
+                  | "request"
+                  | "donate"
+                  | "faq"
+                  | "registry"
+                  | "pdfs"
+              )
+            }
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="একটি সেকশন নির্বাচন করুন" />
+            </SelectTrigger>
+            <SelectContent>
+              {allTabs.map((tab) => (
+                <SelectItem key={tab.id} value={tab.id}>
+                  {tab.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Desktop/Tablet: Original horizontal tabs */}
+        <div className="hidden md:block">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex space-x-8 overflow-x-auto">
+              {allTabs.map((tab) => {
+                const IconComponent = tab.icon;
+                const isPrimary = [
+                  "inventory",
+                  "request",
+                  "donate",
+                  "faq",
+                ].includes(tab.id);
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() =>
+                      setActiveTab(
+                        tab.id as
+                          | "inventory"
+                          | "request"
+                          | "donate"
+                          | "faq"
+                          | "registry"
+                          | "pdfs"
+                      )
+                    }
+                    className={`py-4 px-2 border-b-2 font-medium text-sm flex items-center space-x-2 transition-colors whitespace-nowrap ${
+                      isActive
+                        ? isPrimary
+                          ? "border-red-500 text-red-600"
+                          : "border-blue-500 text-blue-600"
+                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    <IconComponent className="w-5 h-5" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
