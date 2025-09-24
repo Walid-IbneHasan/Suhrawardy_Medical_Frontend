@@ -152,6 +152,8 @@ const About = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const quillRef = useRef<ReactQuill>(null);
+  const [showAll, setShowAll] = useState(false);
+  const [selectedSession, setSelectedSession] = useState<string>("all");
 
   // Icon mapping for achievements
   const iconMap: { [key: string]: React.ComponentType<{ className: string }> } =
@@ -232,6 +234,20 @@ const About = () => {
 
     fetchData();
   }, [toast]);
+
+  // Get unique sessions from team data
+  const uniqueSessions = [...new Set(team.map((member) => member.session))]
+    .sort()
+    .reverse(); // Optional: sort descending
+
+  // Filter team based on selected session
+  const filteredTeam =
+    selectedSession === "all"
+      ? team
+      : team.filter((member) => member.session === selectedSession);
+
+  // Displayed team: first 3 or all based on showAll
+  const displayedTeam = showAll ? filteredTeam : filteredTeam.slice(0, 3);
 
   const handleCreate = async () => {
     try {
@@ -373,6 +389,14 @@ const About = () => {
     type: "about" | "achievement" | "teamMember" | "mission",
     id: number
   ) => {
+    if (!id || isNaN(id)) {
+      toast({
+        title: "Error",
+        description: "Invalid ID provided for deletion.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (!confirm(`Are you sure you want to delete this ${type}?`)) return;
     try {
       if (type === "about") {
@@ -437,7 +461,7 @@ const About = () => {
         : type === "achievement"
         ? { title: "", description: "", icon: "Award" }
         : type === "teamMember"
-        ? { name: "", role: "", specialty: "" }
+        ? { name: "", role: "", session: "" }
         : { title: "", description: "", phone: "", email: "", address: "" }
     );
     setImageFile(null);
@@ -469,7 +493,7 @@ const About = () => {
         ? {
             name: (item as TeamMember).name,
             role: (item as TeamMember).role,
-            specialty: (item as TeamMember).specialty,
+            session: (item as TeamMember).session,
           }
         : {
             title: (item as Mission).title,
@@ -526,7 +550,7 @@ const About = () => {
                 <h3 className="text-sm font-medium text-blue-800">
                   Admin Actions - About
                 </h3>
-                <div className="flex space-x-2">
+                <div className=" flex flex-col space-y-2 lg:flex-row lg:space-y-0 lg:space-x-2">
                   {about && (
                     <>
                       <Button
@@ -696,7 +720,7 @@ const About = () => {
           </div>
           {isAdmin && (
             <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col lg:flex-row gap-2 items-center justify-between">
                 <h3 className="text-sm font-medium text-blue-800">
                   Admin Actions - Achievements
                 </h3>
@@ -796,7 +820,7 @@ const About = () => {
       <section className="section-padding bg-gray-50">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3ল md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               আমাদের নেতৃত্ব ও দিকনির্দেশনা দল
             </h2>
             <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-6"></div>
@@ -815,26 +839,47 @@ const About = () => {
                   size="sm"
                   onClick={() => openCreateDialog("teamMember")}
                 >
-                  <Plus className="w-3 হ-3 mr-2" />
+                  <Plus className="w-3 h-3 mr-2" />
                   Create Team Member
                 </Button>
               </div>
             </div>
           )}
+          <div className="flex justify-end mb-6">
+            <Select value={selectedSession} onValueChange={setSelectedSession}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Filter by Session" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all" className="hover:cursor-pointer">
+                  সকল সেশন{" "}
+                </SelectItem>
+                {uniqueSessions.map((session) => (
+                  <SelectItem
+                    key={session}
+                    value={session}
+                    className="hover:cursor-pointer"
+                  >
+                    {session}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {team.map((member) => (
+            {displayedTeam.map((member) => (
               <Card
                 key={member.id}
                 className="medical-card-hover border-0 shadow-lg text-center overflow-hidden"
               >
-                <div className="relative">
+                <div className="relative aspect-[3/4] w-full overflow-hidden bg-gray-100">
                   <img
                     src={
                       member.images[0]?.image ||
-                      "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&q=80"
+                      "https://images.unsplash.com/photo-1740252117012-bb53ad05e370?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OTB8fHVzZXIlMjBhdmF0YXJ8ZW58MHx8MHx8fDA%3D"
                     }
                     alt={member.name}
-                    className="w-full হ-64 object-cover"
+                    className="absolute inset-0 w-full h-full object-cover object-top"
                   />
                 </div>
                 <CardHeader className="pb-2">
@@ -846,7 +891,7 @@ const About = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600">{member.specialty}</p>
+                  <p className="text-gray-600">সেশন: {member.session}</p>
                   {isAdmin && (
                     <div className="mt-4 flex justify-center space-x-2">
                       <Button
@@ -854,7 +899,7 @@ const About = () => {
                         variant="outline"
                         onClick={() => openEditDialog("teamMember", member)}
                       >
-                        <Edit className="w-3 হ-3 mr-2" />
+                        <Edit className="w-3 h-3 mr-2" />
                         Edit
                       </Button>
                       <Button
@@ -862,7 +907,7 @@ const About = () => {
                         variant="destructive"
                         onClick={() => handleDelete("teamMember", member.id)}
                       >
-                        <Trash2 className="w-3 হ-3 mr-2" />
+                        <Trash2 className="w-3 h-3 mr-2" />
                         Delete
                       </Button>
                     </div>
@@ -871,6 +916,11 @@ const About = () => {
               </Card>
             ))}
           </div>
+          {!showAll && filteredTeam.length > 3 && (
+            <div className="text-center mt-8">
+              <Button onClick={() => setShowAll(true)}>আরো দেখুন</Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -883,7 +933,7 @@ const About = () => {
                 <h3 className="text-sm font-medium text-blue-800">
                   Admin Actions - Mission
                 </h3>
-                <div className="flex space-x-2">
+                <div className="flex flex-col lg:flex-row space-y-2 lg:space-y-0 lg:space-x-2">
                   {mission && (
                     <>
                       <Button
@@ -891,7 +941,7 @@ const About = () => {
                         variant="outline"
                         onClick={() => openEditDialog("mission", mission)}
                       >
-                        <Edit className="w-3 হ-3 mr-2" />
+                        <Edit className="w-3 h-3 mr-2" />
                         Edit Mission
                       </Button>
                       <Button
@@ -899,7 +949,7 @@ const About = () => {
                         variant="destructive"
                         onClick={() => handleDelete("mission", mission.id)}
                       >
-                        <Trash2 className="w-3 হ-3 mr-2" />
+                        <Trash2 className="w-3 h-3 mr-2" />
                         Delete Mission
                       </Button>
                     </>
@@ -909,7 +959,7 @@ const About = () => {
                       size="sm"
                       onClick={() => openCreateDialog("mission")}
                     >
-                      <Plus className="w-3 হ-3 mr-2" />
+                      <Plus className="w-3 h-3 mr-2" />
                       Create Mission
                     </Button>
                   )}
@@ -1047,10 +1097,10 @@ const About = () => {
                   }
                 />
                 <Input
-                  placeholder="Enter specialty (e.g., Medical Student)"
-                  value={formData.specialty || ""}
+                  placeholder="Enter session (e.g., 2024-25)"
+                  value={formData.session || ""}
                   onChange={(e) =>
-                    setFormData({ ...formData, specialty: e.target.value })
+                    setFormData({ ...formData, session: e.target.value })
                   }
                 />
                 <Input

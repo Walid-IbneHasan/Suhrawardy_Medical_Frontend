@@ -109,7 +109,7 @@ export interface TeamMember {
   id: number;
   name: string;
   role: string;
-  specialty: string;
+  session: string;
   images: { image: string }[];
 }
 
@@ -551,7 +551,7 @@ export const adminAPI = {
       method: 'PATCH',
       body: data,
     }),
-    delete: (id: number) => apiCall('/admin/team-members/${id}/', {
+    delete: (id: number) => apiCall(`/admin/team-members/${id}/`, {
       method: 'DELETE',
     }),
   },

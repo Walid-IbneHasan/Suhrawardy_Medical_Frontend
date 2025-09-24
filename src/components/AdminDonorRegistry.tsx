@@ -148,7 +148,7 @@ const AdminDonorRegistry = () => {
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-2 lg:flex-row items-center justify-between">
         <CardTitle>রক্তদাতার তালিকা</CardTitle>
         <Dialog
           open={isDialogOpen}

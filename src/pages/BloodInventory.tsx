@@ -821,7 +821,7 @@ const BloodInventoryPage = () => {
               </h2>
               {isAdmin && (
                 <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-col lg:flex-row gap-2 items-center justify-between">
                     <h3 className="text-lg font-medium text-blue-800">
                       অ্যাডমিন প্যানেল
                     </h3>
@@ -896,7 +896,7 @@ const BloodInventoryPage = () => {
               </h2>
               {isAdmin ? (
                 <Card>
-                  <CardHeader className="flex flex-row items-center justify-between">
+                  <CardHeader className="flex flex-col gap-2 lg:flex-row items-center justify-between">
                     <CardTitle>রক্তের অনুরোধসমূহ</CardTitle>
                     <Button
                       onClick={openCreateRequestDialog}
@@ -1263,7 +1263,7 @@ const BloodInventoryPage = () => {
                 <>
                   {/* Admin Panel for Donation Interests */}
                   <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col lg:flex-row gap-2 items-center justify-between">
                       <h3 className="text-lg font-medium text-blue-800">
                         অ্যাডমিন প্যানেল
                       </h3>
@@ -1912,7 +1912,7 @@ const BloodInventoryPage = () => {
           {activeTab === "registry" && isAdmin && (
             <div>
               <h2 className="text-3xl font-bold text-gray-900 mb-8 text-center">
-                Donor Registry
+                রক্তদাতা নিবন্ধন
               </h2>
               <AdminDonorRegistry />
             </div>
