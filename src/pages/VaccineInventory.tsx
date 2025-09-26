@@ -191,25 +191,25 @@ const VaccineInventoryPage = () => {
               কেন টিকা গুরুত্বপূর্ণ?
             </h2>
             <p className="text-gray-700 mb-4">
-              টিকা আমাদের শরীরকে ক্ষতিকর জীবাণুর বিরুদ্ধে প্রতিরোধ গড়ে তুলতে
-              সাহায্য করে। সময়মতো টিকা নিলে গুরুতর রোগের ঝুঁকি কমে, জটিলতা এড়ানো
-              যায় এবং সমাজব্যাপী রোগ ছড়ানো প্রতিরোধ করা সম্ভব হয়।
+              টিকা আমাদের শরীরকে ক্ষতিকর জীবাণুর বিরুদ্ধে প্রতিরোধ গড়ে তুলতে
+              সাহায্য করে। সময়মতো টিকা নিলে গুরুতর রোগের ঝুঁকি কমে, জটিলতা
+              এড়ানো যায় এবং সমাজব্যাপী রোগ ছড়ানো প্রতিরোধ করা সম্ভব হয়।
             </p>
             <ul className="space-y-2 text-gray-700 list-disc pl-5">
-              <li>রোগ প্রতিরোধে নিরাপদ ও কার্যকর উপায়</li>
-              <li>হাসপাতালে ভর্তি ও জটিলতার ঝুঁকি কমায়</li>
-              <li>পরিবার ও সমাজকে সুরক্ষা দেয় (হার্ড ইমিউনিটি)</li>
-              <li>দীর্ঘমেয়াদে স্বাস্থ্য খরচ কমাতে সাহায্য করে</li>
+              <li>রোগ প্রতিরোধে নিরাপদ ও কার্যকর উপায়</li>
+              <li>হাসপাতালে ভর্তি ও জটিলতার ঝুঁকি কমায়</li>
+              <li>পরিবার ও সমাজকে সুরক্ষা দেয় (হার্ড ইমিউনিটি)</li>
+              <li>দীর্ঘমেয়াদে স্বাস্থ্য খরচ কমাতে সাহায্য করে</li>
             </ul>
           </div>
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
-              সাধারণ পার্শ্বপ্রতিক্রিয়া
+              সাধারণ পার্শ্বপ্রতিক্রিয়া
             </h3>
             <p className="text-gray-700 mb-4">
-              অধিকাংশ টিকার পার্শ্বপ্রতিক্রিয়া সামান্য ও স্বল্পস্থায়ী হয়ে থাকে।
-              যেমন: ইনজেকশন স্থানে ব্যথা/লালচে ভাব, হালকা জ্বর, ক্লান্তি
-              ইত্যাদি। বেশিরভাগ ক্ষেত্রে ২৪-৪৮ ঘণ্টার মধ্যে স্বাভাবিক হয়ে যায়।
+              অধিকাংশ টিকার পার্শ্বপ্রতিক্রিয়া সামান্য ও স্বল্পস্থায়ী হয়ে
+              থাকে। যেমন: ইনজেকশন স্থানে ব্যথা/লালচে ভাব, হালকা জ্বর, ক্লান্তি
+              ইত্যাদি। বেশিরভাগ ক্ষেত্রে ২৪-৪৮ ঘণ্টার মধ্যে স্বাভাবিক হয়ে যায়।
             </p>
             <div className="grid sm:grid-cols-2 gap-3 text-gray-700">
               <div className="p-3 rounded-lg bg-gray-50 border">
@@ -222,7 +222,7 @@ const VaccineInventoryPage = () => {
                 মাথাব্যথা/ক্লান্তি
               </div>
               <div className="p-3 rounded-lg bg-gray-50 border">
-                খাদ্য রুচি কমে যাওয়া
+                খাদ্য রুচি কমে যাওয়া
               </div>
             </div>
           </div>
@@ -239,8 +239,8 @@ const VaccineInventoryPage = () => {
             <div>
               <h4 className="font-semibold text-gray-800 mb-2">শিশু</h4>
               <p>
-                জাতীয় কর্মসূচি অনুযায়ী (EPI) জন্মের পর থেকে নির্ধারিত সময়সূচিতে
-                সব টিকা।
+                জাতীয় কর্মসূচি অনুযায়ী (EPI) জন্মের পর থেকে নির্ধারিত
+                সময়সূচিতে সব টিকা।
               </p>
             </div>
             <div>
@@ -250,10 +250,12 @@ const VaccineInventoryPage = () => {
               </p>
             </div>
             <div>
-              <h4 className="font-semibold text-gray-800 mb-2">প্রাপ্তবয়স্ক</h4>
+              <h4 className="font-semibold text-gray-800 mb-2">
+                প্রাপ্তবয়স্ক
+              </h4>
               <p>
-                ইনফ্লুয়েঞ্জা (বার্ষিক), টিটেনাস বুস্টার, হেপাটাইটিস বি, প্রয়োজন
-                অনুযায়ী অন্যান্য।
+                ইনফ্লুয়েঞ্জা (বার্ষিক), টিটেনাস বুস্টার, হেপাটাইটিস বি,
+                প্রয়োজন অনুযায়ী অন্যান্য।
               </p>
             </div>
           </div>
@@ -264,15 +266,59 @@ const VaccineInventoryPage = () => {
         </div>
       </section>
 
+      {/* Vaccine Information Gallery */}
+      <section className="section-padding">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">
+              ভ্যাকসিন সচেতনতা
+            </h2>
+            <div className="w-24 h-1 medical-gradient mx-auto rounded-full"></div>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="bg-white rounded-xl p-4 shadow-sm border">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+                জরায়ু মুখ ক্যান্সার প্রতিরোধ
+              </h3>
+              <div className="flex justify-center">
+                <img
+                  src="/gallery/Vaccine/WhatsApp Image 2025-09-25 at 00.57.41_288a5c3b.jpg"
+                  alt="জরায়ু মুখ ক্যান্সার প্রতিরোধ সংক্রান্ত তথ্য"
+                  className="max-w-full h-auto rounded-lg shadow-md"
+                />
+              </div>
+              <p className="text-gray-600 text-sm mt-4 text-center">
+                জরায়ু মুখ ক্যান্সার প্রতিরোধে HPV ভ্যাকসিনের গুরুত্বপূর্ণ তথ্য
+              </p>
+            </div>
+            <div className="bg-white rounded-xl p-4 shadow-sm border">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+                সাধারণ ভ্যাকসিনেশন তথ্য
+              </h3>
+              <div className="flex justify-center">
+                <img
+                  src="/gallery/Vaccine/WhatsApp Image 2025-09-25 at 00.57.41_eec5779e.jpg"
+                  alt="সাধারণ ভ্যাকসিনেশন তথ্য ও দাম"
+                  className="max-w-full h-auto rounded-lg shadow-md"
+                />
+              </div>
+              <p className="text-gray-600 text-sm mt-4 text-center">
+                হেপাটাইটিস বি ও অন্যান্য ভ্যাকসিনের বিস্তারিত তথ্য
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Preparation and Aftercare */}
       <section className="section-padding">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-8">
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
-              টিকা নেওয়ার আগে করণীয়
+              টিকা নেওয়ার আগে করণীয়
             </h3>
             <ul className="space-y-2 text-gray-700 list-disc pl-5">
-              <li>বর্তমান ওষুধ/অ্যালার্জির তথ্য নিয়ে আসুন</li>
+              <li>বর্তমান ওষুধ/অ্যালার্জির তথ্য নিয়ে আসুন</li>
               <li>আগের টিকার কার্ড/প্রমাণ সঙ্গে আনুন</li>
               <li>জ্বর/অসুস্থতা থাকলে আগে জানান</li>
               <li>পর্যাপ্ত পানি পান করুন ও হালকা খাবার খান</li>
@@ -280,17 +326,17 @@ const VaccineInventoryPage = () => {
           </div>
           <div className="bg-white rounded-xl p-6 shadow-sm border">
             <h3 className="text-xl font-semibold text-gray-800 mb-3">
-              টিকা নেওয়ার পর করণীয়
+              টিকা নেওয়ার পর করণীয়
             </h3>
             <ul className="space-y-2 text-gray-700 list-disc pl-5">
               <li>৩০ মিনিট পর্যবেক্ষণে থাকুন (সম্ভব হলে)</li>
               <li>ইনজেকশন স্থানে ঠাণ্ডা সেঁক দিতে পারেন</li>
               <li>
-                হালকা জ্বর হলে প্যারাসিটামল নিতে পারেন (প্রয়োজনে চিকিৎসকের
+                হালকা জ্বর হলে প্যারাসিটামল নিতে পারেন (প্রয়োজনে চিকিৎসকের
                 পরামর্শ)
               </li>
               <li>
-                অস্বাভাবিক প্রতিক্রিয়া হলে দ্রুত যোগাযোগ করুন: ০১৮৬৭৪৮৩৬৩১
+                অস্বাভাবিক প্রতিক্রিয়া হলে দ্রুত যোগাযোগ করুন: ০১৮৬৭৪৮৩৬৩১
               </li>
             </ul>
           </div>
@@ -441,19 +487,19 @@ const VaccineInventoryPage = () => {
               <div className="space-y-4 text-gray-700">
                 <div>
                   <p className="font-medium text-gray-800">
-                    ১) এক সাথে একাধিক টিকা নেওয়া যায়?
+                    ১) এক সাথে একাধিক টিকা নেওয়া যায়?
                   </p>
                   <p>
-                    হ্যাঁ, ডাক্তারি পরামর্শ অনুযায়ী একই দিনে ভিন্ন টিকা নেওয়া
+                    হ্যাঁ, ডাক্তারি পরামর্শ অনুযায়ী একই দিনে ভিন্ন টিকা নেওয়া
                     নিরাপদ।
                   </p>
                 </div>
                 <div>
                   <p className="font-medium text-gray-800">
-                    ২) টিকার কার্যকারিতা কবে থেকে শুরু হয়?
+                    ২) টিকার কার্যকারিতা কবে থেকে শুরু হয়?
                   </p>
                   <p>
-                    বেশিরভাগ টিকার সুরক্ষা ১-২ সপ্তাহে গড়ে ওঠে, কিছু ক্ষেত্রে
+                    বেশিরভাগ টিকার সুরক্ষা ১-২ সপ্তাহে গড়ে ওঠে, কিছু ক্ষেত্রে
                     সিরিজ সম্পন্নের পর।
                   </p>
                 </div>
@@ -462,8 +508,8 @@ const VaccineInventoryPage = () => {
                     ৩) অ্যালার্জি থাকলে কী করবেন?
                   </p>
                   <p>
-                    আগে থেকে অ্যালার্জির ইতিহাস অবশ্যই জানান; প্রয়োজন হলে বিকল্প
-                    ব্যবস্থা নেওয়া হবে।
+                    আগে থেকে অ্যালার্জির ইতিহাস অবশ্যই জানান; প্রয়োজন হলে
+                    বিকল্প ব্যবস্থা নেওয়া হবে।
                   </p>
                 </div>
               </div>

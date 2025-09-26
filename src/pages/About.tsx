@@ -595,11 +595,11 @@ const About = () => {
                   />
                 ) : (
                   <p>
-                    Sandhani is a medical students' organization dedicated to
-                    serving humanity through voluntary blood donation,
-                    posthumous eye donation, and support for the
-                    underprivileged. For decades, we have worked tirelessly to
-                    uplift communities and save lives.
+                    সন্ধানী হলো চিকিৎসা বিজ্ঞানের শিক্ষার্থীদের একটি সংগঠন, যা
+                    **স্বেচ্ছায় রক্তদান**, **মরণোত্তর চক্ষুদান**, এবং
+                    **অসহায়দের সহায়তা** করার মাধ্যমে মানবতার সেবায় নিয়োজিত।
+                    গত কয়েক দশক ধরে, আমরা সমাজকে উন্নত করতে এবং জীবন বাঁচাতে
+                    নিরলসভাবে কাজ করে চলেছি।
                   </p>
                 )}
               </div>
@@ -706,6 +706,37 @@ const About = () => {
         </div>
       </section>
 
+      <section className="section-padding bg-white">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-10">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
+              আমাদের কার্যক্রম – ছবি
+            </h2>
+            <div className="w-24 h-1 medical-gradient mx-auto rounded-full mt-4"></div>
+            <p className="text-gray-600 mt-4">
+              সাম্প্রতিক ক্যাম্প ও প্রোগ্রামের কিছু মুহূর্ত।
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+            {bloodGalleryFiles.map((file, idx) => (
+              <button
+                key={file + idx}
+                onClick={() => openGalleryAt(idx)}
+                className="group block overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
+                aria-label={`Open image ${idx + 1}`}
+              >
+                <img
+                  src={bloodImgUrl(file)}
+                  alt={`Blood program ${idx + 1}`}
+                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
+                  loading="lazy"
+                />
+              </button>
+            ))}
+          </div>
+        </div>
+      </section>
       {/* Values & Achievements */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto">
@@ -981,20 +1012,20 @@ const About = () => {
               </h4>
               <div className="grid md:grid-cols-3 gap-4 text-gray-600">
                 <div>
-                  <strong>Phone:</strong>
+                  <strong>ফোন:</strong>
                   <br />
-                  {mission?.phone || "+880 123 456 7890"}
+                  {mission?.phone || "০১৮৬৭৪৮৩৬৩১"}
                 </div>
                 <div>
-                  <strong>Email:</strong>
+                  <strong>ইমেইল:</strong>
                   <br />
-                  {mission?.email || "info@sandhani.org"}
+                  {mission?.email || "jihadhossain98@gmail.com"}
                 </div>
                 <div>
-                  <strong>Address:</strong>
+                  <strong>ঠিকানা:</strong>
                   <br />
                   {mission?.address ||
-                    "Dhaka Medical College, Dhaka, Bangladesh"}
+                    "সোহরাওয়ার্দী মেডিকেল কলেজ, ঢাকা, বাংলাদেশ"}
                 </div>
               </div>
             </div>
@@ -1161,37 +1192,7 @@ const About = () => {
           </div>
         </DialogContent>
       </Dialog>
-      <section className="section-padding bg-white">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900">
-              আমাদের কার্যক্রম – ছবি
-            </h2>
-            <div className="w-24 h-1 medical-gradient mx-auto rounded-full mt-4"></div>
-            <p className="text-gray-600 mt-4">
-              সাম্প্রতিক ক্যাম্প ও প্রোগ্রামের কিছু মুহূর্ত।
-            </p>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-            {bloodGalleryFiles.map((file, idx) => (
-              <button
-                key={file + idx}
-                onClick={() => openGalleryAt(idx)}
-                className="group block overflow-hidden rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-400"
-                aria-label={`Open image ${idx + 1}`}
-              >
-                <img
-                  src={bloodImgUrl(file)}
-                  alt={`Blood program ${idx + 1}`}
-                  className="w-full h-56 object-cover group-hover:scale-105 transition-transform"
-                  loading="lazy"
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-      </section>
       <Footer />
       <Dialog open={galleryOpen} onOpenChange={setGalleryOpen}>
         <DialogContent className="max-w-5xl p-0 bg-black/90 border-0">
