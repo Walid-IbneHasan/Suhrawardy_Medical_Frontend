@@ -33,7 +33,7 @@ const withMediaHost = (src: string) => {
   if (/^https?:\/\//i.test(src)) return src;
   // ensure leading slash
   const path = src.startsWith("/") ? src : `/${src}`;
-  return `http://localhost:8000${path}`;
+  return `https://api.sandhanishsmcu.com${path}`;
 };
 
 // --- Reusable image slider for event cards ---

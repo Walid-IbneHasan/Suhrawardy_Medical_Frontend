@@ -609,7 +609,7 @@ const About = () => {
               <img
                 src={
                   about?.image ||
-                  "/public/gallery/WhatsApp Image 2025-09-11 at 12.50.59 PM (2).jpeg"
+                  "/gallery/WhatsApp Image 2025-09-11 at 12.50.59 PM (2).jpeg"
                 }
                 alt="Sandhani team"
                 className="w-full h-96 object-cover rounded-2xl shadow-2xl"

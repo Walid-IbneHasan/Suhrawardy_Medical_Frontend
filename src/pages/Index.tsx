@@ -142,7 +142,7 @@ const Index = () => {
               <h4 className="text-lg font-semibold mb-4">যোগাযোগের তথ্য</h4>
               <div className="space-y-2 text-gray-400">
                 <p>📞 ০১৮৬৭৪৮৩৬৩১</p>
-                <p>✉️ info@sandhani.org</p>
+                <p>✉️ jihadhossain98@gmail.com</p>
                 <p>📍 শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ, ঢাকা</p>
               </div>
             </div>
