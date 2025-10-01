@@ -120,6 +120,44 @@ const AdminUsers: React.FC = () => {
     }
   };
 
+  // NEW: Promote/Demote handlers
+  const handlePromoteToSuperuser = async (u: User) => {
+    try {
+      await adminAPI.users.update(u.id, { is_superuser: true, is_staff: true });
+      toast({
+        title: "Promoted",
+        description: `${u.email} is now a super admin.`,
+      });
+      const data = await adminAPI.users.getAll();
+      setUsers(data);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to make the user admin",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDemoteFromSuperuser = async (u: User) => {
+    if (!confirm(`Remove admin privileges from ${u.email}?`)) return;
+    try {
+      await adminAPI.users.update(u.id, { is_superuser: false });
+      toast({
+        title: "Demoted",
+        description: `${u.email} is no longer a super admin.`,
+      });
+      const data = await adminAPI.users.getAll();
+      setUsers(data);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to remove admin privileges",
+        variant: "destructive",
+      });
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -300,13 +338,32 @@ const AdminUsers: React.FC = () => {
                       </TableCell>
                       <TableCell>{formatDate(user.date_joined)}</TableCell>
                       <TableCell>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDelete(user.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          {user.is_superuser ? (
+                            <Button
+                              size="sm"
+                              variant="secondary"
+                              onClick={() => handleDemoteFromSuperuser(user)}
+                            >
+                              Remove Admin
+                            </Button>
+                          ) : (
+                            <Button
+                              size="sm"
+                              className="medical-gradient text-white"
+                              onClick={() => handlePromoteToSuperuser(user)}
+                            >
+                              Make Admin
+                            </Button>
+                          )}
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => handleDelete(user.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

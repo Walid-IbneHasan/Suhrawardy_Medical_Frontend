@@ -1,6 +1,7 @@
 // lib/api.ts
 
 const API_BASE_URL = 'https://api.sandhanishsmcu.com/api';
+// const API_BASE_URL = 'http://localhost:8000/api';
 
 // Types
 export interface Service {
@@ -584,6 +585,11 @@ export const adminAPI = {
       method: 'POST',
       body: JSON.stringify(data),
     }),
+    update: (id: number, data: Partial<Pick<User, 'username' | 'is_staff' | 'is_superuser'>>) =>
+      apiCall(`/admin/users/${id}/`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
     delete: (id: number) => apiCall(`/admin/users/${id}/`, {
       method: 'DELETE',
     }),

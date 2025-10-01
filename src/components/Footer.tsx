@@ -46,8 +46,9 @@ const Footer = () => {
             <h4 className="text-lg font-semibold mb-4">যোগাযোগের তথ্য</h4>
             <div className="space-y-2 text-gray-400">
               <p>📞 ০১৮৬৭৪৮৩৬৩১</p>
-              <p>✉️ jihadhossain98@gmail.com</p>
-              <p>📍 শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ, ঢাকা</p>
+              <p>✉️ sandhanishsmcu72@gmail.com</p>
+              <p>📍 সন্ধানী রুম, দ্বিতীয় তলা, ২০৮ নং ওয়ার্ডের বিপরীতে,শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ হাসপাতাল,শের-এ-বাংলা নগর,ঢাকা-১২০৭
+              </p>
             </div>
           </div>
         </div>

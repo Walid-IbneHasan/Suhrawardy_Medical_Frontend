@@ -1,5 +1,5 @@
 // src/pages/Blogs.tsx
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import {
@@ -26,8 +26,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import { Editor } from "@tinymce/tinymce-react";
 
 const Blogs = () => {
   const [blogs, setBlogs] = useState<Blog[]>([]);
@@ -36,8 +35,8 @@ const Blogs = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingBlog, setEditingBlog] = useState<Blog | null>(null);
+  const editorRef = useRef<any>(null);
 
-  // NOTE: slug removed from local form state
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -47,16 +46,6 @@ const Blogs = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
-
-  const quillModules = {
-    toolbar: [
-      [{ header: [1, 2, 3, false] }],
-      ["bold", "italic", "underline"],
-      [{ list: "ordered" }, { list: "bullet" }],
-      ["link"],
-      ["clean"],
-    ],
-  };
 
   const defaultBlogs: Blog[] = [
     {
@@ -121,6 +110,15 @@ const Blogs = () => {
     },
   ];
 
+  // Reset form when dialog closes
+  useEffect(() => {
+    if (!dialogOpen) {
+      setEditingBlog(null);
+      setFormData({ title: "", content: "", published: false });
+      setImageFiles([]);
+    }
+  }, [dialogOpen]);
+
   // If navigated from BlogDetail → edit
   useEffect(() => {
     const state = location.state as { blog?: Blog };
@@ -160,19 +158,19 @@ const Blogs = () => {
 
   const handleCreateBlog = async () => {
     try {
+      const content = editorRef.current
+        ? editorRef.current.getContent()
+        : formData.content;
+
       const formDataPayload = new FormData();
       formDataPayload.append("title", formData.title);
-      // slug removed – backend generates it
-      formDataPayload.append("content", formData.content);
+      formDataPayload.append("content", content);
       formDataPayload.append("published", String(formData.published));
       imageFiles.forEach((file) => formDataPayload.append("image_files", file));
 
       await adminAPI.blogs.create(formDataPayload);
       toast({ title: "Success", description: "Blog created successfully" });
       setDialogOpen(false);
-      setEditingBlog(null);
-      setFormData({ title: "", content: "", published: false });
-      setImageFiles([]);
       const data = await blogAPI.getBlogs();
       setBlogs(data);
       setFilteredBlogs(data);
@@ -189,19 +187,19 @@ const Blogs = () => {
   const handleEditBlog = async () => {
     if (!editingBlog) return;
     try {
+      const content = editorRef.current
+        ? editorRef.current.getContent()
+        : formData.content;
+
       const formDataPayload = new FormData();
       formDataPayload.append("title", formData.title);
-      // slug removed – backend keeps existing slug stable
-      formDataPayload.append("content", formData.content);
+      formDataPayload.append("content", content);
       formDataPayload.append("published", String(formData.published));
       imageFiles.forEach((file) => formDataPayload.append("image_files", file));
 
       await adminAPI.blogs.update(editingBlog.slug, formDataPayload);
       toast({ title: "Success", description: "Blog updated successfully" });
       setDialogOpen(false);
-      setEditingBlog(null);
-      setFormData({ title: "", content: "", published: false });
-      setImageFiles([]);
       const data = await blogAPI.getBlogs();
       setBlogs(data);
       setFilteredBlogs(data);
@@ -233,14 +231,14 @@ const Blogs = () => {
     }
   };
 
-  const openCreateDialog = () => {
+  const openCreateDialog = useCallback(() => {
     setEditingBlog(null);
     setFormData({ title: "", content: "", published: false });
     setImageFiles([]);
     setDialogOpen(true);
-  };
+  }, []);
 
-  const openEditDialog = (blog: Blog) => {
+  const openEditDialog = useCallback((blog: Blog) => {
     setEditingBlog(blog);
     setFormData({
       title: blog.title,
@@ -249,7 +247,7 @@ const Blogs = () => {
     });
     setImageFiles([]);
     setDialogOpen(true);
-  };
+  }, []);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -333,9 +331,9 @@ const Blogs = () => {
           </h1>
           <div className="w-24 h-1 medical-gradient mx-auto rounded-full mb-8"></div>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed mb-8">
-            আমাদের মেডিকেল বিশেষজ্ঞদের কাছ থেকে স্বাস্থ্য বিষয়ক সর্বশেষ খবর,
-            টিপস এবং পরামর্শ সম্পর্কে জেনে নিন। জ্ঞান দিয়েই আপনার সুস্থ থাকার
-            যাত্রা শুরু হয়।
+            আমাদের মেডিকেল বিশেষজ্ঞদের কাছ থেকে স্বাস্থ্য বিষয়ক সর্বশেষ খবর,
+            টিপস এবং পরামর্শ সম্পর্কে জেনে নিন। জ্ঞান দিয়েই আপনার সুস্থ থাকার
+            যাত্রা শুরু হয়।
           </p>
 
           {/* Search Bar */}
@@ -372,7 +370,7 @@ const Blogs = () => {
                       <span>Create New Blog</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
+                  <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>
                         {editingBlog ? "Edit Blog" : "Create New Blog"}
@@ -384,23 +382,61 @@ const Blogs = () => {
                       </DialogDescription>
                     </DialogHeader>
                     <div className="space-y-4">
-                      <Input
-                        placeholder="Blog title"
-                        value={formData.title}
-                        onChange={(e) =>
-                          setFormData({ ...formData, title: e.target.value })
-                        }
-                      />
-                      {/* Slug input removed – it is auto-generated server-side */}
-                      <ReactQuill
-                        value={formData.content}
-                        onChange={(content) =>
-                          setFormData({ ...formData, content })
-                        }
-                        modules={quillModules}
-                        className="bg-white border border-gray-200 rounded"
-                        placeholder="Write your blog content here..."
-                      />
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Blog Title
+                        </label>
+                        <Input
+                          placeholder="Enter blog title"
+                          value={formData.title}
+                          onChange={(e) =>
+                            setFormData({ ...formData, title: e.target.value })
+                          }
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-sm font-medium mb-2 block">
+                          Blog Content
+                        </label>
+                        <Editor
+                          apiKey="s1y89frcr4sbgbj6kt5pb5apm9fcoeih0ru2u0tyx5dzfcpq"
+                          onInit={(evt, editor) => (editorRef.current = editor)}
+                          initialValue={formData.content}
+                          init={{
+                            height: 400,
+                            menubar: false,
+                            plugins: [
+                              "advlist",
+                              "autolink",
+                              "lists",
+                              "link",
+                              "image",
+                              "charmap",
+                              "anchor",
+                              "searchreplace",
+                              "visualblocks",
+                              "code",
+                              "fullscreen",
+                              "insertdatetime",
+                              "media",
+                              "table",
+                              "preview",
+                              "help",
+                              "wordcount",
+                            ],
+                            toolbar:
+                              "undo redo | blocks | " +
+                              "bold italic forecolor | alignleft aligncenter " +
+                              "alignright alignjustify | bullist numlist outdent indent | " +
+                              "removeformat | help",
+                            content_style:
+                              "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                            branding: false,
+                          }}
+                        />
+                      </div>
+
                       <div className="flex items-center space-x-2">
                         <Checkbox
                           id="published"
@@ -416,7 +452,11 @@ const Blogs = () => {
                           Published
                         </label>
                       </div>
+
                       <div className="space-y-2">
+                        <label className="text-sm font-medium block">
+                          Blog Images
+                        </label>
                         <Input
                           type="file"
                           accept="image/*"
@@ -434,17 +474,21 @@ const Blogs = () => {
                                   className="w-full h-24 object-cover rounded"
                                 />
                                 <button
+                                  type="button"
                                   onClick={() => removeImage(index)}
-                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1"
+                                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                                 >
                                   <X className="w-4 h-4" />
                                 </button>
-                                <p className="text-xs truncate">{file.name}</p>
+                                <p className="text-xs truncate mt-1">
+                                  {file.name}
+                                </p>
                               </div>
                             ))}
                           </div>
                         )}
                       </div>
+
                       <Button
                         onClick={
                           editingBlog ? handleEditBlog : handleCreateBlog
@@ -508,7 +552,7 @@ const Blogs = () => {
                         to={`/blogs/${blog.slug}`}
                         className="text-red-600 hover:text-red-800 font-medium text-sm transition-colors inline-flex items-center"
                       >
-                        Read Full Article →
+                        পুরো লেখাটি পড়ুন →
                       </Link>
 
                       {isAdmin && (
