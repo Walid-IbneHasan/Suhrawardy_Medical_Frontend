@@ -21,12 +21,42 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { adminAPI, User } from "@/utils/api";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
+
+type UserRole = "user" | "moderator" | "super_admin";
+
+const roleToFlags = (role: UserRole) => {
+  if (role === "super_admin") {
+    return { is_staff: true, is_superuser: true };
+  }
+  if (role === "moderator") {
+    return { is_staff: true, is_superuser: false };
+  }
+  return { is_staff: false, is_superuser: false };
+};
+
+const getUserRole = (user: User): UserRole => {
+  if (user.is_superuser) return "super_admin";
+  if (user.is_staff) return "moderator";
+  return "user";
+};
+
+const roleLabel: Record<UserRole, string> = {
+  user: "User",
+  moderator: "Moderator",
+  super_admin: "Super Admin",
+};
 
 const AdminUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
@@ -37,10 +67,10 @@ const AdminUsers: React.FC = () => {
     password: "",
     confirm_password: "",
     username: "",
-    is_superuser: false,
+    role: "user" as UserRole,
   });
   const { toast } = useToast();
-  const { isAdmin } = useAuth();
+  const { isAdmin, isSuperAdmin, user: currentUser } = useAuth();
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -66,6 +96,15 @@ const AdminUsers: React.FC = () => {
   }, [isAdmin, toast]);
 
   const handleCreateUser = async () => {
+    if (!isSuperAdmin) {
+      toast({
+        title: "Forbidden",
+        description: "Only super admins can create users.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (formData.password !== formData.confirm_password) {
       toast({
         title: "Error",
@@ -76,13 +115,14 @@ const AdminUsers: React.FC = () => {
     }
 
     try {
+      const flags = roleToFlags(formData.role);
       await adminAPI.users.create({
         email: formData.email,
         password: formData.password,
         confirm_password: formData.confirm_password,
         username: formData.username || undefined,
-        is_staff: formData.is_superuser, // Set is_staff to true if is_superuser is true
-        is_superuser: formData.is_superuser,
+        is_staff: flags.is_staff,
+        is_superuser: flags.is_superuser,
       });
       toast({ title: "Success", description: "User created successfully" });
       setDialogOpen(false);
@@ -91,7 +131,7 @@ const AdminUsers: React.FC = () => {
         password: "",
         confirm_password: "",
         username: "",
-        is_superuser: false,
+        role: "user",
       });
       const data = await adminAPI.users.getAll();
       setUsers(data);
@@ -105,6 +145,7 @@ const AdminUsers: React.FC = () => {
   };
 
   const handleDelete = async (id: number) => {
+    if (!isSuperAdmin) return;
     if (!confirm("Are you sure you want to delete this user?")) return;
     try {
       await adminAPI.users.delete(id);
@@ -120,39 +161,29 @@ const AdminUsers: React.FC = () => {
     }
   };
 
-  // NEW: Promote/Demote handlers
-  const handlePromoteToSuperuser = async (u: User) => {
-    try {
-      await adminAPI.users.update(u.id, { is_superuser: true, is_staff: true });
+  const handleSetRole = async (u: User, role: UserRole) => {
+    if (!isSuperAdmin) return;
+    if (u.id === currentUser?.id && role !== "super_admin") {
       toast({
-        title: "Promoted",
-        description: `${u.email} is now a super admin.`,
+        title: "Blocked",
+        description: "You cannot change your own role from this screen.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await adminAPI.users.update(u.id, roleToFlags(role));
+      toast({
+        title: "Updated",
+        description: `${u.email} is now ${roleLabel[role]}.`,
       });
       const data = await adminAPI.users.getAll();
       setUsers(data);
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to make the user admin",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleDemoteFromSuperuser = async (u: User) => {
-    if (!confirm(`Remove admin privileges from ${u.email}?`)) return;
-    try {
-      await adminAPI.users.update(u.id, { is_superuser: false });
-      toast({
-        title: "Demoted",
-        description: `${u.email} is no longer a super admin.`,
-      });
-      const data = await adminAPI.users.getAll();
-      setUsers(data);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error?.message || "Failed to remove admin privileges",
+        description: "Failed to update user role",
         variant: "destructive",
       });
     }
@@ -207,95 +238,105 @@ const AdminUsers: React.FC = () => {
               </p>
             </div>
           </div>
-          <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="medical-gradient text-white">
-                <Plus className="h-4 w-4 mr-2" />
-                Add User
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create New User</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="Enter email"
-                    value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="username">Username (optional)</Label>
-                  <Input
-                    id="username"
-                    placeholder="Enter username"
-                    value={formData.username}
-                    onChange={(e) =>
-                      setFormData({ ...formData, username: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    placeholder="Enter password"
-                    value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="confirm_password">Confirm Password</Label>
-                  <Input
-                    id="confirm_password"
-                    type="password"
-                    placeholder="Confirm password"
-                    value={formData.confirm_password}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        confirm_password: e.target.value,
-                      })
-                    }
-                    required
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="is_superuser"
-                    checked={formData.is_superuser}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, is_superuser: !!checked })
-                    }
-                  />
-                  <Label htmlFor="is_superuser">Super Admin</Label>
-                </div>
-                <Button
-                  onClick={handleCreateUser}
-                  className="w-full medical-gradient text-white"
-                  disabled={
-                    !formData.email ||
-                    !formData.password ||
-                    !formData.confirm_password
-                  }
-                >
-                  Create User
+          {isSuperAdmin && (
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="medical-gradient text-white">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add User
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Create New User</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="username">Username (optional)</Label>
+                    <Input
+                      id="username"
+                      placeholder="Enter username"
+                      value={formData.username}
+                      onChange={(e) =>
+                        setFormData({ ...formData, username: e.target.value })
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Enter password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="confirm_password">Confirm Password</Label>
+                    <Input
+                      id="confirm_password"
+                      type="password"
+                      placeholder="Confirm password"
+                      value={formData.confirm_password}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          confirm_password: e.target.value,
+                        })
+                      }
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="role">Role</Label>
+                    <Select
+                      value={formData.role}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, role: value as UserRole })
+                      }
+                    >
+                      <SelectTrigger id="role">
+                        <SelectValue placeholder="Select role" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="user">User</SelectItem>
+                        <SelectItem value="moderator">Moderator</SelectItem>
+                        <SelectItem value="super_admin">Super Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <Button
+                    onClick={handleCreateUser}
+                    className="w-full medical-gradient text-white"
+                    disabled={
+                      !formData.email ||
+                      !formData.password ||
+                      !formData.confirm_password
+                    }
+                  >
+                    Create User
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <Card>
@@ -313,7 +354,7 @@ const AdminUsers: React.FC = () => {
                     <TableHead>Username</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Joined</TableHead>
-                    <TableHead>Actions</TableHead>
+                    {isSuperAdmin && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -325,46 +366,69 @@ const AdminUsers: React.FC = () => {
                       <TableCell>{user.username || "N/A"}</TableCell>
                       <TableCell>
                         <div className="flex space-x-2">
-                          {user.is_superuser && (
+                          {getUserRole(user) === "super_admin" && (
                             <Badge variant="destructive">Super Admin</Badge>
                           )}
-                          {user.is_staff && !user.is_superuser && (
-                            <Badge variant="secondary">Staff</Badge>
+                          {getUserRole(user) === "moderator" && (
+                            <Badge variant="secondary">Moderator</Badge>
                           )}
-                          {!user.is_staff && (
+                          {getUserRole(user) === "user" && (
                             <Badge variant="outline">User</Badge>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>{formatDate(user.date_joined)}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {user.is_superuser ? (
+                      {isSuperAdmin && (
+                        <TableCell>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {!user.is_superuser && (
+                              <Button
+                                size="sm"
+                                className="medical-gradient text-white"
+                                onClick={() => handleSetRole(user, "super_admin")}
+                              >
+                                Make Admin
+                              </Button>
+                            )}
+                            {!user.is_staff && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleSetRole(user, "moderator")}
+                              >
+                                Make Moderator
+                              </Button>
+                            )}
+                            {user.is_staff && !user.is_superuser && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleSetRole(user, "user")}
+                              >
+                                Make User
+                              </Button>
+                            )}
+                            {user.is_superuser && (
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                onClick={() => handleSetRole(user, "moderator")}
+                                disabled={user.id === currentUser?.id}
+                              >
+                                Set Moderator
+                              </Button>
+                            )}
                             <Button
                               size="sm"
-                              variant="secondary"
-                              onClick={() => handleDemoteFromSuperuser(user)}
+                              variant="destructive"
+                              onClick={() => handleDelete(user.id)}
+                              disabled={user.id === currentUser?.id}
                             >
-                              Remove Admin
+                              <Trash2 className="h-4 w-4" />
                             </Button>
-                          ) : (
-                            <Button
-                              size="sm"
-                              className="medical-gradient text-white"
-                              onClick={() => handlePromoteToSuperuser(user)}
-                            >
-                              Make Admin
-                            </Button>
-                          )}
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => handleDelete(user.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
+                          </div>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

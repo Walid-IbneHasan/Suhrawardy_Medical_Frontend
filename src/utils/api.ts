@@ -148,6 +148,7 @@ export interface User {
   username: string | null;
   is_staff: boolean;
   is_superuser: boolean;
+  role?: 'user' | 'moderator' | 'super_admin';
   date_joined: string;
 }
 
@@ -162,6 +163,9 @@ export interface UserProfile {
   blood_group: string;
   address: string;
   last_donation_date: string | null;
+  is_staff: boolean;
+  is_superuser: boolean;
+  role?: 'user' | 'moderator' | 'super_admin';
 }
 
 
@@ -195,7 +199,27 @@ const apiCall = async <T>(endpoint: string, options: RequestInit = {}): Promise<
 
   // Accept 204 No Content as success for DELETE requests
   if (!response.ok && !(options.method === 'DELETE' && response.status === 204)) {
-    throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    let message = `API call failed: ${response.status} ${response.statusText}`;
+
+    try {
+      const contentType = response.headers.get("content-type") || "";
+      if (contentType.includes("application/json")) {
+        const errorData = await response.json();
+        const detail =
+          (typeof errorData === "string" && errorData) ||
+          errorData?.detail ||
+          errorData?.non_field_errors?.[0] ||
+          errorData?.email?.[0] ||
+          errorData?.password?.[0];
+        if (detail) {
+          message = `API call failed: ${response.status} ${detail}`;
+        }
+      }
+    } catch {
+      // Keep the default HTTP status message when parsing fails.
+    }
+
+    throw new Error(message);
   }
 
   // For DELETE requests with 204, return an empty object

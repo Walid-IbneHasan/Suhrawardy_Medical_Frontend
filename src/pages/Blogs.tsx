@@ -46,6 +46,38 @@ const Blogs = () => {
   const { isAdmin } = useAuth();
   const { toast } = useToast();
   const location = useLocation();
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  // ✅ ADDED: paste fallback state (works on mobile reliably)
+  const [pasteDialogOpen, setPasteDialogOpen] = useState(false);
+  const [pasteBuffer, setPasteBuffer] = useState("");
+
+  // ✅ ADDED: helper to safely insert pasted plain text into TinyMCE
+  const escapeHtml = (s: string) =>
+    s
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+
+  // ✅ ADDED: insert pasted text as paragraphs/line breaks
+  const insertPastedTextIntoEditor = () => {
+    const ed = editorRef.current;
+    if (!ed) {
+      toast({
+        title: "Error",
+        description: "Editor is not ready yet. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const safe = escapeHtml(pasteBuffer).replace(/\r\n|\r|\n/g, "<br/>");
+    ed.insertContent(safe);
+    setPasteBuffer("");
+    setPasteDialogOpen(false);
+  };
 
   const defaultBlogs: Blog[] = [
     {
@@ -116,6 +148,14 @@ const Blogs = () => {
       setEditingBlog(null);
       setFormData({ title: "", content: "", published: false });
       setImageFiles([]);
+    }
+  }, [dialogOpen]);
+
+  // ✅ ADDED: also reset paste dialog when main dialog closes
+  useEffect(() => {
+    if (!dialogOpen) {
+      setPasteDialogOpen(false);
+      setPasteBuffer("");
     }
   }, [dialogOpen]);
 
@@ -399,42 +439,65 @@ const Blogs = () => {
                         <label className="text-sm font-medium mb-2 block">
                           Blog Content
                         </label>
+                        <div id="tinymce-ui">
+                        <div id="tinymce-toolbar" />
+
                         <Editor
                           apiKey="s1y89frcr4sbgbj6kt5pb5apm9fcoeih0ru2u0tyx5dzfcpq"
-                          onInit={(evt, editor) => (editorRef.current = editor)}
-                          initialValue={formData.content}
+                          onInit={(_, editor) => (editorRef.current = editor)}
+                          value={formData.content}
+                          onEditorChange={(content) => setFormData((p) => ({ ...p, content }))}
+                          // ✅ ADDED: key forces reliable remount inside Dialog (fixes “editor not appearing” cases on mobile)
+                          key={(editingBlog?.slug ?? "new") + (dialogOpen ? "-open" : "-closed")}
                           init={{
                             height: 400,
                             menubar: false,
+                            ui_mode: "split",
+                            fixed_toolbar_container: "#tinymce-toolbar",
+                            ui_container: "#tinymce-ui",
+                            zindex: 20000,
+                            // IMPORTANT: keep it simple; remove stuff you don’t need
                             plugins: [
-                              "advlist",
-                              "autolink",
                               "lists",
                               "link",
-                              "image",
-                              "charmap",
-                              "anchor",
-                              "searchreplace",
-                              "visualblocks",
-                              "code",
-                              "fullscreen",
-                              "insertdatetime",
-                              "media",
                               "table",
-                              "preview",
-                              "help",
+                              "code",
                               "wordcount",
+                              "paste",
                             ],
                             toolbar:
-                              "undo redo | blocks | " +
-                              "bold italic forecolor | alignleft aligncenter " +
-                              "alignright alignjustify | bullist numlist outdent indent | " +
-                              "removeformat | help",
-                            content_style:
-                              "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+                              "undo redo | blocks | bold italic | bullist numlist  | table | code",
                             branding: false,
+
+                            // These help with paste cleanup, without needing paste buttons
+                            paste_merge_formats: true,
+                            paste_as_text: false,
+
+                            // Optional: stop Tiny turning URLs into links automatically
+                            autolink_pattern: /$^/, // disables autolink (aggressive but effective)
+
+                            // ✅ ADDED: small mobile quality-of-life
+                            // (does not magically force OS paste menu, but reduces some weirdness)
+                            browser_spellcheck: true,
+                            contextmenu: false,
                           }}
                         />
+                        </div>
+
+                        {/* ✅ ADDED: Bulletproof mobile paste fallback */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="text-xs text-gray-500">
+                            {isMobile ? "Mobile detected: use Paste button if long-press doesn’t show Paste." : ""}
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setPasteDialogOpen(true)}
+                          >
+                            Paste
+                          </Button>
+                        </div>
+
                       </div>
 
                       <div className="flex items-center space-x-2">
@@ -585,6 +648,46 @@ const Blogs = () => {
           )}
         </div>
       </section>
+
+      {/* ✅ ADDED: Paste fallback Dialog (native paste works here on mobile) */}
+      <Dialog open={pasteDialogOpen} onOpenChange={setPasteDialogOpen}>
+        <DialogContent className="max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Paste content</DialogTitle>
+            <DialogDescription>
+              On mobile, long-press inside the box below to paste. Then click Insert.
+            </DialogDescription>
+          </DialogHeader>
+
+          <textarea
+            className="w-full min-h-[180px] border rounded p-2"
+            value={pasteBuffer}
+            onChange={(e) => setPasteBuffer(e.target.value)}
+            placeholder="Long-press here → Paste"
+          />
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setPasteBuffer("");
+                setPasteDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={insertPastedTextIntoEditor}
+              disabled={!pasteBuffer.trim()}
+            >
+              Insert
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </div>
   );

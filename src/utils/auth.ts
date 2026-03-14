@@ -6,6 +6,7 @@ export interface User {
   username?: string;
   is_staff: boolean;
   is_superuser: boolean;
+  role?: 'user' | 'moderator' | 'super_admin';
   date_joined: string;
 }
 
@@ -64,7 +65,7 @@ export const authUtils = {
 
   isAdmin: (): boolean => {
     const user = authUtils.getUser();
-    return user?.is_superuser || false;
+    return user?.is_staff || false;
   },
 
   // Logout

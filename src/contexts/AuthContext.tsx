@@ -14,6 +14,8 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isSuperAdmin: boolean;
+  isModerator: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (
     email: string,
@@ -46,11 +48,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const refreshUser = async () => {
     try {
       const profile = (await authAPI.getUserProfile()) as User;
-      // preserve is_superuser if your /auth/profile doesn't include it
+      // Preserve role flags from local state if profile payload is partial.
       const stored = authUtils.getUser();
       const merged = {
         ...profile,
-        is_superuser: stored?.is_superuser ?? profile?.is_superuser,
+        is_staff: stored?.is_staff ?? profile?.is_staff ?? false,
+        is_superuser: stored?.is_superuser ?? profile?.is_superuser ?? false,
+        role: stored?.role ?? profile?.role,
       };
       authUtils.setUser(merged);
       setUser(merged);
@@ -65,7 +69,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       if (userData && authUtils.getAccessToken()) {
         try {
           const profile = (await authAPI.getUserProfile()) as User;
-          setUser({ ...profile, is_superuser: userData.is_superuser });
+          setUser({
+            ...profile,
+            is_staff: userData.is_staff ?? profile.is_staff,
+            is_superuser: userData.is_superuser ?? profile.is_superuser,
+            role: userData.role ?? profile.role,
+          });
         } catch (error) {
           authUtils.logout();
           toast({
@@ -87,12 +96,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       const response = (await authAPI.login(email, password)) as {
         access: string;
         refresh: string;
+        is_staff: boolean;
         is_superuser: boolean;
+        role: "user" | "moderator" | "super_admin";
       };
       authUtils.setTokens(response);
 
       const userData = (await authAPI.getUserProfile()) as User;
+      userData.is_staff = response.is_staff ?? userData.is_staff;
       userData.is_superuser = response.is_superuser; // ensure flag present
+      userData.role = response.role ?? userData.role;
       authUtils.setUser(userData);
       setUser(userData);
 
@@ -158,7 +171,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
       value={{
         user,
         isAuthenticated: !!user,
-        isAdmin: user?.is_superuser || false,
+        isAdmin: user?.is_staff || false,
+        isSuperAdmin: user?.is_superuser || false,
+        isModerator: !!user?.is_staff && !user?.is_superuser,
         login,
         register,
         logout,

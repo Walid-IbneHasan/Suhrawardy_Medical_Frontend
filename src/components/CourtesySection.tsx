@@ -42,7 +42,8 @@ const CourtesySection = () => {
                     </CardTitle>
                     <CardDescription className="text-gray-600">
                       কেন্দ্রীয় সাধারণ সম্পাদক <br />
-                      সন্ধানী কেন্দ্রীয় কার্যকরী পরিষদ-২০২৪-২৫
+                      সন্ধানী কেন্দ্রীয় কার্যকরী পরিষদ-২০২৪-২৫ <br />
+                      ব্যাচ: sh-15
                     </CardDescription>
                   </div>
                 </div>
@@ -60,7 +61,8 @@ const CourtesySection = () => {
                     <CardDescription className="text-gray-600">
                       সভাপতি <br />
                       সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
-                      পরিষদ-২০২৪-২৫
+                      পরিষদ-২০২৪-২৫ <br />
+                      ব্যাচ: sh-16
                     </CardDescription>
                   </div>
                 </div>
@@ -78,7 +80,8 @@ const CourtesySection = () => {
                     <CardDescription className="text-gray-600">
                       সাধারণ সম্পাদক <br />
                       সন্ধানী শহীদ সোহরাওয়ার্দী মেডিকেল কলেজ ইউনিট কার্যকরী
-                      পরিষদ-২০২৪-২৫
+                      পরিষদ-২০২৪-২৫ <br />
+                      ব্যাচ: shD-10
                     </CardDescription>
                   </div>
                 </div>
